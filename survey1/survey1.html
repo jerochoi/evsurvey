@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수요분석</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+
+        #container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        #map {
+            flex: 1;
+            height: 100%;
+            background: #f0f0f0;
+        }
+
+        #sidebar {
+            width: 350px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: #f8f9fa;
+            border-left: 1px solid #ddd;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .sidebar-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .sidebar-header {
+            padding: 10px;
+            background: #e9ecef;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .sidebar-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .park-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .park-item:hover {
+            background: #e9ecef;
+        }
+
+        .park-name {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .park-addr {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Custom Tooltip/Popup tweaks if needed */
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="container">
+        <div id="map"></div>
+        <div id="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-header">Apartments (EV Rate &ge; 5% or 2%)</div>
+                <div id="sidebar-apt-list" class="sidebar-list"></div>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-header">Parking Lots</div>
+                <div id="sidebar-park-list" class="sidebar-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Proj4 + Proj4Leaflet for Kakao Coordinate System -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.11.0/proj4.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4leaflet/1.0.2/proj4leaflet.min.js"></script>
+
+    <script>
+        // -----------------------------------------------------------------------
+        // 1. Define CRS for Kakao Map (EPSG:5181)
+        // -----------------------------------------------------------------------
+        const crs = new L.Proj.CRS(
+            'EPSG:5181',
+            '+proj=tmerc +lat_0=38 +lon_0=127 +k=1 +x_0=200000 +y_0=500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
+            {
+                resolutions: [2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5, 0.25],
+                origin: [-30000, -60000],
+                bounds: L.bounds([-30000, -60000], [494288, 988576])
+            }
+        );
+
+        // -----------------------------------------------------------------------
+        // 2. Initialize Map with Canvas Renderer for Performance
+        // -----------------------------------------------------------------------
+        const map = L.map('map', {
+            crs: crs,
+            center: [37.55, 126.68], // Lat, Lng
+            zoom: 9,
+            minZoom: 1,
+            maxZoom: 13, // Matches resolutions length - 1
+            preferCanvas: true // IMPORTANT: Uses Canvas for vector layers (markers)
+        });
+
+        // Add Kakao Tile Layer
+        // Note: The structure L{z} in Kakao tiles corresponds to resolutions index
+        L.tileLayer('http://map{s}.daumcdn.net/map_2d/2212kc/L{z}/{y}/{x}.png', {
+            subdomains: ['0', '1', '2', '3'],
+            tms: true, // Kakao/Daum often uses inverted Y, but check if needed. 
+            // Based on OL code: "tms" was not explicitly set but standard XYZ logic was used.
+            // However, standard XYZ top-left origin. EPSG:5181 generally uses bottom-left logic or defined origin.
+            // Let's try tms: false (default) first because OL source.XYZ default is top-left.
+            // BUT, standard Kakao tiles sometimes need `tms: true` in Leaflet if origin is bottom-left?
+            // OL config: origin [-30k, -60k]. 
+            // Let's trust standard Leaflet behavior with defined CRS origin.
+            // NOTE: The 'z' for Kakao tiles usually needs to be (14 - zoom) or similar if using standard numbered levels.
+            // But the OL code used `L{z}` where z matches the resolution index directly.
+            zoomOffset: 0,
+            zIndex: 1
+        }).addTo(map);
+
+        /* 
+           Troubleshooting Tile Alignment:
+           If tiles are mixed up, it's usually the {z} or {y} Logic.
+           OL: L{z}/{y}/{x}.
+           We will count on Proj4Leaflet to pass the correct 'z' based on resolution index.
+        */
+
+        const sidebarParkList = document.getElementById('sidebar-park-list');
+        const sidebarAptList = document.getElementById('sidebar-apt-list');
+
+        // -----------------------------------------------------------------------
+        // 3. Load Data
+        // -----------------------------------------------------------------------
+        Promise.all([
+            fetch('./seoguData.json').then(r => r.json()),
+            fetch('./parkData.json').then(r => r.json()),
+            fetch('./kaptData.json').then(r => r.json()),
+            fetch('./statData.json').then(r => r.json())
+        ]).then(([seoguData, parkData, kaptData, statData]) => {
+            console.log("Data loaded. Rendering...");
+
+            // -------------------------------------------------------------------
+            // A. Seogu Polygon
+            // -------------------------------------------------------------------
+            if (seoguData) {
+                // Leaflet accepts GeoJSON with [Lon, Lat]. 
+                // Since our Map CRS is 5181, but data is 4326, Proj4Leaflet handles projection if configured correctly.
+                // However, usually L.geoJSON expects EPSG:4326 data by default and projects it to Map CRS.
+
+                // Fix for the Array structure issue (same as before)
+                let geoJsonData = seoguData;
+                if (Array.isArray(seoguData)) {
+                    geoJsonData = {
+                        type: "FeatureCollection",
+                        features: seoguData
+                    };
+                }
+
+                const seoguLayer = L.geoJSON(geoJsonData, {
+                    style: {
+                        color: 'blue',
+                        weight: 2,
+                        fillColor: 'transparent'
+                    }
+                }).addTo(map);
+
+                // Fit bounds
+                map.fitBounds(seoguLayer.getBounds());
+            }
+
+            // -------------------------------------------------------------------
+            // B. Park Markers (Green Circles + P icon simulation?)
+            //    User requested green markers.
+            // -------------------------------------------------------------------
+            parkData.forEach(p => {
+                if (!p.lat || !p.lng) return;
+
+                // Using L.circleMarker for performance (Canvas)
+                const marker = L.circleMarker([p.lat, p.lng], {
+                    radius: 6,
+                    fillColor: "#28a745", // Green
+                    color: "#000",
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 1
+                })
+                    .addTo(map)
+                    .bindPopup(`
+                    <div style="min-width:150px">
+                        <b>${p.nm}</b><br>
+                        <span style="font-size:12px; color:#555">${p.addr}</span>
+                    </div>
+                `);
+
+                // Sidebar
+                const item = document.createElement('div');
+                item.className = 'park-item';
+                item.innerHTML = `
+                    <div class="park-name">${p.nm}</div>
+                    <div class="park-addr">${p.addr}</div>
+                `;
+                item.addEventListener('click', () => {
+                    map.flyTo([p.lat, p.lng], 16, { duration: 0.5 });
+                    marker.openPopup();
+                });
+                sidebarParkList.appendChild(item);
+            });
+
+            // -------------------------------------------------------------------
+            // C. Kapt Markers
+            // -------------------------------------------------------------------
+            kaptData.forEach(k => {
+                if (!k.lat || !k.lng) return;
+
+                let yearStr = k.approvalDate ? k.approvalDate.substring(0, 4) : "-";
+                let year = parseInt(yearStr) || 0;
+                let evGround = parseInt(k.evCountGround) || 0;
+                let evUnder = parseInt(k.evCountUnderground) || 0;
+                let totalEv = evGround + evUnder;
+                let totalParking = parseInt(k.totalParking) || 1;
+                let rate = (totalEv / totalParking) * 100;
+                let threshold = (year >= 2022) ? 5.0 : 2.0;
+                let isSatisfied = rate >= threshold;
+                let color = isSatisfied ? '#3388ff' : '#dc3545'; // Blue or Red
+
+                const marker = L.circleMarker([k.lat, k.lng], {
+                    radius: 7,
+                    fillColor: color,
+                    color: "#fff",
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 1
+                })
+                    .addTo(map)
+                    .bindPopup(`
+                     <div style="min-width:200px">
+                        <h4 style="margin:0 0 5px 0; font-size:14px;">${k.kaptName}</h4>
+                        <div style="font-size:12px; color:#555;">
+                            <b>Addr:</b> ${k.addrLegacy}<br>
+                            <b>Year:</b> ${year}<br>
+                            <b>Parking:</b> ${k.totalParking}<br>
+                            <b>Total EV:</b> ${totalEv}<br>
+                            <b>Rate:</b> ${rate.toFixed(1)}%<br>
+                            <b>Threshold:</b> ${threshold}% (${isSatisfied ? 'Satisfied' : 'Unsatisfied'})
+                        </div>
+                    </div>
+                `);
+
+                // Sidebar
+                const item = document.createElement('div');
+                item.className = 'park-item';
+                item.innerHTML = `
+                    <div class="park-name">${k.kaptName}</div>
+                    <div class="park-addr">${k.addrLegacy}</div>
+                    <div style="font-size:12px; color:#555; margin-top:4px;">
+                        Year: ${year} | P: ${k.totalParking} | EV: ${totalEv} (${rate.toFixed(1)}%)
+                    </div>
+                    <div style="font-size:12px; font-weight:bold; color:${isSatisfied ? 'blue' : 'darkred'}; margin-top:2px;">
+                        ${isSatisfied ? 'Satisfied' : 'Unsatisfied'}
+                    </div>
+                `;
+                item.addEventListener('click', () => {
+                    map.flyTo([k.lat, k.lng], 16, { duration: 0.5 });
+                    marker.openPopup();
+                });
+                sidebarAptList.appendChild(item);
+            });
+
+            // -------------------------------------------------------------------
+            // D. Stat Data (Chunked & Optimized)
+            // -------------------------------------------------------------------
+            const chunkSize = 1000;
+            let index = 0;
+
+            // Create a specific LayerGroup for Stats if we want to toggle them, 
+            // but for raw performance on Canvas, adding directly to map is also fine 
+            // as they all share the single Canvas renderer.
+
+            function processStatChunk() {
+                const chunk = statData.slice(index, index + chunkSize);
+
+                chunk.forEach(s => {
+                    if (!s.lat || !s.lng) return;
+
+                    let fillColor = '#007bff';
+                    const year = parseInt(s.year);
+                    const isME = s.statId && s.statId.startsWith('ME');
+
+                    if (isME) {
+                        // Logic similar to prev
+                        if (year && year <= 2018) {
+                            fillColor = '#dc3545'; // Red
+                        } else {
+                            fillColor = '#6f42c1'; // Purple
+                        }
+
+                        // 500m Radius Circle
+                        // L.circle radius is in meters.
+                        L.circle([s.lat, s.lng], {
+                            radius: 500,
+                            color: fillColor,
+                            fillColor: fillColor,
+                            fillOpacity: 0.1,
+                            weight: 1
+                        }).addTo(map);
+                    }
+
+                    // Circle Marker
+                    L.circleMarker([s.lat, s.lng], {
+                        radius: 4,
+                        fillColor: fillColor,
+                        color: "#000",
+                        weight: 0.5,
+                        opacity: 1,
+                        fillOpacity: 1
+                    })
+                        .addTo(map)
+                        .bindPopup(`
+                        <div style="min-width:150px;">
+                            <h4 style="margin:0 0 5px 0; font-size:14px;">${s.statNm}</h4>
+                            <div style="font-size:12px; color:#555;">
+                                <b>ID:</b> ${s.statId} (Charger: ${s.chgerId})<br>
+                                <b>Addr:</b> ${s.addr}<br>
+                                <b>Year:</b> ${s.year}
+                            </div>
+                        </div>
+                    `);
+                });
+
+                index += chunkSize;
+                if (index < statData.length) {
+                    requestAnimationFrame(processStatChunk);
+                } else {
+                    console.log("All Stat Data Loaded.");
+                }
+            }
+
+            processStatChunk();
+
+        }).catch(err => console.error("Error loading data:", err));
+    </script>
+</body>
+
+</html>
