@@ -94,6 +94,30 @@
             background: rgba(0, 0, 0, 0);
             border: none;
         }
+
+        #footer {
+            background: #fff;
+            border-top: 1px solid #ddd;
+            padding: 10px;
+            font-size: 12px;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .footer-item {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .footer-label {
+            font-weight: bold;
+            margin-right: 5px;
+            color: #000;
+        }
     </style>
 </head>
 
@@ -103,17 +127,36 @@
         <div id="map"></div>
         <div id="sidebar">
             <div class="sidebar-section">
-                <div class="sidebar-header">Apartments (EV Rate &ge; 5% or 2%)</div>
+                <div class="sidebar-header">아파트 (충전기 보급률 &ge; 5% or 2%)</div>
                 <div id="sidebar-apt-list" class="sidebar-list"></div>
             </div>
             <div class="sidebar-section">
-                <div class="sidebar-header">Parking Lots</div>
+                <div class="sidebar-header">주차장</div>
                 <div id="sidebar-park-list" class="sidebar-list"></div>
+            </div>
+
+            </style>
+            <!-- Bottom Footer (Inside Sidebar) -->
+            <div id="footer">
+                <div class="footer-item">
+                    <label style="cursor:pointer; font-weight:bold;">
+                        <input type="checkbox" id="chk-unsatisfied"> 아파트 미달만 보기
+                    </label>
+                </div>
+                <div class="footer-item">
+                    <span class="footer-label">(환경부) 급속충전소 반경:</span>
+                    <label style="cursor:pointer; margin-right:10px;"><input type="radio" name="rad-opt" value="500"
+                            checked> 500m</label>
+                    <label style="cursor:pointer;"><input type="radio" name="rad-opt" value="1000"> 1km</label>
+                </div>
+                <div class="footer-item" style="display:block; line-height:1.4;">
+                    <div><span class="footer-label">[아파트]</span> K-apt 공동주택관리정보시스템</div>
+                    <div><span class="footer-label">[주차장]</span> 네이버 검색</div>
+                    <div><span class="footer-label">[충전소]</span> 환경공단 공공데이터</div>
+                </div>
             </div>
         </div>
     </div>
-
-    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <!-- Proj4 + Proj4Leaflet for Kakao Coordinate System -->
@@ -256,147 +299,230 @@
             });
 
             // -------------------------------------------------------------------
-            // C. Kapt Markers
+            // C. Kapt Markers (Refactored for Filtering)
             // -------------------------------------------------------------------
-            kaptData.forEach(k => {
-                if (!k.lat || !k.lng) return;
+            const aptLayerGroup = L.layerGroup().addTo(map);
 
-                let yearStr = k.approvalDate ? k.approvalDate.substring(0, 4) : "-";
-                let year = parseInt(yearStr) || 0;
-                let evGround = parseInt(k.evCountGround) || 0;
-                let evUnder = parseInt(k.evCountUnderground) || 0;
-                let totalEv = evGround + evUnder;
-                let totalParking = parseInt(k.totalParking) || 1;
-                let rate = (totalEv / totalParking) * 100;
-                let threshold = (year >= 2022) ? 5.0 : 2.0;
-                let isSatisfied = rate >= threshold;
-                // let color = isSatisfied ? '#3388ff' : '#dc3545'; // Blue or Red
-                let color = isSatisfied ? '#3388ff' : '#EB3223'; // Blue or Red
+            function renderApartments(onlyUnsatisfied) {
+                // Clear existing markers and list
+                aptLayerGroup.clearLayers();
+                sidebarAptList.innerHTML = '';
 
-                // Create SVG Icon for Apartment (Circle with Building)
-                const aptIconHtml = `
-                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="12" cy="12" r="11" fill="${color}" stroke="white" stroke-width="2"/>
-                        <path d="M7 19H17V6H7V19ZM9 8H11V10H9V8ZM13 8H15V10H13V8ZM9 12H11V14H9V12ZM13 12H15V14H13V12ZM9 16H11V18H9V16ZM13 16H15V18H13V16Z" fill="white"/>
-                    </svg>
-                `;
+                kaptData.forEach(k => {
+                    if (!k.lat || !k.lng) return;
 
-                const aptIcon = L.divIcon({
-                    html: aptIconHtml,
-                    className: 'custom-svg-icon',
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 12],
-                    popupAnchor: [0, -12]
-                });
+                    let yearStr = k.approvalDate ? k.approvalDate.substring(0, 4) : "-";
+                    let year = parseInt(yearStr) || 0;
+                    let evGround = parseInt(k.evCountGround) || 0;
+                    let evUnder = parseInt(k.evCountUnderground) || 0;
+                    let totalEv = evGround + evUnder;
+                    let totalParking = parseInt(k.totalParking) || 1;
+                    let rate = (totalEv / totalParking) * 100;
+                    let threshold = (year >= 2022) ? 5.0 : 2.0;
+                    let isSatisfied = rate >= threshold;
 
-                const marker = L.marker([k.lat, k.lng], {
-                    icon: aptIcon
-                })
-                    .addTo(map)
-                    .bindPopup(`
-                     <div style="min-width:200px">
-                        <h4 style="margin:0 0 5px 0; font-size:14px;">${k.kaptName}</h4>
-                        <div style="font-size:12px; color:#555;">
-                            <b>주소:</b> ${k.addrLegacy}<br>
-                            <b>Year:</b> ${year}<br>
-                            <b>주차면수:</b> ${k.totalParking}<br>
-                            <b>충전시설:</b> ${totalEv}<br>
-                            <b>보급률:</b> ${rate.toFixed(1)}%<br>
-                            <b>목표치:</b> ${threshold}% (${isSatisfied ? '만족' : '미달'})
-                        </div>
-                    </div>
-                `);
-
-                // Sidebar
-                const item = document.createElement('div');
-                item.className = 'park-item';
-                item.innerHTML = `
-                    <div class="park-name">${k.kaptName}</div>
-                    <div class="park-addr">${k.addrLegacy}</div>
-                    <div style="font-size:12px; color:#555; margin-top:4px;">
-                        Year: ${year} | P: ${k.totalParking} | EV: ${totalEv} (${rate.toFixed(1)}%)
-                    </div>
-                    <div style="font-size:12px; font-weight:bold; color:${isSatisfied ? 'blue' : 'darkred'}; margin-top:2px;">
-                        ${isSatisfied ? '만족' : '미달'}
-                    </div>
-                `;
-                item.addEventListener('click', () => {
-                    map.flyTo([k.lat, k.lng], 16, { duration: 0.5 });
-                    marker.openPopup();
-                });
-                sidebarAptList.appendChild(item);
-            });
-
-            // -------------------------------------------------------------------
-            // D. Stat Data (Chunked & Optimized)
-            // -------------------------------------------------------------------
-            const chunkSize = 1000;
-            let index = 0;
-
-            // Create a specific LayerGroup for Stats if we want to toggle them, 
-            // but for raw performance on Canvas, adding directly to map is also fine 
-            // as they all share the single Canvas renderer.
-
-            function processStatChunk() {
-                const chunk = statData.slice(index, index + chunkSize);
-
-                chunk.forEach(s => {
-                    if (!s.lat || !s.lng) return;
-
-                    let fillColor = '#007bff';
-                    const year = parseInt(s.year);
-                    const isME = s.statId && s.statId.startsWith('ME');
-
-                    if (isME) {
-                        // Logic similar to prev
-                        if (year && year <= 2018) {
-                            fillColor = '#dc3545'; // Red
-                        } else {
-                            fillColor = '#6f42c1'; // Purple
-                        }
-
-                        // 500m Radius Circle
-                        // L.circle radius is in meters.
-                        L.circle([s.lat, s.lng], {
-                            radius: 500,
-                            color: fillColor,
-                            fillColor: fillColor,
-                            fillOpacity: 0.1,
-                            weight: 1
-                        }).addTo(map);
+                    // FILTER LOGIC
+                    if (onlyUnsatisfied && isSatisfied) {
+                        return; // Skip satisfied if filter is on
                     }
 
-                    // Circle Marker
-                    L.circleMarker([s.lat, s.lng], {
-                        radius: 4,
-                        fillColor: fillColor,
-                        color: "#000",
-                        weight: 0.5,
-                        opacity: 1,
-                        fillOpacity: 1
+                    // let color = isSatisfied ? '#3388ff' : '#dc3545'; // Blue or Red
+                    let color = isSatisfied ? '#3388ff' : '#EB3223'; // Blue or Red
+
+                    // Create SVG Icon for Apartment (Circle with Building)
+                    const aptIconHtml = `
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="11" fill="${color}" stroke="white" stroke-width="2"/>
+                            <path d="M7 19H17V6H7V19ZM9 8H11V10H9V8ZM13 8H15V10H13V8ZM9 12H11V14H9V12ZM13 12H15V14H13V12ZM9 16H11V18H9V16ZM13 16H15V18H13V16Z" fill="white"/>
+                        </svg>
+                    `;
+
+                    const aptIcon = L.divIcon({
+                        html: aptIconHtml,
+                        className: 'custom-svg-icon',
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12],
+                        popupAnchor: [0, -12]
+                    });
+
+                    // -----------------------------------------------------------
+                    // 1. Draw Simulated Polygon Area (Zone) -> REMOVED
+                    // -----------------------------------------------------------
+
+                    const marker = L.marker([k.lat, k.lng], {
+                        icon: aptIcon
                     })
-                        .addTo(map)
                         .bindPopup(`
-                        <div style="min-width:150px;">
-                            <h4 style="margin:0 0 5px 0; font-size:14px;">${s.statNm}</h4>
+                        <div style="min-width:200px">
+                            <h4 style="margin:0 0 5px 0; font-size:14px;">${k.kaptName}</h4>
                             <div style="font-size:12px; color:#555;">
-                                <b>ID:</b> ${s.statId} (Charger: ${s.chgerId})<br>
-                                <b>Addr:</b> ${s.addr}<br>
-                                <b>Year:</b> ${s.year}
+                                <b>주소:</b> ${k.addrLegacy}<br>
+                                <b>Year:</b> ${year}<br>
+                                <b>주차면수:</b> ${k.totalParking}<br>
+                                <b>충전시설:</b> ${totalEv}<br>
+                                <b>보급률:</b> ${rate.toFixed(1)}%<br>
+                                <b>목표치:</b> ${threshold}% (${isSatisfied ? '만족' : '미달'})
                             </div>
                         </div>
                     `);
-                });
 
-                index += chunkSize;
-                if (index < statData.length) {
-                    requestAnimationFrame(processStatChunk);
-                } else {
-                    console.log("All Stat Data Loaded.");
-                }
+                    // Add both to the LayerGroup
+                    // aptLayerGroup.addLayer(zone); // Removed
+                    aptLayerGroup.addLayer(marker);
+
+                    // Sidebar
+                    const item = document.createElement('div');
+                    item.className = 'park-item';
+                    item.innerHTML = `
+                        <div class="park-name">${k.kaptName}</div>
+                        <div class="park-addr">${k.addrLegacy}</div>
+                        <div style="font-size:12px; color:#555; margin-top:4px;">
+                            Year: ${year} | P: ${k.totalParking} | EV: ${totalEv} (${rate.toFixed(1)}%)
+                        </div>
+                        <div style="font-size:12px; font-weight:bold; color:${isSatisfied ? 'blue' : 'darkred'}; margin-top:2px;">
+                            ${isSatisfied ? '만족' : '미달'}
+                        </div>
+                    `;
+                    item.addEventListener('click', () => {
+                        map.flyTo([k.lat, k.lng], 16, { duration: 0.5 });
+                        marker.openPopup();
+                    });
+                    sidebarAptList.appendChild(item);
+                });
             }
 
-            processStatChunk();
+            // Initial Render (Show All)
+            renderApartments(false);
+
+            // Checkbox Event
+            const chkUnsatisfied = document.getElementById('chk-unsatisfied');
+            if (chkUnsatisfied) {
+                chkUnsatisfied.addEventListener('change', (e) => {
+                    renderApartments(e.target.checked);
+                });
+            }
+
+            // -------------------------------------------------------------------
+            // D. Stat Data (Aggregated by Station) with Dynamic Radius
+            // -------------------------------------------------------------------
+            // Group statData by statId to prevent stacked markers
+            const stations = {};
+
+            statData.forEach(s => {
+                if (!s.lat || !s.lng || !s.statId) return;
+
+                if (!stations[s.statId]) {
+                    stations[s.statId] = {
+                        ...s,
+                        chargers: [] // Array to hold individual charger info if needed
+                    };
+                }
+                stations[s.statId].chargers.push(s);
+            });
+
+            const stationValues = Object.values(stations);
+            const stationLayerGroup = L.layerGroup().addTo(map);
+            let currentRadius = 500; // Default
+
+            function renderStations() {
+                stationLayerGroup.clearLayers();
+
+                const chunkSize = 500;
+                let index = 0;
+
+                function processChunk() {
+                    const chunk = stationValues.slice(index, index + chunkSize);
+
+                    chunk.forEach(s => {
+                        const count = s.chargers.length;
+                        const year = parseInt(s.year);
+                        const isME = s.statId.startsWith('ME');
+
+                        let fillColor = '#007bff';
+                        if (isME) {
+                            // ME logic: Red if <= 2018, else Purple
+                            if (year && year <= 2018) {
+                                fillColor = '#dc3545';
+                            } else {
+                                fillColor = '#6f42c1';
+                            }
+
+                            // Dynamic Radius Circle
+                            L.circle([s.lat, s.lng], {
+                                radius: currentRadius, // Use dynamic variable
+                                color: fillColor,
+                                fillColor: fillColor,
+                                fillOpacity: 0.05,
+                                weight: 1,
+                                dashArray: '4, 4'
+                            }).addTo(stationLayerGroup);
+                        }
+
+                        // Create Numbered Marker Icon
+                        const countIconHtml = `
+                            <div style="
+                                background-color: ${fillColor};
+                                color: white;
+                                border-radius: 50%;
+                                width: 20px;
+                                height: 20px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-size: 11px;
+                                font-weight: bold;
+                                border: 1px solid white;
+                                box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+                            ">
+                                ${count}
+                            </div>
+                        `;
+
+                        const countIcon = L.divIcon({
+                            html: countIconHtml,
+                            className: 'custom-stat-icon',
+                            iconSize: [20, 20],
+                            iconAnchor: [10, 10],
+                            popupAnchor: [0, -10]
+                        });
+
+                        L.marker([s.lat, s.lng], {
+                            icon: countIcon
+                        })
+                            .addTo(stationLayerGroup)
+                            .bindPopup(`
+                            <div style="min-width:160px;">
+                                <h4 style="margin:0 0 5px 0; font-size:14px;">${s.statNm}</h4>
+                                <div style="font-size:12px; color:#555;">
+                                    <b>ID:</b> ${s.statId}<br>
+                                    <b>Chargers:</b> ${count}대<br>
+                                    <b>Addr:</b> ${s.addr}<br>
+                                    <b>Year:</b> ${s.year}
+                                </div>
+                            </div>
+                        `);
+                    });
+
+                    index += chunkSize;
+                    if (index < stationValues.length) {
+                        requestAnimationFrame(processChunk);
+                    } else {
+                        console.log("All Station Data Rendered.");
+                    }
+                }
+                processChunk(); // Start loop
+            }
+
+            // Initial Render
+            renderStations();
+
+            // Radius Change Event
+            document.querySelectorAll('input[name="rad-opt"]').forEach(r => {
+                r.addEventListener('change', (e) => {
+                    currentRadius = parseInt(e.target.value);
+                    renderStations();
+                });
+            });
 
         }).catch(err => console.error("Error loading data:", err));
     </script>
