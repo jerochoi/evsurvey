@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>EV Map OpenLayers</title>
+    <!-- OpenLayers CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.3.0/ol.css" type="text/css">
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Popup Styling */
+        .ol-popup {
+            position: absolute;
+            background-color: white;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #cccccc;
+            bottom: 12px;
+            /* left: -50px; Remove fixed left to allow positioning */
+            min-width: 280px;
+            transform: translate(-50%, 0);
+            /* Center horizontally */
+        }
+
+        .ol-popup:after,
+        .ol-popup:before {
+            top: 100%;
+            border: solid transparent;
+            content: " ";
+            height: 0;
+            width: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .ol-popup:after {
+            border-top-color: white;
+            border-width: 10px;
+            left: 50%;
+            margin-left: -10px;
+        }
+
+        .ol-popup:before {
+            border-top-color: #cccccc;
+            border-width: 11px;
+            left: 50%;
+            margin-left: -11px;
+        }
+
+        /* Loading Overlay */
+        #loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: sans-serif;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        #loading-text {
+            font-size: 18px;
+            color: #333;
+            font-weight: bold;
+        }
+    </style>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ol@v7.3.0/dist/ol.js"></script>
+</head>
+
+<body>
+    <!-- Map Container -->
+    <div id="map" data-contextpath="."></div>
+
+    <!-- Loading Element -->
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <div id="loading-text">충전소 데이터를 불러오는 중입니다...</div>
+    </div>
+
+    <!-- Popup Element (needed by evMap.js features usually, or we add one) -->
+    <div id="popup" class="ol-popup">
+        <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+        <div id="popup-content"></div>
+    </div>
+
+    <!-- EV Map Logic -->
+    <script src="evMap1.js"></script>
+
+    <!-- Initialization Script -->
+    <script>
+        // Global Variables expected by evMap.js or our logic
+        var baseGround;
+        var mapView;
+        var m_mapStations = new Map();
+
+        // Clustering params
+        var declusterZoom = 15;
+        var clusterDistance = 40;
+        var declusterDistance = 1;
+
+        // Layers
+        var stationLayer = {};
+        var clusterLayer = {};
+        var clustersAlone = [];
+        var stationSpot = [];
+        var stationListOverlay; // Overlay for popup
+        var element_stationList; // Popup DOM element
+
+        // Other globals used in evMap.js functions
+        var _marker_kind = "N";
+        var oldZoomLevel;
+
+        $(document).ready(function () {
+            console.log("Initializing Map...");
+
+            // 1. Setup Map
+            mapView = new ol.View({
+                center: ol.proj.fromLonLat([127.5, 36.5]), // Korea Center
+                zoom: 7
+            });
+
+            baseGround = new ol.Map({
+                target: 'map',
+                layers: [
+                    new ol.layer.Tile({
+                        source: new ol.source.OSM()
+                    })
+                ],
+                view: mapView
+            });
+
+            // 2. Setup Popup Overlay
+            var container = document.getElementById('popup');
+            var content = document.getElementById('popup-content');
+            // var closer = document.getElementById('popup-closer');
+
+            stationListOverlay = new ol.Overlay({
+                element: container,
+                autoPan: true,
+                autoPanAnimation: { duration: 250 }
+            });
+            baseGround.addOverlay(stationListOverlay);
+            element_stationList = container; // mapping for evMap.js usage if any
+
+            // 3. Load Data - Fetch Both Files
+            var files = ["evMapList_me.json", "evMapList_etc.json"];
+
+            function fetchJson(url) {
+                // Update UI for each start
+                return $.getJSON(url).then(function (data) {
+                    $("#loading-text").text(url + " 로드 완료 (" + (data.chargerList ? data.chargerList.length : 0) + " 건).");
+                    return data;
+                }).fail(function () {
+                    console.log("Failed to load " + url);
+                    return { chargerList: [] };
+                });
+            }
+
+            Promise.all(files.map(fetchJson)).then(function (results) {
+                var totalStations = 0;
+
+                $("#loading-text").text("데이터 통합 및 렌더링 중...");
+
+                results.forEach(function (data) {
+                    console.log("Loaded batch with " + (data.chargerList ? data.chargerList.length : 0) + " stations.");
+                    if (data.chargerList) {
+                        totalStations += data.chargerList.length;
+
+                        data.chargerList.forEach(function (item) {
+                            var st = new Station(
+                                item.sid, item.snm, item.x, item.y,
+                                item.hol, 0, item.ut, item.ctp,
+                                item.cm || '00',
+                                "", item.zs, item.lm, item.po,
+                                item.trf, item.smt
+                            );
+
+                            var chgr = new Charger(item.sid, item.cid, item.ctp, item.cst, item.tst, item.smt);
+                            st.chargers.put(item.cid, chgr);
+
+                            if (m_mapStations.containsKey(item.sid)) {
+                                var existSt = m_mapStations.get(item.sid);
+                                existSt.chargers.put(item.cid, chgr);
+                                existSt.setMode(item.lm, item.po, item.ctp);
+                                if (item.cm && item.cm !== '00') {
+                                    existSt.chgeMange = item.cm;
+                                }
+                            } else {
+                                m_mapStations.put(item.sid, st);
+                            }
+                        });
+                    }
+                });
+
+                console.log("Total stations loaded: " + totalStations);
+
+                // Render Map
+                reDrawStatAndMarker();
+
+                // Hide Loading
+                $("#loading-overlay").fadeOut();
+
+            }).catch(function (err) {
+                console.error("Error loading data:", err);
+                $("#loading-text").text("데이터 로딩 중 오류가 발생했습니다.");
+            });
+
+            // 4. Geolocation / Default Zoom
+            if ("geolocation" in navigator) {
+                console.log("Requesting Location...");
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    var lat = position.coords.latitude;
+                    var lng = position.coords.longitude;
+
+                    console.log("Current Location Found: ", lat, lng);
+
+                    mapView.animate({
+                        center: ol.proj.fromLonLat([lng, lat]),
+                        zoom: 16,
+                        duration: 1000
+                    });
+                }, function (error) {
+                    console.warn("Geolocation denied or failed. Defaulting to Seoul.");
+                    moveToSeoul();
+                }, { timeout: 5000 });
+            } else {
+                moveToSeoul();
+            }
+
+            function moveToSeoul() {
+                // Seoul City Hall approx
+                var seoulLng = 126.9780;
+                var seoulLat = 37.5665;
+
+                mapView.animate({
+                    center: ol.proj.fromLonLat([seoulLng, seoulLat]),
+                    zoom: 16,
+                    duration: 1000
+                });
+            }
+
+            // Map Events
+            baseGround.on('moveend', function () {
+                var zoom = baseGround.getView().getZoom();
+
+                if (isThresholdPassed(zoom)) {
+                    reDrawStatAndMarker(true); // Pass true to indicate Zoom Update only
+                }
+
+                oldZoomLevel = zoom;
+            });
+            oldZoomLevel = baseGround.getView().getZoom();
+
+            // Interaction: Click on Marker
+            baseGround.on('singleclick', function (evt) {
+                var feature = baseGround.forEachFeatureAtPixel(evt.pixel, function (feature) {
+                    return feature;
+                });
+
+                if (feature) {
+                    var kind = feature.get('kind');
+                    // Check if it is a cluster with size 1 (direct marker style)
+                    var features = feature.get('features');
+
+                    if (kind === 'ExistingStation' || (features && features.length === 1 && mapView.getZoom() >= declusterZoom)) {
+                        // Handle Cluster of 1 as direct marker
+                        var originalFeature = features ? features[0] : feature;
+                        var sid = originalFeature.get('sid');
+
+                        var st = m_mapStations.get(sid);
+                        var coordinate = evt.coordinate; // Use click coord
+
+                        var contentHTML = '<div style="font-size:14px; font-weight:bold; margin-bottom:5px; border-bottom:1px solid #eee; padding-bottom:5px;">' + st.snm + '</div>';
+                        contentHTML += '<div style="font-size:12px;"><b>운영시간:</b> ' + st.utime + '</div>';
+                        contentHTML += '<div style="font-size:12px;"><b>운영기관:</b> ' + st.chgeMange + '</div>';
+
+                        // Show Chargers info if needed
+                        var chargers = st.chargers.values();
+                        var available = 0;
+                        for (var i = 0; i < chargers.length; i++) {
+                            if (chargers[i].cst == '2') available++;
+                        }
+                        contentHTML += '<div style="font-size:12px; margin-top:5px;"><b>사용가능 충전기:</b> <span style="color:green; font-weight:bold;">' + available + '</span> / ' + chargers.length + '</div>';
+
+                        content.innerHTML = contentHTML;
+                        stationListOverlay.setPosition(coordinate);
+                    }
+                } else {
+                    stationListOverlay.setPosition(undefined);
+                }
+            });
+        });
+
+        // Dummy Checkboxes for Filter if needed by evMap.js to avoid errors
+        // or we define dummy functions in evMap.js override?
+        // evMap.js: $(".filterType").each(...)
+        // If no elements, length is 0, loops don't run.
+        // getExceptType returns array of excluded types. If loop doesn't run, array is empty?
+        // Code: var chtypeArr = [[...], ...];
+        // Loop checks :checked.
+        // Loop over chtypeArr: if chtypeArr[i][2] == 0 push to exceptArr.
+        // If checkboxes don't exist, they are not checked.
+        // Then chtypeArr[i][2] remains 0.
+        // So ALL types are added to exceptArr.
+        // result: ALL BLOCKED.
+        // We need to create hidden checkboxes that are CHECKED by default for all types.
+    </script>
+
+    <!-- Modern Sidebar for Search & Filters -->
+    <button id="sidebar-toggle" class="sidebar-toggle">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+    </button>
+
+    <div class="map-sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span>EV Station Map</span>
+            <button id="sidebar-close" class="close-btn">&times;</button>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="station-search" class="search-input" placeholder="충전소명 검색...">
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-title">충전기 타입</div>
+            <div class="checkbox-group">
+                <label class="custom-checkbox"><input type="checkbox" class="filterType" value="D" checked> <span>DC
+                        콤보</span></label>
+                <label class="custom-checkbox"><input type="checkbox" class="filterType" value="B" checked> <span>DC
+                        차데모</span></label>
+                <label class="custom-checkbox"><input type="checkbox" class="filterType" value="C" checked> <span>AC
+                        3상</span></label>
+                <label class="custom-checkbox"><input type="checkbox" class="filterType" value="A" checked> <span>AC
+                        완속</span></label>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-title">필터 옵션</div>
+            <div class="checkbox-group">
+                <label class="custom-checkbox"><input type="checkbox" id="F_24HOUR1"> <span>24시간 운영</span></label>
+                <label class="custom-checkbox"><input type="checkbox" id="F_SMART_CHRGR1"> <span>스마트 충전기</span></label>
+                <label class="custom-checkbox"><input type="checkbox" id="chktrf"> <span>교통약자 배려</span></label>
+            </div>
+        </div>
+
+        <div class="filter-status">
+            총 <span id="status-count">0</span>개 충전소
+        </div>
+    </div>
+
+    <!-- Hidden Input for compatibility with existing search logic -->
+    <input type="hidden" id="F_SEARCH_TYPE1" value="">
+
+    <style>
+        /* Sidebar Styles */
+        .map-sidebar {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 300px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            padding: 24px;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            max-height: 85vh;
+            overflow-y: auto;
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .map-sidebar.collapsed {
+            transform: translateX(-360px);
+        }
+
+        .sidebar-toggle {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: white;
+            border: none;
+            border-radius: 12px;
+            padding: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .sidebar-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        .sidebar-header {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: #1a1a1a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            color: #666;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .search-container {
+            margin-bottom: 24px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            font-size: 14px;
+            box-sizing: border-box;
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: #3498db;
+            outline: none;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .filter-section {
+            margin-bottom: 20px;
+        }
+
+        .filter-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #888;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .custom-checkbox {
+            display: flex;
+            align-items: center;
+            font-size: 15px;
+            color: #333;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .custom-checkbox input {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            accent-color: #3498db;
+            cursor: pointer;
+        }
+
+        .filter-status {
+            margin-top: 24px;
+            font-size: 13px;
+            color: #666;
+            text-align: right;
+            border-top: 1px solid #eee;
+            padding-top: 16px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .map-sidebar {
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: auto;
+                max-height: 50vh;
+                border-radius: 0 0 16px 16px;
+                transform: translateY(0);
+            }
+
+            .map-sidebar.collapsed {
+                transform: translateY(-110%);
+            }
+
+            .sidebar-toggle {
+                display: flex;
+            }
+        }
+    </style>
+
+    <script>
+        $(document).ready(function () {
+            // Sidebar Toggle Logic
+            function toggleSidebar() {
+                $('#sidebar').toggleClass('collapsed');
+                if ($('#sidebar').hasClass('collapsed')) {
+                    $('#sidebar-toggle').fadeIn();
+                } else {
+                    $('#sidebar-toggle').fadeOut();
+                }
+            }
+
+            $('#sidebar-close').click(toggleSidebar);
+            $('#sidebar-toggle').click(toggleSidebar);
+
+            // Bind Filter Changes to Map Redraw
+            $('.filterType, #F_24HOUR1, #F_SMART_CHRGR1, #chktrf').change(function () {
+                reDrawStatAndMarker();
+            });
+
+            // Bind Search Input
+            var searchTimeout;
+            $('#station-search').on('input', function () {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function () {
+                    reDrawStatAndMarker();
+                }, 300); // Debounce
+            });
+        });
+    </script>
+</body>
+
+</html>
