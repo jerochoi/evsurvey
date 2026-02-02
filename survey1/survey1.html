@@ -88,6 +88,12 @@
         .leaflet-popup-content-wrapper {
             border-radius: 8px;
         }
+
+        /* Reset default divIcon background if any */
+        .leaflet-div-icon.custom-svg-icon {
+            background: rgba(0, 0, 0, 0);
+            border: none;
+        }
     </style>
 </head>
 
@@ -118,6 +124,11 @@
         // -----------------------------------------------------------------------
         // 1. Define CRS for Kakao Map (EPSG:5181)
         // -----------------------------------------------------------------------
+        // -----------------------------------------------------------------------
+        // 1. Define CRS for Kakao Map (EPSG:5181)
+        // -----------------------------------------------------------------------
+        /* 
+        // Kakao Tile Direct Access is deprecated/blocked. Switching to Standard OSM (EPSG:3857).
         const crs = new L.Proj.CRS(
             'EPSG:5181',
             '+proj=tmerc +lat_0=38 +lon_0=127 +k=1 +x_0=200000 +y_0=500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
@@ -127,34 +138,24 @@
                 bounds: L.bounds([-30000, -60000], [494288, 988576])
             }
         );
+        */
 
         // -----------------------------------------------------------------------
         // 2. Initialize Map with Canvas Renderer for Performance
         // -----------------------------------------------------------------------
         const map = L.map('map', {
-            crs: crs,
+            // crs: crs, // Disabled custom CRS, reverting to default EPSG:3857
             center: [37.55, 126.68], // Lat, Lng
             zoom: 9,
             minZoom: 1,
-            maxZoom: 13, // Matches resolutions length - 1
+            maxZoom: 18, // Increased for OSM
             preferCanvas: true // IMPORTANT: Uses Canvas for vector layers (markers)
         });
 
-        // Add Kakao Tile Layer
-        // Note: The structure L{z} in Kakao tiles corresponds to resolutions index
-        L.tileLayer('http://map{s}.daumcdn.net/map_2d/2212kc/L{z}/{y}/{x}.png', {
-            subdomains: ['0', '1', '2', '3'],
-            tms: true, // Kakao/Daum often uses inverted Y, but check if needed. 
-            // Based on OL code: "tms" was not explicitly set but standard XYZ logic was used.
-            // However, standard XYZ top-left origin. EPSG:5181 generally uses bottom-left logic or defined origin.
-            // Let's try tms: false (default) first because OL source.XYZ default is top-left.
-            // BUT, standard Kakao tiles sometimes need `tms: true` in Leaflet if origin is bottom-left?
-            // OL config: origin [-30k, -60k]. 
-            // Let's trust standard Leaflet behavior with defined CRS origin.
-            // NOTE: The 'z' for Kakao tiles usually needs to be (14 - zoom) or similar if using standard numbered levels.
-            // But the OL code used `L{z}` where z matches the resolution index directly.
-            zoomOffset: 0,
-            zIndex: 1
+        // Add OpenStreetMap Tile Layer (Alternative: VWorld for Korean labels)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
         /* 
@@ -214,14 +215,23 @@
             parkData.forEach(p => {
                 if (!p.lat || !p.lng) return;
 
-                // Using L.circleMarker for performance (Canvas)
-                const marker = L.circleMarker([p.lat, p.lng], {
-                    radius: 6,
-                    fillColor: "#28a745", // Green
-                    color: "#000",
-                    weight: 1,
-                    opacity: 1,
-                    fillOpacity: 1
+                // Create SVG Icon for Parking
+                const parkingIconHtml = `
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="11" fill="#28a745" stroke="#ffffff" stroke-width="2"/>
+                        <path d="M9 7h4a3 3 0 0 1 0 6H9v4H7V7h2z" fill="#ffffff"/>
+                    </svg>
+                `;
+                const parkingIcon = L.divIcon({
+                    html: parkingIconHtml,
+                    className: 'custom-svg-icon', // You can add global CSS reset for this if needed to avoid default background
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12], // center
+                    popupAnchor: [0, -12]
+                });
+
+                const marker = L.marker([p.lat, p.lng], {
+                    icon: parkingIcon
                 })
                     .addTo(map)
                     .bindPopup(`
@@ -260,27 +270,39 @@
                 let rate = (totalEv / totalParking) * 100;
                 let threshold = (year >= 2022) ? 5.0 : 2.0;
                 let isSatisfied = rate >= threshold;
-                let color = isSatisfied ? '#3388ff' : '#dc3545'; // Blue or Red
+                // let color = isSatisfied ? '#3388ff' : '#dc3545'; // Blue or Red
+                let color = isSatisfied ? '#3388ff' : '#EB3223'; // Blue or Red
 
-                const marker = L.circleMarker([k.lat, k.lng], {
-                    radius: 7,
-                    fillColor: color,
-                    color: "#fff",
-                    weight: 1,
-                    opacity: 1,
-                    fillOpacity: 1
+                // Create SVG Icon for Apartment (Circle with Building)
+                const aptIconHtml = `
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="11" fill="${color}" stroke="white" stroke-width="2"/>
+                        <path d="M7 19H17V6H7V19ZM9 8H11V10H9V8ZM13 8H15V10H13V8ZM9 12H11V14H9V12ZM13 12H15V14H13V12ZM9 16H11V18H9V16ZM13 16H15V18H13V16Z" fill="white"/>
+                    </svg>
+                `;
+
+                const aptIcon = L.divIcon({
+                    html: aptIconHtml,
+                    className: 'custom-svg-icon',
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12],
+                    popupAnchor: [0, -12]
+                });
+
+                const marker = L.marker([k.lat, k.lng], {
+                    icon: aptIcon
                 })
                     .addTo(map)
                     .bindPopup(`
                      <div style="min-width:200px">
                         <h4 style="margin:0 0 5px 0; font-size:14px;">${k.kaptName}</h4>
                         <div style="font-size:12px; color:#555;">
-                            <b>Addr:</b> ${k.addrLegacy}<br>
+                            <b>주소:</b> ${k.addrLegacy}<br>
                             <b>Year:</b> ${year}<br>
-                            <b>Parking:</b> ${k.totalParking}<br>
-                            <b>Total EV:</b> ${totalEv}<br>
-                            <b>Rate:</b> ${rate.toFixed(1)}%<br>
-                            <b>Threshold:</b> ${threshold}% (${isSatisfied ? 'Satisfied' : 'Unsatisfied'})
+                            <b>주차면수:</b> ${k.totalParking}<br>
+                            <b>충전시설:</b> ${totalEv}<br>
+                            <b>보급률:</b> ${rate.toFixed(1)}%<br>
+                            <b>목표치:</b> ${threshold}% (${isSatisfied ? '만족' : '미달'})
                         </div>
                     </div>
                 `);
@@ -295,7 +317,7 @@
                         Year: ${year} | P: ${k.totalParking} | EV: ${totalEv} (${rate.toFixed(1)}%)
                     </div>
                     <div style="font-size:12px; font-weight:bold; color:${isSatisfied ? 'blue' : 'darkred'}; margin-top:2px;">
-                        ${isSatisfied ? 'Satisfied' : 'Unsatisfied'}
+                        ${isSatisfied ? '만족' : '미달'}
                     </div>
                 `;
                 item.addEventListener('click', () => {
