@@ -142,6 +142,9 @@
                     <label style="cursor:pointer; font-weight:bold;">
                         <input type="checkbox" id="chk-unsatisfied"> 아파트 미달만 보기
                     </label>
+                    <label style="cursor:pointer; font-weight:bold; margin-left: 15px;">
+                        <input type="checkbox" id="chk-public-park"> 공영 주차장만 보기
+                    </label>
                 </div>
                 <div class="footer-item">
                     <span class="footer-label">(환경부) 급속충전소 반경:</span>
@@ -217,9 +220,10 @@
         Promise.all([
             fetch('./23080_inline.geojson').then(r => r.json()),
             fetch('./parkData.json').then(r => r.json()),
+            fetch('./pubparkData.json').then(r => r.json()),
             fetch('./kaptData.json').then(r => r.json()),
             fetch('./statData.json').then(r => r.json())
-        ]).then(([seoguData, parkData, kaptData, statData]) => {
+        ]).then(([seoguData, parkData, pubParkData, kaptData, statData]) => {
             console.log("Data loaded. Rendering...");
 
             // -------------------------------------------------------------------
@@ -252,51 +256,165 @@
             }
 
             // -------------------------------------------------------------------
-            // B. Park Markers (Green Circles + P icon simulation?)
-            //    User requested green markers.
+            // B. Park Markers & Sidebar Logic (Naver vs Public Toggle)
             // -------------------------------------------------------------------
-            parkData.forEach(p => {
-                if (!p.lat || !p.lng) return;
+            const naverParkLayer = L.layerGroup();
+            const pubParkLayer = L.layerGroup();
 
-                // Create SVG Icon for Parking
-                const parkingIconHtml = `
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="12" cy="12" r="11" fill="#28a745" stroke="#ffffff" stroke-width="2"/>
-                        <path d="M9 7h4a3 3 0 0 1 0 6H9v4H7V7h2z" fill="#ffffff"/>
-                    </svg>
-                `;
-                const parkingIcon = L.divIcon({
-                    html: parkingIconHtml,
-                    className: 'custom-svg-icon', // You can add global CSS reset for this if needed to avoid default background
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 12], // center
-                    popupAnchor: [0, -12]
+            // 1. Prepare Naver Park Data (parkData)
+            if (parkData) {
+                parkData.forEach(p => {
+                    if (!p.lat || !p.lng) return;
+
+                    // SVG Icon (Green)
+                    const parkingIconHtml = `
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="11" fill="#28a745" stroke="#ffffff" stroke-width="2"/>
+                            <path d="M9 7h4a3 3 0 0 1 0 6H9v4H7V7h2z" fill="#ffffff"/>
+                        </svg>
+                    `;
+                    const parkingIcon = L.divIcon({
+                        html: parkingIconHtml,
+                        className: 'custom-svg-icon',
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12],
+                        popupAnchor: [0, -12]
+                    });
+
+                    const marker = L.marker([p.lat, p.lng], {
+                        icon: parkingIcon
+                    }).bindPopup(`
+                        <div style="min-width:150px">
+                            <b>${p.nm}</b><br>
+                            <span style="font-size:12px; color:#555">${p.addr}</span>
+                        </div>
+                    `);
+
+                    // Add to LayerGroup
+                    naverParkLayer.addLayer(marker);
+
+                    // Store marker reference for sidebar interactions
+                    p._marker = marker;
                 });
+            }
 
-                const marker = L.marker([p.lat, p.lng], {
-                    icon: parkingIcon
-                })
-                    .addTo(map)
-                    .bindPopup(`
-                    <div style="min-width:150px">
-                        <b>${p.nm}</b><br>
-                        <span style="font-size:12px; color:#555">${p.addr}</span>
-                    </div>
-                `);
+            // 2. Prepare Public Park Data (pubParkData)
+            if (pubParkData) {
+                pubParkData.forEach(p => {
+                    const lat = parseFloat(p['위도']);
+                    const lng = parseFloat(p['경도']);
+                    const name = p['주차장명'];
+                    const addr = p['소재지도로명주소'] || p['소재지지번주소'];
+                    const capacity = parseInt(p['주차구획수']) || 0;
 
-                // Sidebar
-                const item = document.createElement('div');
-                item.className = 'park-item';
-                item.innerHTML = `
-                    <div class="park-name">${p.nm}</div>
-                    <div class="park-addr">${p.addr}</div>
-                `;
-                item.addEventListener('click', () => {
-                    map.flyTo([p.lat, p.lng], 16, { duration: 0.5 });
-                    marker.openPopup();
+                    if (!lat || !lng) return;
+
+                    const isLarge = capacity >= 50;
+                    const color = isLarge ? '#dc3545' : '#28a745'; // Red or Green
+
+                    const parkingIconHtml = `
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="11" fill="${color}" stroke="#ffffff" stroke-width="2"/>
+                            <path d="M9 7h4a3 3 0 0 1 0 6H9v4H7V7h2z" fill="#ffffff"/>
+                        </svg>
+                    `;
+                    const parkingIcon = L.divIcon({
+                        html: parkingIconHtml,
+                        className: 'custom-svg-icon',
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12],
+                        popupAnchor: [0, -12]
+                    });
+
+                    const marker = L.marker([lat, lng], {
+                        icon: parkingIcon
+                    }).bindPopup(`
+                        <div style="min-width:150px">
+                            <b>${name}</b><br>
+                            <span style="font-size:12px; color:#555">${addr}</span><br>
+                            <span style="font-size:12px; font-weight:bold;">주차면수: ${capacity}면</span>
+                        </div>
+                    `);
+
+                    pubParkLayer.addLayer(marker);
+                    p._marker = marker;
                 });
-                sidebarParkList.appendChild(item);
-            });
+            }
+
+            // Function to render Sidebar and Toggle Layers
+            function renderParking(isPublic) {
+                // Clear Sidebar
+                sidebarParkList.innerHTML = '';
+
+                // Toggle Layers
+                if (isPublic) {
+                    map.removeLayer(naverParkLayer);
+                    if (!map.hasLayer(pubParkLayer)) map.addLayer(pubParkLayer);
+
+                    // Render Sidebar for Public Parks
+                    if (pubParkData) {
+                        pubParkData.forEach(p => {
+                            // Use keys consistent with pubparkData
+                            const name = p['주차장명'];
+                            const addr = p['소재지도로명주소'] || p['소재지지번주소'];
+                            const capacity = parseInt(p['주차구획수']) || 0;
+                            const isLarge = capacity >= 50;
+
+                            const item = document.createElement('div');
+                            item.className = 'park-item';
+                            item.innerHTML = `
+                                <div class="park-name" style="color: ${isLarge ? '#dc3545' : '#333'}">${name}</div>
+                                <div class="park-addr">${addr}</div>
+                                <div style="font-size:12px; font-weight:bold; color:${isLarge ? '#dc3545' : '#555'}">
+                                    주차면수: ${capacity}
+                                </div>
+                            `;
+                            item.addEventListener('click', () => {
+                                const lat = parseFloat(p['위도']);
+                                const lng = parseFloat(p['경도']);
+                                if (lat && lng) {
+                                    map.flyTo([lat, lng], 16, { duration: 0.5 });
+                                    if (p._marker) p._marker.openPopup();
+                                }
+                            });
+                            sidebarParkList.appendChild(item);
+                        });
+                    }
+                } else {
+                    map.removeLayer(pubParkLayer);
+                    if (!map.hasLayer(naverParkLayer)) map.addLayer(naverParkLayer);
+
+                    // Render Sidebar for Naver Parks
+                    if (parkData) {
+                        parkData.forEach(p => {
+                            const item = document.createElement('div');
+                            item.className = 'park-item';
+                            item.innerHTML = `
+                                <div class="park-name">${p.nm}</div>
+                                <div class="park-addr">${p.addr}</div>
+                            `;
+                            item.addEventListener('click', () => {
+                                if (p.lat && p.lng) {
+                                    map.flyTo([p.lat, p.lng], 16, { duration: 0.5 });
+                                    if (p._marker) p._marker.openPopup();
+                                }
+                            });
+                            sidebarParkList.appendChild(item);
+                        });
+                    }
+                }
+            }
+
+            // Initial Render: Default to Naver Parks (Not public only)
+            renderParking(false);
+
+            // Event Listener for Checkbox
+            const chkPublicPark = document.getElementById('chk-public-park');
+            if (chkPublicPark) {
+                chkPublicPark.addEventListener('change', (e) => {
+                    renderParking(e.target.checked);
+                });
+            }
 
             // -------------------------------------------------------------------
             // C. Kapt Markers (Refactored for Filtering)
