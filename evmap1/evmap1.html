@@ -185,17 +185,38 @@
             element_stationList = container; // mapping for evMap.js usage if any
 
             // 3. Load Data - Fetch Both Files
-            var files = ["evMapList_me.json", "evMapList_etc.json"];
+            var files = ["evMapList_me.json.gz", "evMapList_etc.json.gz"];
 
-            function fetchJson(url) {
-                // Update UI for each start
-                return $.getJSON(url).then(function (data) {
-                    $("#loading-text").text(url + " 로드 완료 (" + (data.chargerList ? data.chargerList.length : 0) + " 건).");
-                    return data;
-                }).fail(function () {
-                    console.log("Failed to load " + url);
+            async function fetchJson(url) {
+                try {
+                    if (url.endsWith('.gz')) {
+                        const response = await fetch(url);
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        const blob = await response.blob();
+                        const ds = new DecompressionStream('gzip');
+                        const stream = blob.stream().pipeThrough(ds);
+                        const data = await new Response(stream).json();
+
+                        $("#loading-text").text(url + " 로드 완료 (" + (data.chargerList ? data.chargerList.length : 0) + " 건).");
+                        return data;
+                    } else {
+                        // Standard JSON file
+                        return new Promise((resolve, reject) => {
+                            $.getJSON(url, function (data) {
+                                $("#loading-text").text(url + " 로드 완료 (" + (data.chargerList ? data.chargerList.length : 0) + " 건).");
+                                resolve(data);
+                            }).fail(function () {
+                                console.log("Failed to load " + url);
+                                resolve({ chargerList: [] });
+                            });
+                        });
+                    }
+                } catch (err) {
+                    console.log("Failed to load " + url + " : " + err);
                     return { chargerList: [] };
-                });
+                }
             }
 
             Promise.all(files.map(fetchJson)).then(function (results) {
