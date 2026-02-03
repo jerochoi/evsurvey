@@ -64,11 +64,18 @@ $(document).ready(function () {
 
 function initMap() {
     // Center on Korea
-    map = L.map('map').setView([36.5, 127.5], 7);
+    // Center on Korea
+    map = L.map('map', {
+        preferCanvas: true // Improve rendering performance
+    }).setView([36.5, 127.5], 7);
 
     // Add Tile Layer (OSM)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        keepBuffer: 16, // Increase from default (2) to keep more tiles in memory (screen screens)
+        updateWhenIdle: false, // Load tiles during pan interaction
+        updateInterval: 50, // Check for new tiles more frequently (default 200ms)
+        maxZoom: 19
     }).addTo(map);
 
     // Initialize Marker Cluster Group

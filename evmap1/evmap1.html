@@ -163,9 +163,12 @@
 
             baseGround = new ol.Map({
                 target: 'map',
+                loadTilesWhileAnimating: true, // Load tiles during animations
+                loadTilesWhileInteracting: true, // Load tiles during interaction (drag/zoom)
                 layers: [
                     new ol.layer.Tile({
-                        source: new ol.source.OSM()
+                        source: new ol.source.OSM(),
+                        preload: 6 // Preload low-resolution tiles to minimize white flashes
                     })
                 ],
                 view: mapView
