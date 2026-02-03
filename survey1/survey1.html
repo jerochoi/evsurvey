@@ -439,6 +439,13 @@
                     let threshold = (year >= 2022) ? 5.0 : 2.0;
                     let isSatisfied = rate >= threshold;
 
+                    let needed = 0;
+                    if (!isSatisfied) {
+                        let targetCount = Math.ceil(totalParking * (threshold / 100));
+                        needed = targetCount - totalEv;
+                        if (needed < 0) needed = 0;
+                    }
+
                     // FILTER LOGIC
                     if (onlyUnsatisfied && isSatisfied) {
                         return; // Skip satisfied if filter is on
@@ -479,7 +486,7 @@
                                 <b>주차면수:</b> ${k.totalParking}<br>
                                 <b>충전시설:</b> ${totalEv}<br>
                                 <b>보급률:</b> ${rate.toFixed(1)}%<br>
-                                <b>목표치:</b> ${threshold}% (${isSatisfied ? '만족' : '미달'})
+                                <b>목표치:</b> ${threshold}% (${isSatisfied ? '만족' : `미달, ${needed}기 필요`})
                             </div>
                         </div>
                     `);
@@ -498,7 +505,7 @@
                             Year: ${year} | P: ${k.totalParking} | EV: ${totalEv} (${rate.toFixed(1)}%)
                         </div>
                         <div style="font-size:12px; font-weight:bold; color:${isSatisfied ? 'blue' : 'darkred'}; margin-top:2px;">
-                            ${isSatisfied ? '만족' : '미달'}
+                            ${isSatisfied ? '만족' : `미달 (필요수량: ${needed}대)`}
                         </div>
                     `;
                     item.addEventListener('click', () => {
