@@ -96,13 +96,43 @@ function initMap() {
 }
 
 function loadData() {
-    var files = ["evMapList_me.json", "evMapList_etc.json"];
+    var files = ["evMapList_me.json.gz", "evMapList_etc.json.gz"];
 
-    Promise.all(files.map(url => $.getJSON(url))).then(function (results) {
+    async function fetchJson(url) {
+        try {
+            if (url.endsWith('.gz')) {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const blob = await response.blob();
+                const ds = new DecompressionStream('gzip');
+                const stream = blob.stream().pipeThrough(ds);
+                const data = await new Response(stream).json();
+
+                // Optional: Update loading text like in evmap1 logic if desired, 
+                // but preserving existing structure mostly.
+                return data;
+            } else {
+                return new Promise((resolve, reject) => {
+                    $.getJSON(url, function (data) {
+                        resolve(data);
+                    }).fail(function () {
+                        reject(new Error("Failed to load " + url));
+                    });
+                });
+            }
+        } catch (err) {
+            console.error("Failed to load " + url + " : " + err);
+            return { chargerList: [] }; // Return empty data on failure to keep Promise.all alive
+        }
+    }
+
+    Promise.all(files.map(fetchJson)).then(function (results) {
         var stationMap = new Map();
 
         results.forEach(function (data) {
-            if (data.chargerList) {
+            if (data && data.chargerList) {
                 data.chargerList.forEach(function (item) {
                     if (stationMap.has(item.sid)) {
                         // Update existing
