@@ -1,24 +1,88 @@
 [
   {
-    "statId": "ME174125",
-    "statNm": "㈜현대자동차 블루핸즈 서인천 서비스 주차장 입구",
-    "addr": "인천광역시 서구 원삭로 160",
-    "lat": 37.509973287,
-    "lng": 126.64197627,
+    "statId": "ME181106",
+    "statNm": "송도골프",
+    "addr": "지역코드: 28185",
+    "lat": 37.4147398,
+    "lng": 126.6512636,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME174119",
+    "statNm": "강화풍물시장 공영주차장",
+    "addr": "지역코드: 28710",
+    "lat": 37.7404676,
+    "lng": 126.4919478,
     "chargers_count": 1
   },
   {
-    "statId": "ME18B192",
-    "statNm": "가좌2동 행정복지센터",
-    "addr": "인천광역시 서구 가좌동 30-105",
-    "lat": 37.490759,
-    "lng": 126.6852272,
+    "statId": "ME174120",
+    "statNm": "계산1택지 공영주차장",
+    "addr": "지역코드: 28245",
+    "lat": 37.540182,
+    "lng": 126.7363007,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME174125",
+    "statNm": "㈜현대자동차 블루핸즈 서인천 서비스 주차장 입구",
+    "addr": "지역코드: 28260",
+    "lat": 37.5099733,
+    "lng": 126.6419763,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME174127",
+    "statNm": "영흥수산물직판장 주차장",
+    "addr": "지역코드: 28720",
+    "lat": 37.2551047,
+    "lng": 126.4981467,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME183080",
+    "statNm": "덕산국민여가캠핑장",
+    "addr": "지역코드: 28710",
+    "lat": 37.7175253,
+    "lng": 126.3808179,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME184082",
+    "statNm": "인천시청",
+    "addr": "지역코드: 28200",
+    "lat": 37.455605,
+    "lng": 126.704138,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME184083",
+    "statNm": "송도컨벤시아",
+    "addr": "지역코드: 28185",
+    "lat": 37.3891519,
+    "lng": 126.6465433,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME18B188",
+    "statNm": "온수리 공영 주차장",
+    "addr": "지역코드: 28710",
+    "lat": 37.63936,
+    "lng": 126.49185,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME18B196",
+    "statNm": "신기남부종합시장 주차장",
+    "addr": "지역코드: 28177",
+    "lat": 37.4464524,
+    "lng": 126.6784408,
     "chargers_count": 1
   },
   {
     "statId": "ME18B293",
     "statNm": "로봇타워",
-    "addr": "인천광역시 서구 로봇랜드로 155-11",
+    "addr": "지역코드: 28260",
     "lat": 37.5280515,
     "lng": 126.6081737,
     "chargers_count": 2
@@ -26,79 +90,639 @@
   {
     "statId": "ME18B294",
     "statNm": "청라중앙호수공원 2주차장",
-    "addr": "인천광역시 서구 경서동 638-5",
+    "addr": "지역코드: 28260",
     "lat": 37.527265,
     "lng": 126.63678,
     "chargers_count": 2
   },
   {
-    "statId": "ME18B295",
-    "statNm": "서곶근린공원 제1주차장",
-    "addr": "인천광역시 서구 연희동 산150-5",
-    "lat": 37.54766783,
-    "lng": 126.68108195,
-    "chargers_count": 2
-  },
-  {
-    "statId": "ME18B409",
-    "statNm": "인천아시아드주경기장 D1주차장",
-    "addr": "인천광역시 서구 연희동 187-8",
-    "lat": 37.5497931,
-    "lng": 126.6685351,
-    "chargers_count": 4
-  },
-  {
     "statId": "ME18B605",
     "statNm": "인천서구청",
-    "addr": "인천광역시 서구 서곶로 307",
-    "lat": 37.544744813,
+    "addr": "지역코드: 28260",
+    "lat": 37.5447448,
     "lng": 126.6762323,
     "chargers_count": 2
   },
   {
     "statId": "ME18B606",
     "statNm": "인천서구청소년수련관",
-    "addr": "인천광역시 서구 원창로 92",
-    "lat": 37.51786945,
-    "lng": 126.65928097,
+    "addr": "지역코드: 28260",
+    "lat": 37.5178695,
+    "lng": 126.6592809,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME18B291",
+    "statNm": "서운체육공원 주차장",
+    "addr": "지역코드: 28245",
+    "lat": 37.5309835,
+    "lng": 126.7458704,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME18B307",
+    "statNm": "인천광역시 교통연수원",
+    "addr": "지역코드: 28245",
+    "lat": 37.5435937,
+    "lng": 126.7165035,
+    "chargers_count": 3
+  },
+  {
+    "statId": "ME18B189",
+    "statNm": "모탱이공원",
+    "addr": "지역코드: 28245",
+    "lat": 37.5617629,
+    "lng": 126.755013,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME18B299",
+    "statNm": "인천아시안게임 남동경기장 1주차장",
+    "addr": "지역코드: 28200",
+    "lat": 37.43936,
+    "lng": 126.73344,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME18B197",
+    "statNm": "인천교통공사 본사",
+    "addr": "지역코드: 28200",
+    "lat": 37.47002,
+    "lng": 126.7089,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME18B300",
+    "statNm": "소래제1주차장",
+    "addr": "지역코드: 28200",
+    "lat": 37.3977887,
+    "lng": 126.7360483,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME18B601",
+    "statNm": "늘솔길공원 3주차장",
+    "addr": "지역코드: 28200",
+    "lat": 37.3879526,
+    "lng": 126.7218022,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME18B602",
+    "statNm": "남동복지관",
+    "addr": "지역코드: 28200",
+    "lat": 37.44776,
+    "lng": 126.73315,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME18B603",
+    "statNm": "서창2호 공영주차장",
+    "addr": "지역코드: 28200",
+    "lat": 37.43573,
+    "lng": 126.74745,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME18B190",
+    "statNm": "현대시장 공영주차장",
+    "addr": "지역코드: 28140",
+    "lat": 37.4770884,
+    "lng": 126.6470791,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME18B292",
+    "statNm": "열우물경기장",
+    "addr": "지역코드: 28237",
+    "lat": 37.4788151,
+    "lng": 126.6926361,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME18B191",
+    "statNm": "인천나비공원 주차장",
+    "addr": "지역코드: 28237",
+    "lat": 37.52066,
+    "lng": 126.69698,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME18B198",
+    "statNm": "부평깡시장 공영주차장",
+    "addr": "지역코드: 28237",
+    "lat": 37.49901,
+    "lng": 126.72673,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME18B199",
+    "statNm": "갈산역 공영주차장",
+    "addr": "지역코드: 28237",
+    "lat": 37.5155424,
+    "lng": 126.7237655,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME18B296",
+    "statNm": "아트센터인천",
+    "addr": "지역코드: 28185",
+    "lat": 37.39439,
+    "lng": 126.62722,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME18B297",
+    "statNm": "연수구청",
+    "addr": "지역코드: 28185",
+    "lat": 37.4104617,
+    "lng": 126.6782309,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME18B298",
+    "statNm": "십리포해수욕장 주차장",
+    "addr": "지역코드: 28720",
+    "lat": 37.28163,
+    "lng": 126.48604,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME18B193",
+    "statNm": "이마트 동인천점",
+    "addr": "지역코드: 28110",
+    "lat": 37.46648,
+    "lng": 126.62911,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME18B194",
+    "statNm": "인천공항물류단지 행정지원센터",
+    "addr": "지역코드: 28110",
+    "lat": 37.4794525,
+    "lng": 126.4776964,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME18B604",
+    "statNm": "롯데마트 영종도점",
+    "addr": "지역코드: 28110",
+    "lat": 37.4925552,
+    "lng": 126.4910728,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME18B195",
+    "statNm": "월미공원 제2주차장",
+    "addr": "지역코드: 28110",
+    "lat": 37.4772813,
+    "lng": 126.5987024,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME18B295",
+    "statNm": "서곶근린공원 제1주차장",
+    "addr": "지역코드: 28260",
+    "lat": 37.5476678,
+    "lng": 126.6810819,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME18B409",
+    "statNm": "인천아시아드주경기장 D1주차장",
+    "addr": "지역코드: 28260",
+    "lat": 37.5497931,
+    "lng": 126.6685351,
+    "chargers_count": 4
+  },
+  {
+    "statId": "ME19A255",
+    "statNm": "강화경기장",
+    "addr": "지역코드: 28710",
+    "lat": 37.7550888,
+    "lng": 126.468875,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME19A256",
+    "statNm": "대룡리 공영주차장",
+    "addr": "지역코드: 28710",
+    "lat": 37.78176,
+    "lng": 126.2785154,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME19A258",
+    "statNm": "근로복지공단 인천북부지사",
+    "addr": "지역코드: 28237",
+    "lat": 37.478914,
+    "lng": 126.7531779,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME19A267",
+    "statNm": "왕산 공영주차장",
+    "addr": "지역코드: 28110",
+    "lat": 37.4569697,
+    "lng": 126.3716307,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME19A268",
+    "statNm": "정부인천지방합동청사",
+    "addr": "지역코드: 28177",
+    "lat": 37.4694892,
+    "lng": 126.6610145,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME19A259",
+    "statNm": "인천환경공단 가좌사업소",
+    "addr": "지역코드: 28260",
+    "lat": 37.4978561,
+    "lng": 126.6476539,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME19A260",
+    "statNm": "여성의광장",
+    "addr": "지역코드: 28185",
+    "lat": 37.412327,
+    "lng": 126.6654825,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME19A261",
+    "statNm": "송도컨벤시아",
+    "addr": "지역코드: 28185",
+    "lat": 37.3891519,
+    "lng": 126.6465433,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME19A262",
+    "statNm": "시립박물관주변 공영주차장",
+    "addr": "지역코드: 28185",
+    "lat": 37.421396,
+    "lng": 126.6521857,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME19A263",
+    "statNm": "월미도 공영주차장",
+    "addr": "지역코드: 28110",
+    "lat": 37.4753136,
+    "lng": 126.6017426,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME19A264",
+    "statNm": "인천환경공단 운북사업소",
+    "addr": "지역코드: 28110",
+    "lat": 37.5137173,
+    "lng": 126.497041,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME19A275",
+    "statNm": "롯데마트 인천터미널점",
+    "addr": "지역코드: 28177",
+    "lat": 37.4429456,
+    "lng": 126.7013992,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME19A271",
+    "statNm": "삼산월드체육관",
+    "addr": "지역코드: 28237",
+    "lat": 37.5078088,
+    "lng": 126.7382491,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME19A272",
+    "statNm": "한국폴리텍대학 남인천캠퍼스",
+    "addr": "지역코드: 28177",
+    "lat": 37.4720947,
+    "lng": 126.6772847,
     "chargers_count": 2
   },
   {
     "statId": "ME19A167",
     "statNm": "국립생물자원관",
-    "addr": "인천광역시 서구 환경로 42",
-    "lat": 37.565291158,
-    "lng": 126.63721531,
+    "addr": "지역코드: 28260",
+    "lat": 37.5652912,
+    "lng": 126.6372153,
     "chargers_count": 1
   },
   {
-    "statId": "ME19A259",
-    "statNm": "인천환경공단 가좌사업소",
-    "addr": "인천광역시 서구 중봉대로211",
-    "lat": 37.4978561,
-    "lng": 126.64765399999,
+    "statId": "ME19A169",
+    "statNm": "영종 하늘문화센터",
+    "addr": "지역코드: 28110",
+    "lat": 37.4958271,
+    "lng": 126.4728318,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME19Y222",
+    "statNm": "연수 공영주차장",
+    "addr": "지역코드: 28185",
+    "lat": 37.4226767,
+    "lng": 126.6975174,
     "chargers_count": 2
   },
   {
-    "statId": "ME20A286",
-    "statNm": "서구청 제1공영주차장",
-    "addr": "인천광역시 서구 탁옥로 51번길 26",
-    "lat": 37.545976,
-    "lng": 126.675636,
+    "statId": "ME19Y258",
+    "statNm": "선재어촌계",
+    "addr": "지역코드: 28720",
+    "lat": 37.232786,
+    "lng": 126.537299,
     "chargers_count": 2
+  },
+  {
+    "statId": "ME19Y259",
+    "statNm": "장경리주차장",
+    "addr": "지역코드: 28720",
+    "lat": 37.272469,
+    "lng": 126.453835,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME20A283",
+    "statNm": "용진진주차장",
+    "addr": "지역코드: 28710",
+    "lat": 37.7097745,
+    "lng": 126.5142204,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME20A1c3",
+    "statNm": "한국교통안전공단 인천자동차검사소",
+    "addr": "지역코드: 28177",
+    "lat": 37.4410511,
+    "lng": 126.6376686,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME20A282",
+    "statNm": "석모도미네랄온천",
+    "addr": "지역코드: 28710",
+    "lat": 37.6858257,
+    "lng": 126.3112126,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME20A1c5",
+    "statNm": "함박종합사회복지관",
+    "addr": "지역코드: 28185",
+    "lat": 37.425984,
+    "lng": 126.687375,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME20A1c1",
+    "statNm": "간석2동 행정복지센터 1층 주차장",
+    "addr": "지역코드: 28200",
+    "lat": 37.464013,
+    "lng": 126.71099,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME20A288",
+    "statNm": "인천광역시중구청사",
+    "addr": "지역코드: 28110",
+    "lat": 37.4733161,
+    "lng": 126.6219716,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME20A281",
+    "statNm": "강화읍 관청 제1공영주차장",
+    "addr": "지역코드: 28710",
+    "lat": 37.7517439,
+    "lng": 126.4792513,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME20A1b9",
+    "statNm": "샛별공영주차장",
+    "addr": "지역코드: 28245",
+    "lat": 37.5317089,
+    "lng": 126.7106456,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME20A1b4",
+    "statNm": "교동면사무소",
+    "addr": "지역코드: 28710",
+    "lat": 37.7841044,
+    "lng": 126.2828388,
+    "chargers_count": 1
   },
   {
     "statId": "ME20A287",
     "statNm": "청라사업소",
-    "addr": "인천광역시 서구 경서동 673-6",
+    "addr": "지역코드: 28260",
     "lat": 37.5280476,
     "lng": 126.6081269,
     "chargers_count": 2
   },
   {
+    "statId": "ME20A302",
+    "statNm": "인천스타트업파크",
+    "addr": "지역코드: 28185",
+    "lat": 37.3879068,
+    "lng": 126.6396618,
+    "chargers_count": 3
+  },
+  {
+    "statId": "ME20A1b8",
+    "statNm": "양사면사무소",
+    "addr": "지역코드: 28710",
+    "lat": 37.7981804,
+    "lng": 126.4086467,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME20A285",
+    "statNm": "한국산업인력공단 인천지사",
+    "addr": "지역코드: 28200",
+    "lat": 37.4083131,
+    "lng": 126.6923337,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME19C262",
+    "statNm": "지산입구(용진) 버스정류장 옆 주차장",
+    "addr": "지역코드: 28710",
+    "lat": 37.714046,
+    "lng": 126.5121563,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME19A257",
+    "statNm": "문화예술회관공영주차장",
+    "addr": "지역코드: 28200",
+    "lat": 37.4440215,
+    "lng": 126.6996318,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME19A162",
+    "statNm": "동화마을 공영주차장",
+    "addr": "지역코드: 28110",
+    "lat": 37.4790818,
+    "lng": 126.6186645,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME18B192",
+    "statNm": "가좌2동 행정복지센터",
+    "addr": "지역코드: 28260",
+    "lat": 37.490759,
+    "lng": 126.6852272,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME20A1b7",
+    "statNm": "양도면사무소, 보건지소",
+    "addr": "지역코드: 28710",
+    "lat": 37.6628894,
+    "lng": 126.4221118,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME20A1b3",
+    "statNm": "강화읍 갑곳 공영주차장",
+    "addr": "지역코드: 28710",
+    "lat": 37.7421874,
+    "lng": 126.5054591,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME20A1c0",
+    "statNm": "인천광역시농업기술센터",
+    "addr": "지역코드: 28245",
+    "lat": 37.5343589,
+    "lng": 126.7443061,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME20A286",
+    "statNm": "서구청 제1공영주차장",
+    "addr": "지역코드: 28260",
+    "lat": 37.545976,
+    "lng": 126.675636,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME20A1b2",
+    "statNm": "강화도서관",
+    "addr": "지역코드: 28710",
+    "lat": 37.7491079,
+    "lng": 126.4834655,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME20A1b5",
+    "statNm": "불은면사무소",
+    "addr": "지역코드: 28710",
+    "lat": 37.6864076,
+    "lng": 126.4796574,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME20A1b6",
+    "statNm": "삼산면사무소",
+    "addr": "지역코드: 28710",
+    "lat": 37.7051506,
+    "lng": 126.3198067,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME20A1c2",
+    "statNm": "논현1동 행정복지센터 지상주차장 (인천)",
+    "addr": "지역코드: 28200",
+    "lat": 37.405593,
+    "lng": 126.729516,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME20A1c6",
+    "statNm": "인천적십자병원",
+    "addr": "지역코드: 28185",
+    "lat": 37.4184847,
+    "lng": 126.6892471,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME174128",
+    "statNm": "도원역 부근 공영주차장",
+    "addr": "지역코드: 28110",
+    "lat": 37.4672392,
+    "lng": 126.641403,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME20A1b1",
+    "statNm": "강화군시설관리공단",
+    "addr": "지역코드: 28710",
+    "lat": 37.7379917,
+    "lng": 126.5119556,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME20A1c4",
+    "statNm": "연수역 북부 공영주차장",
+    "addr": "지역코드: 28185",
+    "lat": 37.419539,
+    "lng": 126.676446,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME22A335",
+    "statNm": "인천연수경찰서 ",
+    "addr": "지역코드: 28185",
+    "lat": 37.4101174,
+    "lng": 126.6802885,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME22C269",
+    "statNm": "구인천여고 공영주차장",
+    "addr": "지역코드: 28110",
+    "lat": 37.4774448,
+    "lng": 126.6297755,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME19A163",
+    "statNm": "영종역남부 공영주차장",
+    "addr": "지역코드: 28110",
+    "lat": 37.510709,
+    "lng": 126.5237441,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME21C235",
+    "statNm": "근로복지공단 인천병원",
+    "addr": "지역코드: 28237",
+    "lat": 37.4772769,
+    "lng": 126.752741,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME21C236",
+    "statNm": "인천국민안전체험관",
+    "addr": "지역코드: 28260",
+    "lat": 37.5219804,
+    "lng": 126.6761204,
+    "chargers_count": 2
+  },
+  {
     "statId": "ME21A143",
     "statNm": "청라복합문화센터",
-    "addr": "인천광역시 서구 청라대로 26",
+    "addr": "지역코드: 28260",
     "lat": 37.5248064,
     "lng": 126.6338018,
     "chargers_count": 1
@@ -106,23 +730,47 @@
   {
     "statId": "ME21B228",
     "statNm": "인천서부경찰서",
-    "addr": "인천광역시 서구 탁옥로 77",
+    "addr": "지역코드: 28260",
     "lat": 37.5439122,
     "lng": 126.6781294,
     "chargers_count": 2
   },
   {
-    "statId": "ME21C236",
-    "statNm": "인천국민안전체험관",
-    "addr": "인천광역시 서구 봉오재1로 120",
-    "lat": 37.5219804,
-    "lng": 126.6761204,
+    "statId": "ME21B232",
+    "statNm": "강화군청 부설주차장(2층 야외주차장)",
+    "addr": "지역코드: 28710",
+    "lat": 37.7467102,
+    "lng": 126.4886517,
     "chargers_count": 2
+  },
+  {
+    "statId": "ME21D049",
+    "statNm": "계양구 공영주차장",
+    "addr": "지역코드: 28245",
+    "lat": 37.5306878,
+    "lng": 126.7245089,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME21B1D3",
+    "statNm": "강화군국민체육센터",
+    "addr": "지역코드: 28710",
+    "lat": 37.7538053,
+    "lng": 126.4698464,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME21B1D5",
+    "statNm": "연수 벚꽃로 공영주차장",
+    "addr": "지역코드: 28185",
+    "lat": 37.4170001,
+    "lng": 126.6793662,
+    "chargers_count": 1
   },
   {
     "statId": "ME21C2A8",
     "statNm": "경인항 인천터미널 아라뱃길 충전소",
-    "addr": "인천광역시 서구 정서진1로 41",
+    "addr": "지역코드: 28260",
     "lat": 37.557878,
     "lng": 126.608404,
     "chargers_count": 2
@@ -130,41 +778,577 @@
   {
     "statId": "ME21D050",
     "statNm": "인천서구청 제1주차장",
-    "addr": "인천광역시 서구 탁옥로51번길 26",
+    "addr": "지역코드: 28260",
     "lat": 37.5459352,
     "lng": 126.6755823,
     "chargers_count": 1
   },
   {
-    "statId": "ME22B903",
-    "statNm": "인천공항 졸음쉼터",
-    "addr": "인천광역시 서구 인천국제공항고속도로 24(검암동)",
-    "lat": 37.5691052,
-    "lng": 126.6622963,
+    "statId": "ME21B310",
+    "statNm": "인천미추홀경찰서",
+    "addr": "지역코드: 28177",
+    "lat": 37.4426672,
+    "lng": 126.6537692,
     "chargers_count": 3
+  },
+  {
+    "statId": "ME22A330",
+    "statNm": "강화읍 남문공영주차장",
+    "addr": "지역코드: 28710",
+    "lat": 37.7449392,
+    "lng": 126.4867038,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME21B227",
+    "statNm": "벽돌막 공영주차장",
+    "addr": "지역코드: 28237",
+    "lat": 37.4688559,
+    "lng": 126.7006419,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME21B181",
+    "statNm": "부평2동행정복지센터",
+    "addr": "지역코드: 28237",
+    "lat": 37.487543,
+    "lng": 126.7170935,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME22C1C7",
+    "statNm": "동일방직 옆 공영주차장",
+    "addr": "지역코드: 28140",
+    "lat": 37.4832929,
+    "lng": 126.6203586,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME21B1D1",
+    "statNm": "송도체육센터",
+    "addr": "지역코드: 28185",
+    "lat": 37.3867731,
+    "lng": 126.669634,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME21B1D4",
+    "statNm": "연수역 남부 공영주차장",
+    "addr": "지역코드: 28185",
+    "lat": 37.4186796,
+    "lng": 126.6763916,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME21E225",
+    "statNm": "강화경찰서",
+    "addr": "지역코드: 28710",
+    "lat": 37.7475591,
+    "lng": 126.4873101,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME21B229",
+    "statNm": "인천삼산경찰서",
+    "addr": "지역코드: 28237",
+    "lat": 37.5105479,
+    "lng": 126.7326369,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME21B1D6",
+    "statNm": "청학동 제2공영주차장",
+    "addr": "지역코드: 28185",
+    "lat": 37.4274142,
+    "lng": 126.662192,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME19A161",
+    "statNm": "계산3동행정복지센터 주차장",
+    "addr": "지역코드: 28245",
+    "lat": 37.5378195,
+    "lng": 126.7295426,
+    "chargers_count": 1
   },
   {
     "statId": "ME22C122",
     "statNm": "남청라영업소",
-    "addr": "인천광역시 서구 청라동 194-2",
+    "addr": "지역코드: 28260",
     "lat": 37.5152149,
     "lng": 126.6207346,
     "chargers_count": 1
   },
   {
+    "statId": "ME22D201",
+    "statNm": "계산택지1 공영주차장",
+    "addr": "지역코드: 28245",
+    "lat": 37.5408619,
+    "lng": 126.7371416,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME22A329",
+    "statNm": "풍물시장 부설주차장",
+    "addr": "지역코드: 28710",
+    "lat": 37.7404859,
+    "lng": 126.4920126,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME22A331",
+    "statNm": "갑곶돈대",
+    "addr": "지역코드: 28710",
+    "lat": 37.7333378,
+    "lng": 126.5155285,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME22C266",
+    "statNm": "소래제5 공영주차장",
+    "addr": "지역코드: 28200",
+    "lat": 37.4012731,
+    "lng": 126.7388837,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME22C123",
+    "statNm": "계양종합사회복지관",
+    "addr": "지역코드: 28245",
+    "lat": 37.5257589,
+    "lng": 126.7498742,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME22A332",
+    "statNm": "인천어린이과학관",
+    "addr": "지역코드: 28245",
+    "lat": 37.5517478,
+    "lng": 126.7391694,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME22C264",
+    "statNm": "인천논현경찰서",
+    "addr": "지역코드: 28200",
+    "lat": 37.4031652,
+    "lng": 126.7151832,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME22C124",
+    "statNm": "인천어린이과학관",
+    "addr": "지역코드: 28245",
+    "lat": 37.5517478,
+    "lng": 126.7391694,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME22C270",
+    "statNm": "인천출입국외국인청",
+    "addr": "지역코드: 28110",
+    "lat": 37.4620217,
+    "lng": 126.6317642,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME22C1C8",
+    "statNm": "동인천 공영주차장",
+    "addr": "지역코드: 28110",
+    "lat": 37.473246,
+    "lng": 126.6332998,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME22C267",
+    "statNm": "인하대병원사거리공영주차장",
+    "addr": "지역코드: 28110",
+    "lat": 37.458401,
+    "lng": 126.6360599,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME22A334",
+    "statNm": "도화1동 제4노외주차장",
+    "addr": "지역코드: 28177",
+    "lat": 37.4641169,
+    "lng": 126.666388,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME22A328",
+    "statNm": "강화군청 공영주차장",
+    "addr": "지역코드: 28710",
+    "lat": 37.7466966,
+    "lng": 126.488645,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME22A606",
+    "statNm": "인천대공원사업소 충전소",
+    "addr": "지역코드: 28200",
+    "lat": 37.4588255,
+    "lng": 126.7502402,
+    "chargers_count": 4
+  },
+  {
+    "statId": "ME22A333",
+    "statNm": "남인천영업소",
+    "addr": "지역코드: 28200",
+    "lat": 37.4327241,
+    "lng": 126.765047,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME22C1C4",
+    "statNm": "동화마을 공영주차장",
+    "addr": "지역코드: 28110",
+    "lat": 37.478954,
+    "lng": 126.6189354,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME22C1C9",
+    "statNm": "수문통 공영주차장",
+    "addr": "지역코드: 28140",
+    "lat": 37.4788495,
+    "lng": 126.6334984,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME22C271",
+    "statNm": "인천지방해양수산청",
+    "addr": "지역코드: 28110",
+    "lat": 37.4589366,
+    "lng": 126.6294555,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME22C1C3",
+    "statNm": "부개역 공영주차장",
+    "addr": "지역코드: 28237",
+    "lat": 37.4890017,
+    "lng": 126.7393101,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME22C1C6",
+    "statNm": "소래제3 공영주차장",
+    "addr": "지역코드: 28200",
+    "lat": 37.4009434,
+    "lng": 126.7320213,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME22C213",
+    "statNm": "소래제1 공영주차장",
+    "addr": "지역코드: 28200",
+    "lat": 37.3975846,
+    "lng": 126.7357678,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME22C1C5",
+    "statNm": "소래제2 공영주차장",
+    "addr": "지역코드: 28200",
+    "lat": 37.3997332,
+    "lng": 126.7345354,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME22C263",
+    "statNm": "인천계양경찰서 ",
+    "addr": "지역코드: 28245",
+    "lat": 37.5378868,
+    "lng": 126.7356647,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME22B903",
+    "statNm": "인천공항 졸음쉼터",
+    "addr": "지역코드: 28260",
+    "lat": 37.5691052,
+    "lng": 126.6622963,
+    "chargers_count": 3
+  },
+  {
+    "statId": "ME22D1C2",
+    "statNm": "장기파출소",
+    "addr": "지역코드: 28245",
+    "lat": 37.5764971,
+    "lng": 126.7345087,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME22C265",
+    "statNm": "차이나타운공영주차장",
+    "addr": "지역코드: 28110",
+    "lat": 37.476269,
+    "lng": 126.6182593,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME22C268",
+    "statNm": "경동공영주차장",
+    "addr": "지역코드: 28110",
+    "lat": 37.4712304,
+    "lng": 126.6307368,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME23B162",
+    "statNm": "초지진",
+    "addr": "지역코드: 28710",
+    "lat": 37.6318212,
+    "lng": 126.5318499,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME22C301",
+    "statNm": "인천중부경찰서 ",
+    "addr": "지역코드: 28110",
+    "lat": 37.4725743,
+    "lng": 126.6189447,
+    "chargers_count": 3
+  },
+  {
     "statId": "ME22D1B4",
     "statNm": "검단제1 공영주차장",
-    "addr": "인천광역시 서구 마전동 986",
+    "addr": "지역코드: 28260",
     "lat": 37.601586,
     "lng": 126.6611015,
     "chargers_count": 1
   },
   {
+    "statId": "ME22D154",
+    "statNm": "서창5호 공영주차장",
+    "addr": "지역코드: 28200",
+    "lat": 37.4342432,
+    "lng": 126.7512935,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME23B175",
+    "statNm": "장수1호 공영주차장",
+    "addr": "지역코드: 28200",
+    "lat": 37.4518511,
+    "lng": 126.7512533,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME23B178",
+    "statNm": "내동공영주차장",
+    "addr": "지역코드: 28110",
+    "lat": 37.47227,
+    "lng": 126.6269662,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME23B179",
+    "statNm": "전동공영주차장",
+    "addr": "지역코드: 28110",
+    "lat": 37.4756599,
+    "lng": 126.6265278,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME23B1A9",
+    "statNm": "서창3호 공영주차장",
+    "addr": "지역코드: 28200",
+    "lat": 37.4329066,
+    "lng": 126.7518527,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME23B1B0",
+    "statNm": "진주4호 공영주차장",
+    "addr": "지역코드: 28200",
+    "lat": 37.4582453,
+    "lng": 126.7258168,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME23B174",
+    "statNm": "노인복지회관 앞 공영주차장",
+    "addr": "지역코드: 28110",
+    "lat": 37.4674635,
+    "lng": 126.6337541,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME23B184",
+    "statNm": "관청근린공원주차장",
+    "addr": "지역코드: 28710",
+    "lat": 37.7463853,
+    "lng": 126.4931925,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME23B177",
+    "statNm": "차이나타운공영주차장(2층)",
+    "addr": "지역코드: 28110",
+    "lat": 37.4760515,
+    "lng": 126.6183831,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME23B1B1",
+    "statNm": "독점 공영주차장",
+    "addr": "지역코드: 28200",
+    "lat": 37.4508063,
+    "lng": 126.7121954,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME23B214",
+    "statNm": "강화풍물시장 주차장",
+    "addr": "지역코드: 28710",
+    "lat": 37.7420767,
+    "lng": 126.4919091,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME23A221",
+    "statNm": "신문 제2 공영주차장",
+    "addr": "지역코드: 28710",
+    "lat": 37.7478132,
+    "lng": 126.4796606,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME23A222",
+    "statNm": "월미도제2공영주차장",
+    "addr": "지역코드: 28110",
+    "lat": 37.477315,
+    "lng": 126.5986338,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME23B185",
+    "statNm": "신문리 공영주차장",
+    "addr": "지역코드: 28710",
+    "lat": 37.7472429,
+    "lng": 126.4787793,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME23B103",
+    "statNm": "송림체육관",
+    "addr": "지역코드: 28140",
+    "lat": 37.4856317,
+    "lng": 126.6472143,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME23B105",
+    "statNm": "장수2호 공영주차장",
+    "addr": "지역코드: 28200",
+    "lat": 37.4509027,
+    "lng": 126.7540537,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME23B107",
+    "statNm": "약산제1호 공영주차장",
+    "addr": "지역코드: 28200",
+    "lat": 37.468024,
+    "lng": 126.7122219,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME23B108",
+    "statNm": "용현5동 행정복지센터",
+    "addr": "지역코드: 28177",
+    "lat": 37.4527668,
+    "lng": 126.6405751,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME23B106",
+    "statNm": "돌산마루 제1호 공영주차장",
+    "addr": "지역코드: 28200",
+    "lat": 37.4647634,
+    "lng": 126.7183955,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME23B176",
+    "statNm": "차이나타운공영주차장(1층)",
+    "addr": "지역코드: 28110",
+    "lat": 37.4760515,
+    "lng": 126.6183831,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME23B1C7",
+    "statNm": "인천공항파출소",
+    "addr": "지역코드: 28110",
+    "lat": 37.4695092,
+    "lng": 126.4507804,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME24A249",
+    "statNm": "인천환경공단 남항사업소",
+    "addr": "지역코드: 28110",
+    "lat": 37.4348027,
+    "lng": 126.6296132,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME24A250",
+    "statNm": "북도면사무소",
+    "addr": "지역코드: 28720",
+    "lat": 37.5326763,
+    "lng": 126.4296267,
+    "chargers_count": 2
+  },
+  {
+    "statId": "ME24A251",
+    "statNm": "신도바다역",
+    "addr": "지역코드: 28720",
+    "lat": 37.5150769,
+    "lng": 126.4388447,
+    "chargers_count": 2
+  },
+  {
     "statId": "ME24B209",
     "statNm": "인천환경공단 가좌사업소",
-    "addr": "인천광역시 서구 중봉대로211",
+    "addr": "지역코드: 28260",
     "lat": 37.496672,
     "lng": 126.645047,
     "chargers_count": 2
+  },
+  {
+    "statId": "ME24B150",
+    "statNm": "영흥화력사택",
+    "addr": "지역코드: 28720",
+    "lat": 37.2502292,
+    "lng": 126.4548982,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME24B148",
+    "statNm": "자월면사무소",
+    "addr": "지역코드: 28720",
+    "lat": 37.254528,
+    "lng": 126.307363,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME24B151",
+    "statNm": "덕적친환경에너지홍보관",
+    "addr": "지역코드: 28720",
+    "lat": 37.238704,
+    "lng": 126.119842,
+    "chargers_count": 1
+  },
+  {
+    "statId": "ME24B149",
+    "statNm": "덕적면사무소",
+    "addr": "지역코드: 28720",
+    "lat": 37.227776,
+    "lng": 126.145227,
+    "chargers_count": 1
   }
 ]

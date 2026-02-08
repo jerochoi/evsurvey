@@ -255,12 +255,15 @@
                     });
 
                     stations.forEach(s => {
-                        const marker = L.marker([s.lat, s.lng], { icon: icon }).bindPopup(`
-                            <div style="font-weight:bold;">${s.statNm}</div>
-                            <div style="font-size:12px;">${s.addr || ""}</div>
-                        `);
-                        marker.stationData = s; // Attach data for radius usage
-                        layers.stations.addLayer(marker);
+                        // Validate Coordinates
+                        if (s.lat > 33 && s.lat < 43 && s.lng > 124 && s.lng < 132) {
+                            const marker = L.marker([s.lat, s.lng], { icon: icon }).bindPopup(`
+                                <div style="font-weight:bold;">${s.statNm}</div>
+                                <div style="font-size:12px;">${s.addr || ""}</div>
+                            `);
+                            marker.stationData = s; // Attach data for radius usage
+                            layers.stations.addLayer(marker);
+                        }
                     });
 
                     // Trigger initial radius drawing if checked
