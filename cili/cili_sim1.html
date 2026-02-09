@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인천 서구 CILI 시뮬레이터</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Pako (GZIP decompression) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Malgun Gothic', sans-serif;
+        }
+
+        #container {
+            display: flex;
+            height: 100vh;
+        }
+
+        #sidebar {
+            width: 380px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-right: 1px solid #ddd;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #map {
+            flex: 1;
+            height: 100%;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #343a40;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+
+        h3 {
+            font-size: 1rem;
+            margin-top: 20px;
+            color: #495057;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        input[type=range] {
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .val-display {
+            width: 40px;
+            text-align: right;
+            font-size: 0.85rem;
+            color: #007bff;
+        }
+
+        .sub-label {
+            font-size: 0.8rem;
+            width: 140px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-block;
+            margin-right: 5px;
+            color: #555;
+        }
+
+        .legend {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+
+        .legend i {
+            width: 15px;
+            height: 15px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+
+        .description-text {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            background: #eee;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .btn-update {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .btn-update:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="container">
+        <div id="sidebar">
+            <h2>CILI 지수 시뮬레이터 (인천 서구)</h2>
+
+            <div class="description-text">
+                데이터: 인천광역시 서구 (28260)<br>
+                기본값: QC 모드 가중치 적용
+            </div>
+
+            <button class="btn-update" onclick="calculateAndStyle()">지수 업데이트</button>
+
+            <h3>[1] 대분류 가중치 (총합: <span id="mainSum">1.0</span>)<br>
+                <span style="font-size:0.8rem; font-weight:normal; color:#888;">* 총합은 1.0으로 환산되어 계산됩니다.</span>
+            </h3>
+
+            <div id="mainWeights">
+                <!-- JS로 동적 생성 -->
+            </div>
+
+            <h3>[2] 세부지표 가중치</h3>
+            <div id="subWeights">
+                <!-- JS로 동적 생성 -->
+            </div>
+
+        </div>
+        <div id="map"></div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // 1. 지도 초기화 (오픈스트리트맵)
+        const map = L.map('map').setView([37.55, 126.65], 12); // 인천 서구 대략 중심
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        let geoJsonLayer;
+        let originalData = null; // 원본 데이터 저장
+
+        // 2. 가중치 및 지표 이름 설정
+        const indicatorNames = {
+            'PDI': '잠재적 수요 가능성',
+            'UCI': '이용 편의성',
+            'CSI': '설치 필요 및 용이성',
+            'CII': '환경 영향성',
+            'DI': '재난 위험성'
+        };
+
+        // 세부지표 이름 매핑 (index.txt 기반)
+        const subIndicatorNames = {
+            'PDI_1': '인접도로 연간통행량',
+            'PDI_2': '운전면허 소지자 수',
+            'PDI_3': '전기차 등록대수',
+            'PDI_4': '기 충전소 월 충전횟수',
+            'PDI_5': '문화 및 편의시설 수',
+            'PDI_6': '기타',
+
+            'UCI_1': '차량 진입로 유무',
+            'UCI_2': '무료 주차장 수',
+
+            'CSI_1': '급속충전기 수',
+            'CSI_2': '충전소 접근성',
+            'CSI_3': '도로 접근성',
+
+            'CII_1': '미세먼지 나쁨 일수',
+            'CII_2': '일 평균기온 0℃ 이하',
+            'CII_3': '일 평균기온 25℃ 이상',
+
+            'DI_1': '침수 발생 지역 유무',
+            'DI_2': '산불 발생 횟수',
+            'DI_3': '화재 발생 횟수',
+            'DI_4': '소방용수시설 개수',
+            'DI_5': '소방서 접근성',
+            'DI_6': '지하주차장 유무'
+        };
+
+        const defaultMainWeights = {
+            'PDI': 0.3182, 'UCI': 0.2110, 'CSI': 0.1886, 'CII': 0.0441, 'DI': 0.2381
+        };
+
+        const subIndicators = {
+            'PDI': ['PDI_1', 'PDI_2', 'PDI_3', 'PDI_4', 'PDI_5', 'PDI_6'],
+            'UCI': ['UCI_1', 'UCI_2'],
+            'CSI': ['CSI_1', 'CSI_2', 'CSI_3'],
+            'CII': ['CII_1', 'CII_2', 'CII_3'],
+            'DI': ['DI_1', 'DI_2', 'DI_3', 'DI_4', 'DI_5', 'DI_6']
+        };
+
+        // UI 생성 함수
+        function createWeightControls() {
+            const mainContainer = document.getElementById('mainWeights');
+            const subContainer = document.getElementById('subWeights');
+
+            // 대분류
+            for (const [key, val] of Object.entries(defaultMainWeights)) {
+                const labelName = indicatorNames[key] ? `${key} (${indicatorNames[key]})` : key;
+
+                mainContainer.innerHTML += `
+                <div class="control-group">
+                    <label>${labelName} 가중치</label>
+                    <div class="slider-container">
+                        <input type="range" class="main-w" id="w_${key}" min="0" max="1" step="0.01" value="${val}" oninput="updateDisplay(this); updateMainSum();">
+                        <span class="val-display" id="disp_w_${key}">${val}</span>
+                    </div>
+                </div>
+            `;
+
+                // 세부지표 (해당 대분류 아래)
+                if (subIndicators[key]) {
+                    let subHtml = `<div class="control-group" style="padding-left:10px; border-left:3px solid #eee;">
+                                <label style="font-size:0.8rem; color:#666; margin-bottom:10px;">- ${key} 세부지표 -</label>`;
+
+                    const defaultSubWeight = (1.0 / subIndicators[key].length).toFixed(4); // 균등 분배
+
+                    subIndicators[key].forEach(subKey => {
+                        // 이름 매핑 적용
+                        const name = subIndicatorNames[subKey] || subKey;
+                        const displyName = `${subKey} (${name})`;
+
+                        subHtml += `
+                        <div class="slider-container">
+                            <span class="sub-label" title="${displyName}">${displyName}</span>
+                            <input type="range" class="sub-w" data-parent="${key}" id="w_${subKey}" min="0" max="1" step="0.01" value="${defaultSubWeight}" oninput="updateDisplay(this)">
+                            <span class="val-display" id="disp_w_${subKey}">${defaultSubWeight}</span>
+                        </div>
+                     `;
+                    });
+                    subHtml += `</div>`;
+                    subContainer.innerHTML += subHtml;
+                }
+            }
+        }
+
+        function updateDisplay(el) {
+            document.getElementById('disp_' + el.id).innerText = el.value;
+        }
+
+        function updateMainSum() {
+            let sum = 0;
+            document.querySelectorAll('.main-w').forEach(el => {
+                sum += parseFloat(el.value);
+            });
+            document.getElementById('mainSum').innerText = sum.toFixed(2);
+        }
+
+        createWeightControls();
+
+        // 3. 데이터 자동 로드 (fetch + pako decompression)
+        fetch('incheon_seogu_data.geojson.gz')
+            .then(response => response.arrayBuffer())
+            .then(buffer => {
+                const decompressed = pako.inflate(new Uint8Array(buffer), { to: 'string' });
+                const data = JSON.parse(decompressed);
+
+                originalData = data;
+                drawMap(data);
+                const bounds = L.geoJSON(data).getBounds();
+                map.fitBounds(bounds);
+            })
+            .catch(err => {
+                console.error(err);
+                alert("데이터 로드 실패: 로컬 서버에서 실행 필요.\n" + err);
+            });
+
+
+        // 4. 지도 그리기 및 스타일링
+        function drawMap(data) {
+            if (geoJsonLayer) map.removeLayer(geoJsonLayer);
+
+            calculateScores(data);
+
+            geoJsonLayer = L.geoJSON(data, {
+                style: styleFeature,
+                onEachFeature: function (feature, layer) {
+                    const props = feature.properties;
+                    let content = `<b>${props.SPO_NO_CD}</b><br/>`;
+                    content += `등급: <b style="color:${getColor(props.grade)}">${props.grade}등급</b><br/>`;
+                    content += `총점: ${props.finalScore.toFixed(4)}<br/>`;
+                    layer.bindPopup(content);
+                }
+            }).addTo(map);
+
+            addLegend();
+        }
+
+        // 5. 점수 계산 로직
+        function calculateScores(geoJson) {
+            const weights = {};
+            let mainWeightSum = 0;
+
+            for (const key of Object.keys(defaultMainWeights)) {
+                let val = parseFloat(document.getElementById(`w_${key}`).value);
+                weights[key] = val;
+                mainWeightSum += val;
+            }
+
+            const normalizeFactor = mainWeightSum > 0 ? (1.0 / mainWeightSum) : 0;
+
+            for (const key of Object.keys(defaultMainWeights)) {
+                weights[key + '_subs'] = {};
+                subIndicators[key].forEach(subKey => {
+                    const el = document.getElementById(`w_${subKey}`);
+                    if (el) weights[key + '_subs'][subKey] = parseFloat(el.value);
+                });
+            }
+
+            geoJson.features.forEach(feature => {
+                const props = feature.properties;
+                let finalScore = 0;
+
+                for (const key of Object.keys(defaultMainWeights)) {
+                    let subScoreSum = 0;
+
+                    subIndicators[key].forEach(subKey => {
+                        let val = props[subKey] || 0;
+                        let w = weights[key + '_subs'][subKey] || 0;
+                        subScoreSum += (val * w);
+                    });
+
+                    let normalizedWeight = weights[key] * normalizeFactor;
+                    finalScore += subScoreSum * normalizedWeight;
+                }
+
+                feature.properties.finalScore = finalScore;
+                feature.properties.grade = getGrade(finalScore);
+            });
+        }
+
+        function getGrade(score) {
+            if (score >= 0.8) return 1;
+            if (score >= 0.6) return 2;
+            if (score >= 0.4) return 3;
+            if (score >= 0.2) return 4;
+            return 5;
+        }
+
+        function getColor(grade) {
+            switch (grade) {
+                case 1: return '#ff0000'; // 매우 높음 (Red)
+                case 2: return '#ffa500'; // 높음 (Orange)
+                case 3: return '#ffff00'; // 보통 (Yellow)
+                case 4: return '#90ee90'; // 낮음 (Light Green)
+                case 5: return '#008000'; // 매우 낮음 (Green)
+                default: return '#cccccc';
+            }
+        }
+
+        function styleFeature(feature) {
+            return {
+                fillColor: getColor(feature.properties.grade),
+                weight: 1,
+                opacity: 1,
+                color: 'white',
+                dashArray: '3',
+                fillOpacity: 0.6
+            };
+        }
+
+        function calculateAndStyle() {
+            if (!originalData) {
+                alert("데이터가 아직 로드되지 않았습니다.");
+                return;
+            }
+            drawMap(originalData);
+        }
+
+        function addLegend() {
+            if (document.querySelector('.legend')) return;
+
+            const legend = L.control({ position: 'bottomright' });
+            legend.onAdd = function (map) {
+                const div = L.DomUtil.create('div', 'legend');
+                const grades = [1, 2, 3, 4, 5];
+                const labels = ["매우 높음", "높음", "보통", "낮음", "매우 낮음"];
+                const ranges = ["0.8~1.0", "0.6~0.8", "0.4~0.6", "0.2~0.4", "0.0~0.2"];
+
+                div.innerHTML = '<strong>CILI 등급</strong><br>';
+                for (let i = 0; i < grades.length; i++) {
+                    div.innerHTML +=
+                        '<i style="background:' + getColor(grades[i]) + '"></i> ' +
+                        grades[i] + '등급 (' + labels[i] + ') <br>' +
+                        '<small style="color:#666; padding-left:20px;">' + ranges[i] + '</small><br>';
+                }
+                return div;
+            };
+            legend.addTo(map);
+        }
+
+    </script>
+
+</body>
+
+</html>
