@@ -369,22 +369,34 @@
             const weights = {};
             let mainWeightSum = 0;
 
+            // 1) 대분류 가중치 수집 및 합계 계산
             for (const key of Object.keys(defaultMainWeights)) {
                 let val = parseFloat(document.getElementById(`w_${key}`).value);
                 weights[key] = val;
                 mainWeightSum += val;
             }
 
-            const normalizeFactor = mainWeightSum > 0 ? (1.0 / mainWeightSum) : 0;
+            // 대분류 정규화 계수
+            const mainNormalizeFactor = mainWeightSum > 0 ? (1.0 / mainWeightSum) : 0;
 
+            // 2) 세부지표 가중치 수집 및 합계 계산
             for (const key of Object.keys(defaultMainWeights)) {
                 weights[key + '_subs'] = {};
+                let subSum = 0;
+
                 subIndicators[key].forEach(subKey => {
                     const el = document.getElementById(`w_${subKey}`);
-                    if (el) weights[key + '_subs'][subKey] = parseFloat(el.value);
+
+                    if (el) {
+                        let w = parseFloat(el.value);
+                        weights[key + '_subs'][subKey] = w;
+                        subSum += w;
+                    }
                 });
+                weights[key + '_subSum'] = subSum;
             }
 
+            // 3) 피처(격자)별 점수 계산
             geoJson.features.forEach(feature => {
                 const props = feature.properties;
                 let finalScore = 0;
@@ -392,14 +404,24 @@
                 for (const key of Object.keys(defaultMainWeights)) {
                     let subScoreSum = 0;
 
+                    // 해당 대분류의 세부지표 합계
+                    let currentSubSum = weights[key + '_subSum'];
+                    let subNormalizeFactor = currentSubSum > 0 ? (1.0 / currentSubSum) : 0;
+
+                    // 세부지표 점수 합산 (각 가중치를 정규화하여 적용)
                     subIndicators[key].forEach(subKey => {
                         let val = props[subKey] || 0;
-                        let w = weights[key + '_subs'][subKey] || 0;
-                        subScoreSum += (val * w);
+                        let rawW = weights[key + '_subs'][subKey] || 0;
+                        let normalizedSubW = rawW * subNormalizeFactor; // 세부지표 정규화
+
+                        subScoreSum += (val * normalizedSubW);
                     });
 
-                    let normalizedWeight = weights[key] * normalizeFactor;
-                    finalScore += subScoreSum * normalizedWeight;
+                    // 대분류 가중치 정규화 적용
+                    let normalizedMainW = weights[key] * mainNormalizeFactor;
+
+                    // 최종 점수에 반영
+                    finalScore += subScoreSum * normalizedMainW;
                 }
 
                 feature.properties.finalScore = finalScore;
