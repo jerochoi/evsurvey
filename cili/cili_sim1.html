@@ -140,11 +140,25 @@
 
     <div id="container">
         <div id="sidebar">
-            <h2>CILI 지수 시뮬레이터 (인천 서구)</h2>
+            <h2>CILI 지수 시뮬레이터 (인천)</h2>
 
             <div class="description-text">
-                데이터: 인천광역시 서구 (28260)<br>
-                기본값: QC 모드 가중치 적용
+                데이터:
+                <select id="guSelect" onchange="loadDistrictData()"
+                    style="padding:5px; width:100%; border:1px solid #ddd; border-radius:3px; margin-top:5px;">
+                    <option value="28260" selected>서구 (28260)</option>
+                    <option value="28110">중구 (28110)</option>
+                    <option value="28140">동구 (28140)</option>
+                    <option value="28177">미추홀구 (28177)</option>
+                    <option value="28185">연수구 (28185)</option>
+                    <option value="28200">남동구 (28200)</option>
+                    <option value="28237">부평구 (28237)</option>
+                    <option value="28245">계양구 (28245)</option>
+                    <option value="28710">강화군 (28710)</option>
+                    <option value="28720">옹진군 (28720)</option>
+                </select>
+                <br>
+                급속 가중치 적용
             </div>
 
             <button class="btn-update" onclick="calculateAndStyle()">지수 업데이트</button>
@@ -287,22 +301,47 @@
 
         createWeightControls();
 
-        // 3. 데이터 자동 로드 (fetch + pako decompression)
-        fetch('incheon_seogu_data.geojson.gz')
-            .then(response => response.arrayBuffer())
-            .then(buffer => {
-                const decompressed = pako.inflate(new Uint8Array(buffer), { to: 'string' });
-                const data = JSON.parse(decompressed);
+        // 3. 데이터 자동 로드 함수
+        function loadDistrictData() {
+            const guCode = document.getElementById('guSelect').value;
+            const fileName = `incheon_${guCode}_data.geojson.gz`;
 
-                originalData = data;
-                drawMap(data);
-                const bounds = L.geoJSON(data).getBounds();
-                map.fitBounds(bounds);
-            })
-            .catch(err => {
-                console.error(err);
-                alert("데이터 로드 실패: 로컬 서버에서 실행 필요.\n" + err);
-            });
+            console.log(`Loading data for ${guCode}...`);
+
+            // 기존 레이어 제거 (있다면)
+            if (geoJsonLayer) {
+                map.removeLayer(geoJsonLayer);
+                geoJsonLayer = null;
+            }
+
+            fetch(fileName)
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return response.arrayBuffer();
+                })
+                .then(buffer => {
+                    const decompressed = pako.inflate(new Uint8Array(buffer), { to: 'string' });
+                    const data = JSON.parse(decompressed);
+
+                    originalData = data;
+                    drawMap(data);
+
+                    // 데이터가 있으면 줌 이동
+                    if (data.features.length > 0) {
+                        const bounds = L.geoJSON(data).getBounds();
+                        map.fitBounds(bounds);
+                    } else {
+                        alert("해당 구역의 데이터가 없습니다.");
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("데이터 로드 실패: " + fileName + "\n" + err);
+                });
+        }
+
+        // 초기 로드
+        loadDistrictData();
 
 
         // 4. 지도 그리기 및 스타일링
