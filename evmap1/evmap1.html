@@ -163,8 +163,8 @@
 
             baseGround = new ol.Map({
                 target: 'map',
-                loadTilesWhileAnimating: true, // Load tiles during animations
-                loadTilesWhileInteracting: true, // Load tiles during interaction (drag/zoom)
+                loadTilesWhileAnimating: false, // Performance: Disable to improve fluidity
+                loadTilesWhileInteracting: false, // Performance: Disable to improve fluidity
                 layers: [
                     new ol.layer.Tile({
                         source: new ol.source.OSM(),

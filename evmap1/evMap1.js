@@ -275,44 +275,69 @@ function reDrawStatAndMarker_(uid, x, y, isZoomUpdate) {
     // Update Sidebar Count
     $('#status-count').text(arrayNum);
 
-    baseGround.removeLayer(clusterLayer); // 20230417 : attempt remove +0.01 gimmick
+    // baseGround.removeLayer(clusterLayer); // Optimized: handled in clusterDrawing reuse logic
     clusterDrawing(clusterFeatures);
 }
 
 var styleCache = {}; // 20230510 : 줌레벨이 declusterZoom이상시 style를 기록한다
-function clusterDrawing(clusterFeatures) {
+function clusterDrawing(features) {
 
-    if (Object.keys(stationLayer).length > 0) {
+    // Clear conflicting station layer if exists
+    if (Object.keys(stationLayer).length > 0 && stationLayer instanceof ol.layer.Base) { // Ensure it's a layer
         baseGround.removeLayer(stationLayer);
-        stationLayer = new Object();
-        clustersAlone = new Array();
+        stationLayer = {}; // Reset to empty object as per original logic's convention
+        clustersAlone = [];
     }
 
-    if (Object.keys(clusterLayer).length > 0) {
-        baseGround.removeLayer(clusterLayer);
-        clusterLayer = new Object();
-    }
-
+    // Calculate cluster distance based on zoom
     var _newDistance;
     if (baseGround.getView().getZoom() >= declusterZoom) {
         _newDistance = declusterDistance;
     } else {
-        _newDistance = clusterDistance + mapView.getResolution() / 2; // 20230524 : test simpler function
+        _newDistance = clusterDistance + mapView.getResolution() / 2;
     }
 
-    var clusterSource = new ol.source.Cluster({
-        distance: _newDistance,
-        source: new ol.source.Vector({ features: clusterFeatures })
-    });
+    // Reuse existing Cluster Layer if possible
+    var isLayerValid = (clusterLayer && typeof clusterLayer.getSource === 'function');
 
-    clusterLayer = new ol.layer.Vector({
-        name: 'clusterLayer', id: 'cluster',
-        source: clusterSource,
-        style: simplifiedStyle, // originalStyle(feature), // end style
-        zIndex: 20
-    });
+    if (isLayerValid) {
+        var source = clusterLayer.getSource();
+        if (source instanceof ol.source.Cluster) {
+            source.setDistance(_newDistance);
 
-    baseGround.addLayer(clusterLayer);
+            // Update features in the underlying vector source
+            // Note: If this is just a zoom update, features might be identical. 
+            // However, ensuring content is fresh is safer for filter updates.
+            var vectorSource = source.getSource();
+            if (vectorSource) {
+                vectorSource.clear();
+                if (features && features.length > 0) {
+                    vectorSource.addFeatures(features);
+                }
+            }
+
+            // Ensure layer is on the map (in case it was removed by filter switch)
+            var layers = baseGround.getLayers().getArray();
+            if (!layers.includes(clusterLayer)) {
+                baseGround.addLayer(clusterLayer);
+            }
+        }
+    } else {
+        // Initial Creation
+        var clusterSource = new ol.source.Cluster({
+            distance: _newDistance,
+            source: new ol.source.Vector({ features: features })
+        });
+
+        clusterLayer = new ol.layer.Vector({
+            name: 'clusterLayer', id: 'cluster',
+            source: clusterSource,
+            style: simplifiedStyle,
+            zIndex: 20
+        });
+
+        baseGround.addLayer(clusterLayer);
+    }
 }
 
 function simplifiedStyle(feature) {
@@ -331,21 +356,20 @@ function simplifiedStyle(feature) {
         return getMarkerStyle(markerKey);
     }
 
-    // considerations: 나눔을 계산시 비싸서, 수동으로 if게이트 처리한다
-    var sizeBracket = Math.floor(size / 200);
-    let style = styleCache[sizeBracket];
+    // considerations: Cache by exact size to avoid mutation and overhead
+    let style = styleCache[size];
 
     if (!style) {
+        var sizeBracket = Math.floor(size / 200);
         var radius = sizeBracket * 2 + 20;
+
         style = new ol.style.Style({
             image: new ol.style.Circle({ radius: radius, fill: new ol.style.Fill({ color: 'rgba(0, 76, 161, 0.75)' }) }),
             text: new ol.style.Text({
                 fill: new ol.style.Fill({ color: '#FFF' }), font: 'bold 15px Arial', offsetX: 0.5, offsetY: 1, scale: 1, text: size.toString()
             })
         });
-        styleCache[sizeBracket] = style;
-    } else {
-        style.getText().setText(size.toString());
+        styleCache[size] = style;
     }
 
     return style;
@@ -525,6 +549,9 @@ function getMarkerKey(busi_id, stat_cd, mode) {
 
 var markerLayerCache = {};
 var logoCache = {};
+var statusStyleCache = {}; // Cache for status circle styles
+var modeStyleCache = {};   // Cache for mode dot styles
+
 function getMarkerStyle(markerKey) {
 
     var returnStyle = new Array;
@@ -533,22 +560,26 @@ function getMarkerStyle(markerKey) {
     var mode = markerKey[2];
     var contextPath = $("div#map").data("contextpath") || "";
 
-    // 1. Station Status Marker (Main Dot)
+    // 1. Station Status Marker (Main Dot) - Cached by stat_cd
     let color = '#999';
     if (stat_cd == '2') color = '#28a745'; // Available - Green
     else if (stat_cd == '3') color = '#fd7e14'; // Charging - Orange
     else if (['1', '4', '5'].includes(stat_cd)) color = '#dc3545'; // Error - Red
 
-    let markerLayerStyle = new ol.style.Style({
-        image: new ol.style.Circle({
-            radius: 13,
-            fill: new ol.style.Fill({ color: '#ffffff' }),
-            stroke: new ol.style.Stroke({ color: color, width: 5 })
-        })
-    });
+    let markerLayerStyle = statusStyleCache[color];
+    if (!markerLayerStyle) {
+        markerLayerStyle = new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 13,
+                fill: new ol.style.Fill({ color: '#ffffff' }),
+                stroke: new ol.style.Stroke({ color: color, width: 5 })
+            })
+        });
+        statusStyleCache[color] = markerLayerStyle;
+    }
     returnStyle.push(markerLayerStyle);
 
-    // 2. Logo Icon (Overlay)
+    // 2. Logo Icon (Overlay) - Cached by busi_id
     // Path: logo_layer/logo_{id}.png - Using relative path from contextpath
     // Default to '00' if error or unknown
     let logoStyle = logoCache[busi_id];
@@ -564,18 +595,22 @@ function getMarkerStyle(markerKey) {
     }
     returnStyle.push(logoStyle);
 
-    // 3. Mode/Type Indicator (Simplified)
+    // 3. Mode/Type Indicator (Simplified) - Cached by mode
     if (mode && mode.includes("_p")) {
         // Add a small inner dot for High Power
         let modeColor = '#007bff';
         if (mode.includes("_p2")) modeColor = '#6610f2';
 
-        let modeStyle = new ol.style.Style({
-            image: new ol.style.Circle({
-                radius: 4,
-                fill: new ol.style.Fill({ color: modeColor }) // Solid dot in center
-            })
-        });
+        let modeStyle = modeStyleCache[modeColor];
+        if (!modeStyle) {
+            modeStyle = new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 4,
+                    fill: new ol.style.Fill({ color: modeColor }) // Solid dot in center
+                })
+            });
+            modeStyleCache[modeColor] = modeStyle;
+        }
         returnStyle.push(modeStyle);
     }
 
