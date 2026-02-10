@@ -223,117 +223,118 @@ function reDrawStatAndMarker(isZoomUpdate) {
 var clusterFeatures = new Array();
 var removeClusterFeatures = new Array();
 
+// Worker-based redraw
 function reDrawStatAndMarker_(uid, x, y, isZoomUpdate) {
+    if (!window.evMapWorker) return;
 
-    // Performance Optimization: If this is just a zoom update and we have features, reuse them.
-    if (isZoomUpdate && clusterFeatures.length > 0) {
-        clusterDrawing(clusterFeatures);
-        return;
+    // 1. Collect Filter States
+    var filters = {
+        type: getExceptType(),
+        mng: getExceptMng(),
+        trf: getExceptTrf(),
+        smrt: getExceptSmrt(),
+        // free: getExceptFree(), // Not used in current logic
+        search: $('#station-search').val(),
+        is24: $('#F_24HOUR1').is(':checked') && !$('.mapLeftWrap').is(':visible')
+    };
+
+    // 2. Get Current Map State
+    var zoom = mapView.getZoom();
+    var extent = mapView.calculateExtent(baseGround.getSize());
+    var bbox = ol.proj.transformExtent(extent, 'EPSG:3857', 'EPSG:4326'); // [minLon, minLat, maxLon, maxLat]
+
+    // 3. Send to Worker
+    window.evMapWorker.postMessage({
+        type: 'updateFilters',
+        filters: filters,
+        bbox: bbox,
+        zoom: zoom
+    });
+
+    // Updates will arrive via onmessage -> handleWorkerMessage -> clusterDrawing
+}
+
+function handleWorkerMessage(data) {
+    if (data.type === 'clustersUpdated') {
+        processWorkerClusters(data.clusters);
+    } else if (data.type === 'dataLoaded') {
+        console.log("Worker loaded " + data.count + " stations.");
+        $("#loading-text").text("데이터 로드 완료 (" + data.count + " 건). 렌더링 중...");
+        // Initial Draw
+        reDrawStatAndMarker();
+        $("#loading-overlay").fadeOut();
     }
+}
 
-    var filterType = getExceptType();
-    var filterMng = getExceptMng();
-    var filterTrf = getExceptTrf(); // 20230510 : 추가 
-    var filterSmrt = getExceptSmrt(); // 스마트제어 충전기
-    var f_24hour_mobile = $('#F_24HOUR1').is(':checked') && !$('.mapLeftWrap').is(':visible');
-    var searchKeyword = $('#station-search').val(); // Get search input
+function processWorkerClusters(clusters) {
+    var features = [];
 
-    var tKeys = m_mapStations.keys();
-    var arrayNum = 0;
+    // Convert Supercluster expansion to OpenLayers Features
+    // Supercluster returns: { type: "Feature", properties: {...}, geometry: {...} }
+    // We need to convert coordinates from LonLat to WebMercator
 
-    clusterFeatures = new Array();;
+    var format = new ol.format.GeoJSON();
 
-    for (var i = 0; i < tKeys.length; i++) {
-        theStation = m_mapStations.get(tKeys[i]);
+    // Batch transform is faster? Or just iterate.
+    // Supercluster features are in EPSG:4326. View is EPSG:3857.
 
-        // Search Filter
-        if (searchKeyword && theStation.snm.indexOf(searchKeyword) === -1) continue;
+    // Optimal way: Read features with featureProjection
+    features = format.readFeatures({
+        type: "FeatureCollection",
+        features: clusters
+    }, {
+        dataProjection: 'EPSG:4326',
+        featureProjection: 'EPSG:3857'
+    });
 
-        if (f_24hour_mobile && theStation.utime != "24시간 이용가능") continue;
+    // Update count in sidebar
+    var atomicCount = 0;
+    features.forEach(f => {
+        var props = f.getProperties();
+        if (props.point_count) atomicCount += props.point_count;
+        else atomicCount++;
+    });
+    $('#status-count').text(atomicCount);
 
-        theStation.setStat(filterType, filterMng, filterTrf, filterSmrt);
-
-        if (theStation.stat != "") {
-
-            stationSpot[arrayNum] = {
-                sid: theStation.sid, id: arrayNum, y: parseFloat(theStation.y), x: parseFloat(theStation.x)
-                , chgeMange: theStation.chgeMange, stat: theStation.stat, mode: theStation.mode
-            }
-
-            clusterFeatures[arrayNum] = new ol.Feature({
-                geometry: new ol.geom.Point(ol.proj.transform([parseFloat(theStation.y), parseFloat(theStation.x)], 'EPSG:4326', 'EPSG:3857'))
-                , chgeMange: theStation.chgeMange
-                , sid: theStation.sid
-                , id: arrayNum
-                , stat: theStation.stat
-                , mode: theStation.mode
-            });
-            arrayNum++;
-        }
-    }
-
-    // Update Sidebar Count
-    $('#status-count').text(arrayNum);
-
-    // baseGround.removeLayer(clusterLayer); // Optimized: handled in clusterDrawing reuse logic
-    clusterDrawing(clusterFeatures);
+    clusterDrawing(features);
 }
 
 var styleCache = {}; // 20230510 : 줌레벨이 declusterZoom이상시 style를 기록한다
 function clusterDrawing(features) {
 
-    // Clear conflicting station layer if exists
-    if (Object.keys(stationLayer).length > 0 && stationLayer instanceof ol.layer.Base) { // Ensure it's a layer
-        baseGround.removeLayer(stationLayer);
-        stationLayer = {}; // Reset to empty object as per original logic's convention
-        clustersAlone = [];
-    }
-
-    // Calculate cluster distance based on zoom
-    var _newDistance;
-    if (baseGround.getView().getZoom() >= declusterZoom) {
-        _newDistance = declusterDistance;
-    } else {
-        _newDistance = clusterDistance + mapView.getResolution() / 2;
-    }
-
     // Reuse existing Cluster Layer if possible
     var isLayerValid = (clusterLayer && typeof clusterLayer.getSource === 'function');
 
     if (isLayerValid) {
-        var source = clusterLayer.getSource();
-        if (source instanceof ol.source.Cluster) {
-            source.setDistance(_newDistance);
-
-            // Update features in the underlying vector source
-            // Note: If this is just a zoom update, features might be identical. 
-            // However, ensuring content is fresh is safer for filter updates.
-            var vectorSource = source.getSource();
-            if (vectorSource) {
-                vectorSource.clear();
-                if (features && features.length > 0) {
-                    vectorSource.addFeatures(features);
-                }
-            }
-
-            // Ensure layer is on the map (in case it was removed by filter switch)
-            var layers = baseGround.getLayers().getArray();
-            if (!layers.includes(clusterLayer)) {
-                baseGround.addLayer(clusterLayer);
+        var vectorSource = clusterLayer.getSource();
+        // Since we are using filtered clusters from worker, we just replace features.
+        // No ol.source.Cluster wrapper needed anymore.
+        if (vectorSource) {
+            vectorSource.clear();
+            if (features && features.length > 0) {
+                vectorSource.addFeatures(features);
             }
         }
-    } else {
-        // Initial Creation
-        var clusterSource = new ol.source.Cluster({
-            distance: _newDistance,
-            source: new ol.source.Vector({ features: features })
-        });
 
-        clusterLayer = new ol.layer.Vector({
+        // Ensure layer is on map
+        var layers = baseGround.getLayers().getArray();
+        if (!layers.includes(clusterLayer)) {
+            baseGround.addLayer(clusterLayer);
+        }
+
+    } else {
+        // Initial Creation - Use VectorImage for performance (renderMode: image)
+        var vectorSource = new ol.source.Vector({ features: features });
+
+        // Use VectorImage only if available (OL 6+)
+        var LayerClass = ol.layer.VectorImage || ol.layer.Vector;
+
+        clusterLayer = new LayerClass({
             name: 'clusterLayer', id: 'cluster',
-            source: clusterSource,
+            source: vectorSource,
             style: simplifiedStyle,
-            zIndex: 20
+            zIndex: 20,
+            imageRatio: 1 // Render exactly viewport size, or larger to buffer
         });
 
         baseGround.addLayer(clusterLayer);
@@ -341,38 +342,39 @@ function clusterDrawing(features) {
 }
 
 function simplifiedStyle(feature) {
-    var size = feature.get('features').length;
+    // Supercluster features have 'point_count' property for clusters
+    var size = feature.get('point_count');
 
-    // Direct render for single items when zoomed in
-    if (mapView.getZoom() >= declusterZoom && size == 1) {
-        var originalFeature = feature.get('features')[0];
-        // Ensure properties exist (added in reDrawStatAndMarker_)
-        var chgeMange = originalFeature.get('chgeMange');
-        var stat = originalFeature.get('stat');
-        var mode = originalFeature.get('mode');
+    if (size) {
+        // Cluster Style
+        // Cache by exact size to avoid mutation and overhead
+        let style = styleCache[size];
 
-        // Use existing getMarkerKey and getMarkerStyle logic
+        if (!style) {
+            var sizeBracket = Math.floor(size / 200);
+            var radius = sizeBracket * 2 + 20;
+
+            style = new ol.style.Style({
+                image: new ol.style.Circle({ radius: radius, fill: new ol.style.Fill({ color: 'rgba(0, 76, 161, 0.75)' }) }),
+                text: new ol.style.Text({
+                    fill: new ol.style.Fill({ color: '#FFF' }), font: 'bold 15px Arial',
+                    offsetX: 0.5, offsetY: 1, scale: 1,
+                    text: size.toString() // feature.get('point_count_abbreviated') // Use abbreviated if needed
+                })
+            });
+            styleCache[size] = style;
+        }
+        return style;
+    } else {
+        // Leaf Node (Single Station)
+        // Properties are directly on the feature now
+        var chgeMange = feature.get('chgeMange');
+        var stat = feature.get('stat');
+        var mode = feature.get('mode');
+
         var markerKey = getMarkerKey(chgeMange, stat, mode);
         return getMarkerStyle(markerKey);
     }
-
-    // considerations: Cache by exact size to avoid mutation and overhead
-    let style = styleCache[size];
-
-    if (!style) {
-        var sizeBracket = Math.floor(size / 200);
-        var radius = sizeBracket * 2 + 20;
-
-        style = new ol.style.Style({
-            image: new ol.style.Circle({ radius: radius, fill: new ol.style.Fill({ color: 'rgba(0, 76, 161, 0.75)' }) }),
-            text: new ol.style.Text({
-                fill: new ol.style.Fill({ color: '#FFF' }), font: 'bold 15px Arial', offsetX: 0.5, offsetY: 1, scale: 1, text: size.toString()
-            })
-        });
-        styleCache[size] = style;
-    }
-
-    return style;
 }
 
 function markerDrawing() {

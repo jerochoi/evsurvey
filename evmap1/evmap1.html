@@ -187,89 +187,27 @@
             baseGround.addOverlay(stationListOverlay);
             element_stationList = container; // mapping for evMap.js usage if any
 
-            // 3. Load Data - Fetch Both Files
-            var files = ["evMapList_me.json.gz", "evMapList_etc.json.gz"];
+            // 3. Setup Web Worker for Data & Clustering
+            if (window.Worker) {
+                window.evMapWorker = new Worker('evMapWorker.js');
 
-            async function fetchJson(url) {
-                try {
-                    if (url.endsWith('.gz')) {
-                        const response = await fetch(url);
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        const blob = await response.blob();
-                        const ds = new DecompressionStream('gzip');
-                        const stream = blob.stream().pipeThrough(ds);
-                        const data = await new Response(stream).json();
+                // Initial Data Load
+                var files = ["evMapList_me.json.gz", "evMapList_etc.json.gz"]; // or full URL
+                window.evMapWorker.postMessage({ type: 'loadData', files: files });
 
-                        $("#loading-text").text(url + " 로드 완료 (" + (data.chargerList ? data.chargerList.length : 0) + " 건).");
-                        return data;
-                    } else {
-                        // Standard JSON file
-                        return new Promise((resolve, reject) => {
-                            $.getJSON(url, function (data) {
-                                $("#loading-text").text(url + " 로드 완료 (" + (data.chargerList ? data.chargerList.length : 0) + " 건).");
-                                resolve(data);
-                            }).fail(function () {
-                                console.log("Failed to load " + url);
-                                resolve({ chargerList: [] });
-                            });
-                        });
+                // Wire up Worker Responses
+                window.evMapWorker.onmessage = function (e) {
+                    // Handled in evMap1.js handleWorkerMessage for cleaner code separation
+                    // But we need to make sure handleWorkerMessage is available. 
+                    // Since evMap1.js defines functions in global scope, it is fine.
+                    if (typeof handleWorkerMessage === 'function') {
+                        handleWorkerMessage(e.data);
                     }
-                } catch (err) {
-                    console.log("Failed to load " + url + " : " + err);
-                    return { chargerList: [] };
-                }
+                };
+            } else {
+                alert("Web Worker is not supported in this browser. Performance may be degraded.");
+                // Fallback logic could go here, but for now we assume Worker exists.
             }
-
-            Promise.all(files.map(fetchJson)).then(function (results) {
-                var totalStations = 0;
-
-                $("#loading-text").text("데이터 통합 및 렌더링 중...");
-
-                results.forEach(function (data) {
-                    console.log("Loaded batch with " + (data.chargerList ? data.chargerList.length : 0) + " stations.");
-                    if (data.chargerList) {
-                        totalStations += data.chargerList.length;
-
-                        data.chargerList.forEach(function (item) {
-                            var st = new Station(
-                                item.sid, item.snm, item.x, item.y,
-                                item.hol, 0, item.ut, item.ctp,
-                                item.cm || '00',
-                                "", item.zs, item.lm, item.po,
-                                item.trf, item.smt
-                            );
-
-                            var chgr = new Charger(item.sid, item.cid, item.ctp, item.cst, item.tst, item.smt);
-                            st.chargers.put(item.cid, chgr);
-
-                            if (m_mapStations.containsKey(item.sid)) {
-                                var existSt = m_mapStations.get(item.sid);
-                                existSt.chargers.put(item.cid, chgr);
-                                existSt.setMode(item.lm, item.po, item.ctp);
-                                if (item.cm && item.cm !== '00') {
-                                    existSt.chgeMange = item.cm;
-                                }
-                            } else {
-                                m_mapStations.put(item.sid, st);
-                            }
-                        });
-                    }
-                });
-
-                console.log("Total stations loaded: " + totalStations);
-
-                // Render Map
-                reDrawStatAndMarker();
-
-                // Hide Loading
-                $("#loading-overlay").fadeOut();
-
-            }).catch(function (err) {
-                console.error("Error loading data:", err);
-                $("#loading-text").text("데이터 로딩 중 오류가 발생했습니다.");
-            });
 
             // 4. Geolocation / Default Zoom
             if ("geolocation" in navigator) {
@@ -278,15 +216,12 @@
                     var lat = position.coords.latitude;
                     var lng = position.coords.longitude;
 
-                    console.log("Current Location Found: ", lat, lng);
-
                     mapView.animate({
                         center: ol.proj.fromLonLat([lng, lat]),
                         zoom: 16,
                         duration: 1000
                     });
                 }, function (error) {
-                    console.warn("Geolocation denied or failed. Defaulting to Seoul.");
                     moveToSeoul();
                 }, { timeout: 5000 });
             } else {
@@ -294,10 +229,8 @@
             }
 
             function moveToSeoul() {
-                // Seoul City Hall approx
                 var seoulLng = 126.9780;
                 var seoulLat = 37.5665;
-
                 mapView.animate({
                     center: ol.proj.fromLonLat([seoulLng, seoulLat]),
                     zoom: 16,
@@ -307,15 +240,11 @@
 
             // Map Events
             baseGround.on('moveend', function () {
-                var zoom = baseGround.getView().getZoom();
-
-                if (isThresholdPassed(zoom)) {
-                    reDrawStatAndMarker(true); // Pass true to indicate Zoom Update only
-                }
-
-                oldZoomLevel = zoom;
+                // Trigger Worker Update
+                // We use reDrawStatAndMarker_ directly or via the debouncer in evMap1.js
+                // But let's call the main entry point
+                reDrawStatAndMarker(true);
             });
-            oldZoomLevel = baseGround.getView().getZoom();
 
             // Interaction: Click on Marker
             baseGround.on('singleclick', function (evt) {
@@ -324,32 +253,40 @@
                 });
 
                 if (feature) {
-                    var kind = feature.get('kind');
-                    // Check if it is a cluster with size 1 (direct marker style)
-                    var features = feature.get('features');
+                    var point_count = feature.get('point_count');
 
-                    if (kind === 'ExistingStation' || (features && features.length === 1 && mapView.getZoom() >= declusterZoom)) {
-                        // Handle Cluster of 1 as direct marker
-                        var originalFeature = features ? features[0] : feature;
-                        var sid = originalFeature.get('sid');
+                    if (!point_count) {
+                        // Leaf Node (Single Station)
+                        var props = feature.getProperties();
 
-                        var st = m_mapStations.get(sid);
-                        var coordinate = evt.coordinate; // Use click coord
-
-                        var contentHTML = '<div style="font-size:14px; font-weight:bold; margin-bottom:5px; border-bottom:1px solid #eee; padding-bottom:5px;">' + st.snm + '</div>';
-                        contentHTML += '<div style="font-size:12px;"><b>운영시간:</b> ' + st.utime + '</div>';
-                        contentHTML += '<div style="font-size:12px;"><b>운영기관:</b> ' + st.chgeMange + '</div>';
-
-                        // Show Chargers info if needed
-                        var chargers = st.chargers.values();
-                        var available = 0;
-                        for (var i = 0; i < chargers.length; i++) {
-                            if (chargers[i].cst == '2') available++;
-                        }
-                        contentHTML += '<div style="font-size:12px; margin-top:5px;"><b>사용가능 충전기:</b> <span style="color:green; font-weight:bold;">' + available + '</span> / ' + chargers.length + '</div>';
+                        var contentHTML = '<div style="font-size:14px; font-weight:bold; margin-bottom:5px; border-bottom:1px solid #eee; padding-bottom:5px;">' + (props.snm || '-') + '</div>';
+                        contentHTML += '<div style="font-size:12px;"><b>운영시간:</b> ' + (props.utime || '-') + '</div>';
+                        contentHTML += '<div style="font-size:12px;"><b>운영기관:</b> ' + (props.chgeMange || '-') + '</div>';
+                        contentHTML += '<div style="font-size:12px; margin-top:5px;"><b>사용가능 충전기:</b> <span style="color:green; font-weight:bold;">' + (props.available || 0) + '</span> / ' + (props.total || 0) + '</div>';
 
                         content.innerHTML = contentHTML;
-                        stationListOverlay.setPosition(coordinate);
+                        stationListOverlay.setPosition(evt.coordinate);
+                    } else {
+                        // Cluster Click - Zoom In
+                        var clusterMembers = feature.get('point_count'); // number
+                        if (clusterMembers < 10) {
+                            // If small cluster, maybe expand? 
+                            // Supercluster expansion zoom is handled by getting next zoom level
+                            // For now, just zoom in 2 levels
+                            var view = baseGround.getView();
+                            view.animate({
+                                center: evt.coordinate,
+                                zoom: view.getZoom() + 2,
+                                duration: 500
+                            });
+                        } else {
+                            var view = baseGround.getView();
+                            view.animate({
+                                center: evt.coordinate,
+                                zoom: view.getZoom() + 2,
+                                duration: 500
+                            });
+                        }
                     }
                 } else {
                     stationListOverlay.setPosition(undefined);
