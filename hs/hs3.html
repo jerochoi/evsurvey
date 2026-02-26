@@ -5,8 +5,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>수소충전소 상업운영(Hying비교)</title>
-    <!-- 데이터 로드 (js 변수 형태로 로드) -->
-    <script src="data/merged_data.js"></script>
+    <!-- 데이터 로드 (js 변수 형태로 로드, pako 압축해제) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <script src="data/compressed_data.js"></script>
+    <script>
+        (function () {
+            var binaryString = atob(compressedDataB64);
+            var len = binaryString.length;
+            var bytes = new Uint8Array(len);
+            for (var i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            var unzipped = pako.inflate(bytes, { to: 'string' });
+            var s = document.createElement('script');
+            s.text = unzipped;
+            document.head.appendChild(s);
+        })();
+    </script>
     <script src="data/h2info_api.js"></script>
     <script src="data/h2cur_api.js"></script>
     <script src="data/apimatch.js"></script>
