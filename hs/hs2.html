@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수소차 등록 현황 (행정구역별)</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+        }
+
+        #layout {
+            display: flex;
+            height: 100%;
+        }
+
+        #sidebar {
+            width: 420px;
+            background: #f8f9fa;
+            border-right: 1px solid #ddd;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+        }
+
+        #map {
+            flex: 1;
+            height: 100%;
+            background: #cdcdcd;
+        }
+
+        /* Sidebar Styling */
+        .sidebar-header {
+            padding: 20px;
+            background: #34495e;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stats-container {
+            padding: 15px;
+        }
+
+        .stat-section {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        /* Legend */
+        .info {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+
+        .info h4 {
+            margin: 0 0 5px;
+            color: #777;
+        }
+
+        .legend {
+            line-height: 18px;
+            color: #555;
+        }
+
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+
+        /* Labels */
+        .map-label {
+            font-size: 10px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            text-shadow:
+                -1px -1px 0 #fff,
+                1px -1px 0 #fff,
+                -1px 1px 0 #fff,
+                1px 1px 0 #fff;
+            white-space: nowrap;
+        }
+
+        /* Added from hs1 */
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .stat-val {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            color: white;
+            font-weight: bold;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .filter-checkbox {
+            margin-right: 5px;
+            cursor: pointer;
+        }
+
+        .filter-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .bg-green {
+            background-color: #27ae60;
+        }
+
+        .bg-red {
+            background-color: #e74c3c;
+        }
+
+        .bg-blue {
+            background-color: #3498db;
+        }
+
+        .bg-gray {
+            background-color: #95a5a6;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="layout">
+        <div id="sidebar">
+            <div class="sidebar-header">
+                수소충전소 현황 대시보드
+                <span style="font-size:0.8rem; opacity:0.8;">(2026.02)</span>
+            </div>
+            <div class="stats-container" id="stats-content">
+                <div class="stat-section">
+                    <div class="stat-title">충전소 구축 현황 (총 <span id="total-stations">0</span>기)</div>
+
+                    <!-- Checkbox Filters -->
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 15px;">
+                        <div class="stat-row">
+                            <label class="filter-label">
+                                <input type="checkbox" class="filter-checkbox" value="green" checked>
+                                <span class="badge bg-green">용역부지</span>
+                            </label>
+                            <span class="stat-val" id="count-green">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <label class="filter-label">
+                                <input type="checkbox" class="filter-checkbox" value="red" checked>
+                                <span class="badge bg-red">구축중</span>
+                            </label>
+                            <span class="stat-val" id="count-red">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <label class="filter-label">
+                                <input type="checkbox" class="filter-checkbox" value="blue" checked>
+                                <span class="badge bg-blue">운영중</span>
+                            </label>
+                            <span class="stat-val" id="count-blue">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <label class="filter-label">
+                                <input type="checkbox" class="filter-checkbox" value="gray" checked>
+                                <span class="badge bg-gray">취소/기타</span>
+                            </label>
+                            <span class="stat-val" id="count-gray">0</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+                        <label class="filter-label" style="font-size: 0.9rem; font-weight: bold; color: #2c3e50;">
+                            <input type="checkbox" id="hcar-polygon-toggle" class="filter-checkbox" checked>
+                            수소차 등록 대수
+                        </label>
+                    </div>
+                </div>
+
+                <div class="stat-section" id="ministry-stage-stats">
+                    <div class="stat-title">구축단계별 부처 현황</div>
+                </div>
+
+                <div class="stat-section" id="ministry-biz-stats">
+                    <div class="stat-title">사업구분별 부처 현황</div>
+                </div>
+
+                <div class="stat-section" id="regional-office-stats">
+                    <div class="stat-title">지방청별 사업/기수 현황</div>
+                </div>
+
+                <div class="stat-section" id="constructor-stats">
+                    <div class="stat-title">구축사업자별 사업/기수 현황</div>
+                </div>
+
+                <div class="stat-section" id="equipment-stats">
+                    <div class="stat-title">설비사업자별 사업/기수 현황</div>
+                </div>
+            </div>
+        </div>
+        <div id="map"></div>
+    </div>
+
+    <!-- Load Data -->
+    <script src="data/merged_data.js"></script>
+    <script src="data/evmregionsig.js"></script>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+        // 1. Data Setup
+        var activeGeoData = null;
+        if (typeof _regionsig !== 'undefined') {
+            activeGeoData = {
+                "type": "FeatureCollection",
+                "features": []
+            };
+            for (var k in _regionsig) {
+                if (_regionsig[k] && _regionsig[k].features) {
+                    activeGeoData.features = activeGeoData.features.concat(_regionsig[k].features);
+                }
+            }
+        } else if (typeof geoData !== 'undefined') {
+            activeGeoData = geoData;
+        }
+
+        const map = L.map('map').setView([36.3, 127.8], 7.5);
+
+        // Create a custom pane for station markers to ensure they are above polygons (z-index 450 > 400 default overlay)
+        map.createPane('stationPane');
+        map.getPane('stationPane').style.zIndex = 450;
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        const stationGroup = L.layerGroup().addTo(map);
+        const hcarLabelGroup = L.layerGroup().addTo(map);
+
+        // Province Mapping
+        const provCodeMap = {
+            "11": "서울", "26": "부산", "27": "대구", "28": "인천", "29": "광주", "30": "대전", "31": "울산", "36": "세종",
+            "41": "경기", "42": "강원", "43": "충북", "44": "충남", "45": "전북", "46": "전남", "47": "경북", "48": "경남", "50": "제주",
+            "51": "강원", "52": "전북"
+        };
+
+        function getProvName(code) {
+            if (!code) return "";
+            const prefix = code.toString().substring(0, 2);
+            return provCodeMap[prefix] || "";
+        }
+
+        const regionAlias = {
+            "경상남도": "경남", "경상북도": "경북", "전라남도": "전남", "전라북도": "전북", "전북특별자치도": "전북",
+            "충청남도": "충남", "충청북도": "충북", "강원도": "강원", "강원특별자치도": "강원",
+            "제주특별자치도": "제주", "제주도": "제주", "경기도": "경기",
+            "서울특별시": "서울", "부산광역시": "부산", "대구광역시": "대구",
+            "인천광역시": "인천", "광주광역시": "광주", "대전광역시": "대전",
+            "울산광역시": "울산", "세종특별자치시": "세종"
+        };
+
+        function normalizeRegion(name) {
+            return regionAlias[name] || name;
+        }
+
+        // Color Scale
+        function getColor(d) {
+            return d > 1000 ? '#800026' :
+                d > 500 ? '#BD0026' :
+                    d > 200 ? '#E31A1C' :
+                        d > 100 ? '#FC4E2A' :
+                            d > 50 ? '#FD8D3C' :
+                                d > 20 ? '#FEB24C' :
+                                    d > 10 ? '#FED976' :
+                                        '#FFEDA0';
+        }
+
+        function style(feature) {
+            return {
+                fillColor: getColor(feature.properties.hcar_count || 0),
+                weight: 1,
+                opacity: 1,
+                color: 'white',
+                dashArray: '3',
+                fillOpacity: 0.7
+            };
+        }
+
+        function highlightFeature(e) {
+            var layer = e.target;
+
+            layer.setStyle({
+                weight: 3,
+                color: '#666',
+                dashArray: '',
+                fillOpacity: 0.9
+            });
+
+            if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                layer.bringToFront();
+            }
+        }
+
+        function resetHighlight(e) {
+            geojson.resetStyle(e.target);
+        }
+
+        function onEachFeature(feature, layer) {
+            if (feature.properties && feature.properties.full_name) {
+                let countStr = feature.properties.hcar_count ? feature.properties.hcar_count.toLocaleString() + ' 대' : '데이터 없음';
+                layer.bindTooltip(`<div style="text-align:center;"><b>${feature.properties.full_name}</b><br/>수소차 등록: <span style="color:#2c3e50;font-weight:bold;">${countStr}</span></div>`, { sticky: true });
+            }
+            layer.on({
+                mouseover: highlightFeature,
+                mouseout: resetHighlight
+            });
+        }
+
+        // Processing Data
+        if (activeGeoData && activeGeoData.features) {
+
+            // Map HCar Data to Features
+            activeGeoData.features.forEach((f) => {
+                const props = f.properties;
+                const geoName = (props.name || props.SIG_KOR_NM || "").trim();
+                const geoCode = (props.code || props.SIG_CD || "");
+                const provName = getProvName(geoCode);
+
+                // Initialize count
+                props.hcar_count = 0;
+                props.full_name = provName + " " + geoName;
+
+                // Match Logic with Normalization
+                let matchData = hcarData.find(d => {
+                    const dRegion = normalizeRegion(d.region);
+                    const mapRegion = normalizeRegion(provName);
+
+                    const regionMatch = (dRegion === mapRegion) ||
+                        (mapRegion === "서울" && dRegion === "서울") ||
+                        (mapRegion === "제주" && dRegion === "제주");
+                    return regionMatch && d.sigungu === geoName;
+                });
+
+                // 2. Parent-Child distribution logic would be complex here for simple property assignment
+                // We will try simpler approach: if exact match, assign val. 
+                // If the HCar data is "Pohang-si" but we have "Pohang-si Nam-gu" and "Buk-gu",
+                // we'll need to handle that. 
+
+                if (!matchData) {
+                    // Check startswith for split districts
+                    matchData = hcarData.find(d => {
+                        const dRegion = normalizeRegion(d.region);
+                        const mapRegion = normalizeRegion(provName);
+
+                        const regionMatch = (dRegion === mapRegion);
+                        // e.g. d.sigungu="창원시", geoName="창원시 성산구" -> startswith match
+                        return regionMatch && geoName.startsWith(d.sigungu) && geoName !== d.sigungu;
+                    });
+
+                    // If matched by parent (e.g. Pohang -> Pohang Nam-gu), we essentially assign the Whole count? 
+                    // Or we should split it? 
+                    // Let's assume we assign the count to visualization for now, 
+                    // ideally we'd divide by number of children, but calculating that on fly is hard.
+                    // Visualizing the parent value on all children creates a "region" block of color which is acceptable.
+                }
+
+                if (matchData) {
+                    // Note: If multiple children match the same parent entry, displaying the FULL count on EACH gives wrong impression of individual density,
+                    // BUT it correctly colors the "Region" as a block. 
+                    // Ideally we divide. Let's start with raw assignment.
+                    props.hcar_count = matchData.count;
+                }
+            });
+
+            var geojson = L.geoJSON(activeGeoData, {
+                style: style,
+                onEachFeature: function (feature, layer) {
+                    onEachFeature(feature, layer);
+
+                    // Add Label
+                    if (feature.properties.hcar_count > 0) {
+                        // Use polylabel center or simple center
+                        var center = layer.getBounds().getCenter();
+                        var count = feature.properties.hcar_count;
+
+                        L.marker(center, {
+                            icon: L.divIcon({
+                                className: 'map-label',
+                                html: count,
+                                iconSize: [40, 20],
+                                iconAnchor: [20, 10]
+                            }),
+                            interactive: false // Labels shouldn't block clicks
+                        }).addTo(hcarLabelGroup);
+                    }
+                }
+            }).addTo(map);
+
+            // Add event listener for checkbox to show/hide polygons and labels
+            document.getElementById('hcar-polygon-toggle').addEventListener('change', function (e) {
+                if (e.target.checked) {
+                    map.addLayer(geojson);
+                    map.addLayer(hcarLabelGroup);
+                } else {
+                    map.removeLayer(geojson);
+                    map.removeLayer(hcarLabelGroup);
+                }
+            });
+
+            // Custom Info Control Removed
+
+            // Legend
+            var legend = L.control({ position: 'bottomright' });
+
+            legend.onAdd = function (map) {
+                var div = L.DomUtil.create('div', 'info legend'),
+                    grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+                    labels = [];
+
+                div.innerHTML += '<div style="font-weight:bold; margin-bottom:8px;">충전소 상태</div>';
+                div.innerHTML += '<div style="margin-bottom:4px;"><i style="background:#27ae60; border-radius:50%;"></i> 용역부지/설계</div>';
+                div.innerHTML += '<div style="margin-bottom:4px;"><i style="background:#e74c3c; border-radius:50%;"></i> 구축중 (인허가/착공)</div>';
+                div.innerHTML += '<div style="margin-bottom:4px;"><i style="background:#3498db; border-radius:50%;"></i> 운영중/구축완료</div>';
+                div.innerHTML += '<div style="margin-bottom:8px;"><i style="background:#95a5a6; border-radius:50%;"></i> 취소/변경/기타</div>';
+
+                div.innerHTML += '<strong style="display:block; margin-top:20px;">수소차 등록 대수</strong><br>';
+
+                for (var i = 0; i < grades.length; i++) {
+                    div.innerHTML +=
+                        '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+                        grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+                }
+
+                return div;
+            };
+
+            legend.addTo(map);
+
+            // Fetch and render station data
+            let stationsData = [];
+            let greenCount = 0, redCount = 0, blueCount = 0, grayCount = 0;
+            const ministryStats = { env: { tot: 0, stages: {}, bizTypes: {} }, land: { tot: 0, stages: {}, bizTypes: {} } };
+            const regionStats = {};
+            const constructStats = {};
+            const equipStats = {};
+
+            if (typeof hsallData !== 'undefined') {
+                hsallData.forEach(st => {
+                    const status = st.status || "";
+                    let color = "#95a5a6";
+                    let type = "gray";
+
+                    // Status Logic
+                    if (status.includes("용역") || status.includes("설계")) { color = "#27ae60"; type = "green"; }
+                    else if (status.includes("구축") || status.includes("착공") || status.includes("인허가")) { color = "#e74c3c"; type = "red"; }
+                    else if (status.includes("운영") || status.includes("완료") || status.includes("준공")) { color = "#3498db"; type = "blue"; }
+                    else if (status.includes("취소") || status.includes("중단")) { color = "#95a5a6"; type = "gray"; }
+
+                    if (type === "green") greenCount++;
+                    else if (type === "red") redCount++;
+                    else if (type === "blue") blueCount++;
+                    else grayCount++;
+
+                    st.markerColor = color;
+                    st.markerType = type;
+                    stationsData.push(st);
+
+                    if (type === 'red') {
+                        const ministry = (st.ministry || "").trim();
+                        const stage = (st.stage || st.status || "미정").trim();
+                        const biz = (st.biz_type || "기타").trim();
+                        const chargers = parseInt(st.chargers) || 1;
+
+                        let mKey = null;
+                        if (ministry.includes("환경")) mKey = "env";
+                        if (ministry.includes("국토")) mKey = "land";
+
+                        if (mKey) {
+                            ministryStats[mKey].tot++;
+                            ministryStats[mKey].stages[stage] = (ministryStats[mKey].stages[stage] || 0) + 1;
+                            ministryStats[mKey].bizTypes[biz] = (ministryStats[mKey].bizTypes[biz] || 0) + 1;
+                        }
+
+                        const agency = (st.agency || "기타").trim();
+                        if (!regionStats[agency]) regionStats[agency] = { proj: 0, chg: 0 };
+                        regionStats[agency].proj++;
+                        regionStats[agency].chg += chargers;
+
+                        const constructor = (st.operator_construct || "미정").trim();
+                        if (constructor && constructor !== "미정") {
+                            if (!constructStats[constructor]) constructStats[constructor] = { proj: 0, chg: 0 };
+                            constructStats[constructor].proj++;
+                            constructStats[constructor].chg += chargers;
+                        }
+
+                        const equip = (st.operator_equipment || "미정").trim();
+                        if (equip && equip !== "미정") {
+                            if (!equipStats[equip]) equipStats[equip] = { proj: 0, chg: 0 };
+                            equipStats[equip].proj++;
+                            equipStats[equip].chg += chargers;
+                        }
+                    }
+                });
+            }
+
+            function renderStations() {
+                // Get checked status values
+                const checkedTypes = Array.from(document.querySelectorAll('.filter-checkbox:checked')).map(cb => cb.value);
+
+                stationGroup.clearLayers();
+                stationsData.forEach(st => {
+                    // Check if makerType is in checkedTypes
+                    if (checkedTypes.includes(st.markerType)) {
+                        // Show all items or optionally exclude cancelled - but if they check 'gray' we might want to show them?
+                        // Based on user request, if checked we show it. 
+                        if (st.lat && st.lng) {
+                            L.circleMarker([st.lat, st.lng], {
+                                pane: 'stationPane',
+                                radius: 5,
+                                fillColor: st.markerColor,
+                                color: "#fff",
+                                weight: 1,
+                                fillOpacity: 0.9
+                            }).bindPopup(`<div style="font-size:12px;">
+                                <strong>[${st.status}] ${st.st_name || '미정'}</strong><br>
+                                ${st.addr}<br>
+                                부처: ${st.ministry}<br>
+                                사업: ${st.biz_type}
+                            </div>`).addTo(stationGroup);
+                        }
+                    }
+                });
+            }
+
+            // Add event listeners to all checkboxes
+            document.querySelectorAll('.filter-checkbox').forEach(cb => {
+                cb.addEventListener('change', renderStations);
+            });
+
+            renderStations();
+
+            // 4. Update Stats UI
+            document.getElementById('total-stations').innerText = stationsData.length;
+            document.getElementById('count-green').innerText = greenCount;
+            document.getElementById('count-red').innerText = redCount;
+            document.getElementById('count-blue').innerText = blueCount;
+            document.getElementById('count-gray').innerText = grayCount;
+
+            function renderMinistryStats() {
+                const stageContainer = document.getElementById('ministry-stage-stats');
+                const bizContainer = document.getElementById('ministry-biz-stats');
+
+                const headerHtml = `
+                <div class="stat-row" style="border-bottom:1px solid #ccc; padding-bottom:5px; margin-bottom:5px; font-weight:bold; font-size:0.85rem; color:#333;">
+                    <span>구분</span>
+                    <span>환경부 / 국토부</span>
+                </div>`;
+
+                let allStages = new Set([...Object.keys(ministryStats.env.stages), ...Object.keys(ministryStats.land.stages)]);
+                let htmlStage = headerHtml;
+                Array.from(allStages).sort().forEach(s => {
+                    const e = ministryStats.env.stages[s] || 0;
+                    const l = ministryStats.land.stages[s] || 0;
+                    if (e + l === 0) return;
+                    htmlStage += `<div class="stat-row">
+                    <span>${s}</span>
+                    <span><span style="color:#27ae60;">${e}</span> / <span style="color:#e67e22;">${l}</span></span>
+                </div>`;
+                });
+                if (stageContainer) stageContainer.innerHTML += htmlStage;
+
+                let allBiz = new Set([...Object.keys(ministryStats.env.bizTypes), ...Object.keys(ministryStats.land.bizTypes)]);
+                let htmlBiz = headerHtml;
+                Array.from(allBiz).sort().forEach(b => {
+                    const e = ministryStats.env.bizTypes[b] || 0;
+                    const l = ministryStats.land.bizTypes[b] || 0;
+                    if (e + l === 0) return;
+                    htmlBiz += `<div class="stat-row">
+                    <span>${b}</span>
+                    <span><span style="color:#27ae60;">${e}</span> / <span style="color:#e67e22;">${l}</span></span>
+                </div>`;
+                });
+                if (bizContainer) bizContainer.innerHTML += htmlBiz;
+            }
+
+            function renderRankTable(containerId, dataObj) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                const sorted = Object.keys(dataObj).sort((a, b) => dataObj[b].proj - dataObj[a].proj);
+                let html = "";
+                sorted.slice(0, 10).forEach(k => {
+                    html += `<div class="stat-row">
+                    <span style="overflow:hidden; white-space:nowrap; text-overflow:ellipsis; max-width:60%;" title="${k}">${k}</span>
+                    <span><b>${dataObj[k].proj}</b>개 / ${dataObj[k].chg}기</span>
+                </div>`;
+                });
+                container.innerHTML += html;
+            }
+
+            renderMinistryStats();
+            renderRankTable('regional-office-stats', regionStats);
+            renderRankTable('constructor-stats', constructStats);
+            renderRankTable('equipment-stats', equipStats);
+
+        } else {
+            console.error("GeoData not loaded");
+        }
+
+    </script>
+</body>
+
+</html>

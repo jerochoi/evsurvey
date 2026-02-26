@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수소충전소 상업운영(Hying비교)</title>
+    <!-- 데이터 로드 (js 변수 형태로 로드) -->
+    <script src="data/merged_data.js"></script>
+    <script src="data/h2info_api.js"></script>
+    <script src="data/h2cur_api.js"></script>
+    <script src="data/apimatch.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            min-width: 250px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            margin-top: 0;
+            color: #34495e;
+            font-size: 1.1em;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+
+        .stat-num {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3498db;
+            margin: 10px 0;
+        }
+
+        .stat-details {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            text-align: left;
+            display: inline-block;
+            line-height: 1.6;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+            min-width: 1000px;
+        }
+
+        th,
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background-color: #34495e;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background-color: #f1f2f6;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+            color: white;
+            display: inline-block;
+        }
+
+        .bg-success {
+            background-color: #2ecc71;
+        }
+
+        /* 운영, 정상영업 */
+        .bg-warning {
+            background-color: #f1c40f;
+            color: #333;
+        }
+
+        /* 운영중지, 영업종료 */
+        .bg-danger {
+            background-color: #e74c3c;
+        }
+
+        /* 고장, 구축중 */
+        .bg-info {
+            background-color: #3498db;
+        }
+
+        /* 매칭 */
+        .bg-secondary {
+            background-color: #95a5a6;
+        }
+
+        /* 기타 */
+        .match-fail {
+            background-color: #e74c3c;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .match-success {
+            background-color: #3498db;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .match-api-only {
+            background-color: #9b59b6;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>수소충전소 상업운영(Hying비교)</h1>
+
+    <div class="stats-container" id="stats-container">
+        <!-- 통계가 여기에 렌더링 됩니다 -->
+    </div>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>매칭 결과</th>
+                    <th>상태 (관리대장)</th>
+                    <th>충전소명 (관리대장)</th>
+                    <th>주소 (관리대장)</th>
+                    <th>충전소명 (API)</th>
+                    <th>영업상태 (API)</th>
+                    <th>현재상태 (API)</th>
+                    <th>대기차량 (API)</th>
+                    <th>충전소통화 (API)</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <!-- 테이블 내용 렌더링 -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // 거리 계산 함수 (Haversine formula)
+        function getDistance(lat1, lon1, lat2, lon2) {
+            if (!lat1 || !lon1 || !lat2 || !lon2) return 999999;
+            const R = 6371e3; // metres
+            const MathPI = Math.PI;
+            const dLat = (lat2 - lat1) * MathPI / 180;
+            const dLon = (lon2 - lon1) * MathPI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * MathPI / 180) * Math.cos(lat2 * MathPI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c; // meters
+        }
+
+        // 이름 정규화 함수 (매칭용)
+        function normName(name) {
+            if (!name) return "";
+            return name.replace(/\s+/g, '')
+                .replace(/수소복합충전소/g, '')
+                .replace(/복합충전소/g, '')
+                .replace(/수소충전소/g, '')
+                .replace(/충전소/g, '')
+                .replace(/수소/g, '')
+                .replace(/[(（].*?[)）]/g, '') // 괄호 내용 제거
+                .replace(/^H/i, '')            // 앞의 H 제거
+                .replace(/휴게소.*/, '휴게소')       // 휴게소 뒤의 방향 등 제거
+                .toLowerCase();
+        }
+
+        function init() {
+            // 1. API 데이터 병합 (h2infoData + h2curData)
+            const apiMap = new Map();
+            let apiOperCount = 0;
+            let apiStopCount = 0;
+
+            h2infoData.forEach(info => {
+                const curInfo = h2curData.find(c => c.chrstn_mno === info.chrstn_mno) || {};
+                const merged = { ...info, ...curInfo, matched: false };
+                apiMap.set(info.chrstn_mno, merged);
+
+                // API 통계
+                if (merged.oper_sttus_nm && (merged.oper_sttus_nm.includes("영업중") || merged.oper_sttus_nm.includes("운영중"))) {
+                    apiOperCount++;
+                } else {
+                    apiStopCount++;
+                }
+            });
+
+            // 2. 통합 리스트 포맷 생성 및 매칭
+            const resultList = [];
+            let hsOperCount = 0;
+            let hsBuildCount = 0;
+            let matchSuccessCount = 0;
+            let matchFailCount = 0;
+
+            let yongyeokCount = 0;
+
+            const apiList = Array.from(apiMap.values());
+
+            hsallData.forEach(st => {
+                let statusType = "기타";
+                const rawStatus = st.status || "";
+                if (rawStatus.includes("운영") || rawStatus.includes("완료") || rawStatus.includes("준공")) {
+                    statusType = "운영중";
+                    hsOperCount++;
+                } else if (rawStatus.includes("용역")) {
+                    statusType = "용역부지";
+                    yongyeokCount++;
+                } else if (rawStatus.includes("구축") || rawStatus.includes("착공") || rawStatus.includes("인허가") || rawStatus.includes("설계")) {
+                    statusType = "구축중";
+                    hsBuildCount++;
+                }
+
+                // Use apimatchData
+                const matchInfo = apimatchData.matches.find(m => m.mgmt_no === st.mgmt_no);
+                let bestMatch = null;
+
+                if (matchInfo) {
+                    bestMatch = apiMap.get(matchInfo.chrstn_mno);
+                    if (bestMatch) {
+                        bestMatch.matched = true;
+                    }
+                }
+
+                if (bestMatch) {
+                    matchSuccessCount++;
+                    resultList.push({
+                        matchType: matchInfo.match_type,
+                        hs: { ...st, statusType },
+                        api: bestMatch
+                    });
+                } else {
+                    // 매칭 실패! (구축중인 경우는 API에 없을 수 있음)
+                    if (statusType === "운영중") {
+                        matchFailCount++;
+                    }
+                    resultList.push({
+                        matchType: statusType === "운영중" ? "매칭실패" : "-",
+                        hs: { ...st, statusType },
+                        api: null
+                    });
+                }
+            });
+
+            // 3. API 데이터 중 hsallData와 매칭 안된 건 처리
+            let unmatchApiCount = 0;
+            apiList.forEach(api => {
+                if (!api.matched) {
+                    unmatchApiCount++;
+                    resultList.push({
+                        matchType: "관리대장 없음",
+                        hs: null,
+                        api: api
+                    });
+                }
+            });
+
+            // 4. 통계 카드 렌더링
+            const statsHtml = `
+                <div class="stat-card">
+                    <h3>관리대장 현황</h3>
+                    <div class="stat-num">${hsallData.length} 개</div>
+                    <div class="stat-details">
+                        - 운영중: ${hsOperCount}개<br>
+                        - 구축중: ${hsBuildCount}개<br>
+                        - 용역부지: ${yongyeokCount}개
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <h3>실시간 API 데이터 현황 (기준: 2026-02-25 16:00)</h3>
+                    <div class="stat-num">${apiMap.size} 개</div>
+                    <div class="stat-details">
+                        - 영업중: ${apiOperCount}개<br>
+                        - 종료/점검 등: ${apiStopCount}개
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <h3>데이터 교차점검 매칭 현황</h3>
+                    <div class="stat-num" style="color:#2ecc71;">${matchSuccessCount} 건 매칭</div>
+                    <div class="stat-details">
+                        - 관리대장 '운영중'인데 API 매칭실패: ${matchFailCount}건<br>
+                        - API에는 있으나 관리대장에 없는 건수: ${unmatchApiCount}건
+                    </div>
+                </div>
+            `;
+            document.getElementById('stats-container').innerHTML = statsHtml;
+
+            // 5. 테이블 렌더링
+            const tbody = document.getElementById('table-body');
+            let trHtml = '';
+
+            // 정렬: 매칭실패 -> 매칭성공(운영중) -> API에만 존재 -> 구축중 등등 기타
+            resultList.sort((a, b) => {
+                const getOrder = (type) => {
+                    if (type === "매칭실패") return 1;
+                    if (type.startsWith("매칭성공")) return 2;
+                    if (type === "관리대장 없음") return 3;
+                    return 4;
+                };
+                return getOrder(a.matchType) - getOrder(b.matchType);
+            });
+
+            resultList.forEach((row, idx) => {
+                let matchSpan = '';
+                if (row.matchType.startsWith('매칭성공')) {
+                    const distMatch = row.matchType.match(/\((\d+)m\)/);
+                    let distNum = distMatch ? parseInt(distMatch[1], 10) : 0;
+                    let distColor = "white"; // 가까움
+                    if (distNum >= 200) {
+                        distColor = "#ff7979"; // 아주 멈 (배경이 파란색이므로 가독성을 위해 밝은 붉은계열 적용)
+                    } else if (distNum >= 50) {
+                        distColor = "#f1c40f"; // 멈 (노란색)
+                    }
+                    matchSpan = `<div style="background-color: #3498db; color: white; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-block; line-height: 1.2;">매칭성공<br><span style="font-size: 0.85em; color: ${distColor};">(${distNum}m)</span></div>`;
+                }
+                else if (row.matchType === '매칭실패') matchSpan = `<span class="match-fail">매칭실패</span>`;
+                else if (row.matchType === '관리대장 없음') matchSpan = `<span class="match-api-only">관리대장 없음</span>`;
+                else matchSpan = `-`;
+
+                let hsStatusBadge = '-';
+                if (row.hs) {
+                    let badgeClass = 'bg-secondary';
+                    if (row.hs.statusType === '운영중') badgeClass = 'bg-success';
+                    else if (row.hs.statusType === '구축중') badgeClass = 'bg-danger';
+
+                    hsStatusBadge = `<span class="badge ${badgeClass}">${row.hs.statusType}</span><br><span style="font-size:10px;color:gray;">(${row.hs.status || ''})</span>`;
+                }
+
+                let apiOperBadge = '-';
+                let apiCurrentBadge = '-';
+                if (row.api) {
+                    const o_yn = row.api.oper_yn === 'Y' ? '운영' : '미운영';
+                    apiOperBadge = `<span class="badge ${o_yn === '운영' ? 'bg-success' : 'bg-warning'}">${o_yn}</span>`;
+
+                    const stnm = row.api.oper_sttus_nm || '상태정보없음';
+                    if (stnm.includes("영업중") || stnm.includes("운영중")) {
+                        apiCurrentBadge = `<span class="badge bg-success">${stnm}</span>`;
+                    } else if (stnm.includes("점검") || stnm.includes("고장")) {
+                        apiCurrentBadge = `<span class="badge bg-danger">${stnm}</span>`;
+                    } else {
+                        apiCurrentBadge = `<span class="badge bg-warning">${stnm}</span>`;
+                    }
+                }
+
+                trHtml += `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td>${matchSpan}</td>
+                        <td>${hsStatusBadge}</td>
+                        <td><strong>${row.hs ? (row.hs.st_name || '이름 없음') : '-'}</strong></td>
+                        <td style="text-align:left; font-size:0.85em;">${row.hs ? row.hs.addr : '-'}</td>
+                        <td><strong>${row.api ? row.api.chrstn_nm : '-'}</strong></td>
+                        <td>${apiOperBadge}</td>
+                        <td>${apiCurrentBadge}</td>
+                        <td>${row.api && row.api.wait_vhcle_alge ? row.api.wait_vhcle_alge + '대' : '-'}</td>
+                        <td>${row.api ? row.api.chrstn_cttpc : '-'}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = trHtml;
+        }
+
+        window.onload = init;
+    </script>
+</body>
+
+</html>
