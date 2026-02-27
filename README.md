@@ -9,6 +9,7 @@ survey1/survey3.html 아파트 충전기 설치 표시<br>
 survey2/survey4.html 충전소, 건물 정보<br>
 
 * 수소충전소 <br>
+hs/hs4.html 관리대장<br>
 hs/hs2.html 관리대장 현황 지도<br>
 hs/hs3.html 관리대장 Hying 비교<br>
 

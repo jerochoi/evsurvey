@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수소충전소 등록/수정</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Noto Sans KR', sans-serif;
+            color: #333;
+        }
+
+        .navbar {
+            background-color: #ffffff;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            padding: 1rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .card {
+            border: none;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            margin-bottom: 2rem;
+        }
+
+        .card-header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e9ecef;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 0.5rem 0.5rem 0 0 !important;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.85rem;
+        }
+
+        .required::after {
+            content: '*';
+            color: #e74a3b;
+            margin-left: 0.25rem;
+        }
+
+        .input-group-text {
+            font-size: 0.8rem;
+            background-color: #f8f9fa;
+        }
+
+        /* Fixed floating action buttons */
+        .floating-actions {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="hs4.html"><i class="fa-solid fa-gas-pump text-primary me-2"></i>수소충전소
+                관리시스템</a>
+        </div>
+    </nav>
+
+    <div class="container pb-5" style="max-width: 1200px;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h4 mb-0 text-gray-800" id="pageTitle">충전소 정보 등록</h2>
+            <button class="btn btn-outline-secondary" onclick="window.location.href='hs4.html'">
+                <i class="fa-solid fa-list me-1"></i> 목록으로
+            </button>
+        </div>
+
+        <form id="hsForm" class="needs-validation" novalidate>
+            <!-- Form content will be injected here -->
+            <div id="formContainer"></div>
+
+            <div class="floating-actions d-flex gap-2">
+                <button type="button" class="btn btn-secondary shadow-sm" onclick="window.history.back()">취소</button>
+                <button type="button" class="btn btn-success shadow-sm" id="btnCalc"><i
+                        class="fa-solid fa-calculator me-1"></i> 기간/금액 자동계산</button>
+                <button type="submit" class="btn btn-primary shadow-sm px-4" id="btnSave"><i
+                        class="fa-solid fa-save me-1"></i> 저장</button>
+            </div>
+        </form>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="data/hsmng_meta.js"></script>
+    <script src="data/hsmng_data_all.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const editId = urlParams.get('id');
+            const form = document.getElementById('hsForm');
+            const container = document.getElementById('formContainer');
+
+            let currentItem = null;
+            if (editId) {
+                currentItem = hsDataDemo.find(d => d.id === editId);
+                if (currentItem) {
+                    document.getElementById('pageTitle').textContent = `충전소 정보 수정 - ${currentItem.name}`;
+                }
+            }
+
+            // Build the form
+            buildFormDynamically(currentItem);
+
+            // Calculation events
+            document.getElementById('btnCalc').addEventListener('click', calculateAutoFields);
+
+            // Form Submit handler
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                if (!form.checkValidity()) {
+                    form.classList.add('was-validated');
+                    alert('필수 입력 항목을 확인해주세요.');
+                    return;
+                }
+
+                const btn = document.getElementById('btnSave');
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> 저장 중...';
+                btn.disabled = true;
+
+                setTimeout(() => {
+                    alert('데이터가 저장되었습니다. (데모)');
+                    window.location.href = 'hs4.html';
+                }, 500);
+            }, false);
+
+            function buildFormDynamically(itemData) {
+                const groupOrder = [
+                    '기본현황', '기타', '년도별현황', '구축관리', '설계', '개별허가', '인허가의제', '시공', '기간', '세부현황', '예산현황', '운영현황'
+                ];
+
+                const checkboxFields = [
+                    '22년연료비지원 대상여부', '2020년 말 70기 기준 해당(보고)', '2021년 말 170기 기준 해당(보고)',
+                    '2022년 말 229기 설치완료', '2023년 말 300기 설치완료', '2024년 말 386기 설치완료'
+                ];
+
+                const toggleFields = ['설비사업자', '운영기관(예정)', '수소공급'];
+
+                groupOrder.forEach(category => {
+                    const fields = hsDataMeta[category];
+                    if (!fields || fields.length === 0) return;
+
+                    const card = document.createElement('div');
+                    card.className = 'card shadow-sm border-0 mb-4';
+
+                    const header = document.createElement('div');
+                    header.className = 'card-header bg-primary bg-opacity-10 py-3';
+                    header.innerHTML = `<h6 class="m-0 font-weight-bold text-primary"><i class="fa-solid fa-layer-group me-2"></i>${category}</h6>`;
+                    card.appendChild(header);
+
+                    const body = document.createElement('div');
+                    body.className = 'card-body p-4';
+
+                    const row = document.createElement('div');
+                    row.className = 'row g-3';
+
+                    fields.forEach((fieldName, index) => {
+                        const col = document.createElement('div');
+
+                        if (fieldName.includes('비고') || fieldName.includes('주소') || fieldName.includes('명칭')) {
+                            col.className = 'col-md-12';
+                        } else if (category === '기간' || category === '예산현황' || checkboxFields.includes(fieldName)) {
+                            col.className = 'col-md-3';
+                        } else {
+                            col.className = 'col-md-4 col-sm-6';
+                        }
+
+                        let val = '';
+                        if (itemData && itemData.groups && itemData.groups[category]) {
+                            val = itemData.groups[category][index] || '';
+                            val = val.trim();
+                        }
+
+                        const fieldId = 'field_' + category + '_' + index;
+                        const isRequired = (fieldName === '관리번호' || fieldName === '충전소명') ? 'required' : '';
+                        const reqClass = isRequired ? 'required' : '';
+                        const readOnly = (fieldName === '관리번호' && itemData) ? 'readonly' : '';
+
+                        if (checkboxFields.includes(fieldName)) {
+                            // Checkbox formatting
+                            const isChecked = (val === 'O' || val === '●' || val.toLowerCase() === 'true' || val === '1') ? 'checked' : '';
+                            col.innerHTML = `
+                                <label class="form-label d-block text-truncate" title="${fieldName}">${fieldName}</label>
+                                <div class="form-check form-switch mt-1">
+                                    <input class="form-check-input" type="checkbox" id="${fieldId}" name="${category}[${index}]" value="O" ${isChecked}>
+                                </div>
+                            `;
+                        } else if (toggleFields.includes(fieldName)) {
+                            // Target Field for toggle
+                            const isMijung = val === '미정';
+                            const isCheckReq = val === '확인필요';
+                            const isDirect = !isMijung && !isCheckReq;
+
+                            col.innerHTML = `
+                                <label class="form-label">${fieldName}</label>
+                                <div>
+                                    <div class="form-check form-check-inline">
+                                      <input class="form-check-input" type="radio" name="radio_${fieldId}" id="radio_mijung_${fieldId}" value="미정" ${isMijung ? 'checked' : ''} onchange="toggleDirectInput('${fieldId}', this.value)">
+                                      <label class="form-check-label" for="radio_mijung_${fieldId}">미정</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                      <input class="form-check-input" type="radio" name="radio_${fieldId}" id="radio_check_${fieldId}" value="확인필요" ${isCheckReq ? 'checked' : ''} onchange="toggleDirectInput('${fieldId}', this.value)">
+                                      <label class="form-check-label" for="radio_check_${fieldId}">확인필요</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                      <input class="form-check-input" type="radio" name="radio_${fieldId}" id="radio_direct_${fieldId}" value="직접입력" ${isDirect ? 'checked' : ''} onchange="toggleDirectInput('${fieldId}', this.value)">
+                                      <label class="form-check-label" for="radio_direct_${fieldId}">직접입력</label>
+                                    </div>
+                                </div>
+                                <input type="text" class="form-control form-control-sm mt-2" id="${fieldId}" name="${category}[${index}]" value="${val}" ${!isDirect ? 'readonly' : ''} style="display: ${isDirect ? 'block' : 'none'};">
+                            `;
+                        } else {
+                            // Standard text input
+                            col.innerHTML = `
+                                <label for="${fieldId}" class="form-label ${reqClass} text-truncate w-100" title="${fieldName}">${fieldName}</label>
+                                <input type="text" class="form-control form-control-sm ${readOnly ? 'bg-light' : ''}" id="${fieldId}" name="${category}[${index}]" value="${val}" ${isRequired} ${readOnly}>
+                            `;
+                        }
+
+                        row.appendChild(col);
+                    });
+
+                    body.appendChild(row);
+                    card.appendChild(body);
+                    container.appendChild(card);
+                });
+            }
+
+            function isInvalidDate(str) {
+                const words = ["입력필요", "운영중지", "미정", "확인필요"];
+                return words.some(w => str.includes(w)) || str.trim() === '-' || str.trim() === '';
+            }
+
+            // Global helper to toggle direct input
+            window.toggleDirectInput = function (fieldId, val) {
+                const inputEl = document.getElementById(fieldId);
+                if (val === '미정' || val === '확인필요') {
+                    inputEl.style.display = 'none';
+                    inputEl.readOnly = true;
+                    inputEl.value = val;
+                } else if (val === '직접입력') {
+                    inputEl.style.display = 'block';
+                    inputEl.readOnly = false;
+                    // Keep original value if it was not 미정 or 확인필요
+                    if (inputEl.value === '미정' || inputEl.value === '확인필요') {
+                        inputEl.value = '';
+                        inputEl.focus();
+                    }
+                }
+            };
+
+            function diffDays(d1, d2) {
+                const date1 = new Date(d1);
+                const date2 = new Date(d2);
+                if (isNaN(date1.getTime()) || isNaN(date2.getTime())) return null;
+                const diffTime = Math.abs(date2 - date1);
+                return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            }
+
+            function calculateAutoFields() {
+                try {
+                    // Extract fields array based on metadata indexes
+                    // Dates for 인허가 (AL to AX => in our JSON: '개별허가' 8 fields + '인허가의제' 5 fields)
+                    const permFields = [];
+                    hsDataMeta['개별허가'].forEach((_, i) => {
+                        permFields.push(document.getElementById(`field_개별허가_${i}`).value);
+                    });
+                    hsDataMeta['인허가의제'].forEach((_, i) => {
+                        permFields.push(document.getElementById(`field_인허가의제_${i}`).value);
+                    });
+
+                    // Date parsing
+                    let hasInvalidStr = permFields.some(isInvalidDate);
+                    let minDate = null;
+                    let maxDate = null;
+
+                    permFields.forEach(d => {
+                        if (!isInvalidDate(d)) {
+                            // try clean date
+                            const t = new Date(d);
+                            if (!isNaN(t.getTime())) {
+                                if (!minDate || t < minDate) minDate = t;
+                                if (!maxDate || t > maxDate) maxDate = t;
+                            }
+                        }
+                    });
+
+                    // 인허가기간
+                    const fieldPermTerm = document.getElementById('field_기간_0'); // 인허가기간
+                    if (hasInvalidStr || !minDate || !maxDate) {
+                        fieldPermTerm.value = -1;
+                    } else {
+                        fieldPermTerm.value = Math.ceil(Math.abs(maxDate - minDate) / (1000 * 60 * 60 * 24));
+                    }
+
+                    // 착공일(C) & 완성검사일(D) & 기본설계완료(B) & 사업자선정(A)
+                    const dateCStr = document.getElementById('field_시공_0').value;
+                    const dateDStr = document.getElementById('field_시공_1').value;
+                    const dateBStr = document.getElementById('field_설계_1').value;
+                    const dateAStr = document.getElementById('field_설계_0').value;
+
+                    const fieldConstTerm = document.getElementById('field_기간_1'); // 시공기간
+                    const fieldBuildTerm = document.getElementById('field_기간_2'); // 구축기간
+                    const fieldBizTerm = document.getElementById('field_기간_3');   // 사업기간
+
+                    fieldConstTerm.value = (isInvalidDate(dateCStr) || isInvalidDate(dateDStr)) ? -1 : diffDays(dateCStr, dateDStr) || -1;
+                    fieldBuildTerm.value = (isInvalidDate(dateBStr) || isInvalidDate(dateDStr)) ? -1 : diffDays(dateBStr, dateDStr) || -1;
+                    fieldBizTerm.value = (isInvalidDate(dateAStr) || isInvalidDate(dateDStr)) ? -1 : diffDays(dateAStr, dateDStr) || -1;
+
+                    // 예산 현황 총액: 국비(1) + 광역(2) + 기초(3) + 민간(4) + 기타투자(5)
+                    let sum = 0;
+                    for (let i = 1; i <= 5; i++) {
+                        const v = document.getElementById(`field_예산현황_${i}`).value.replace(/,/g, '');
+                        if (v && !isNaN(v) && v.trim() !== '-') {
+                            sum += parseFloat(v);
+                        }
+                    }
+                    if (sum > 0) {
+                        // Format with commas
+                        document.getElementById('field_예산현황_0').value = sum.toLocaleString('ko-KR');
+                    }
+
+                    alert('기간 및 예산 계산이 완료되었습니다.');
+                } catch (e) {
+                    console.error(e);
+                    alert('일부 데이터 형식이 일치하지 않아 계산에 실패했습니다.');
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

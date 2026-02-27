@@ -97,9 +97,48 @@
 
         th,
         td {
-            padding: 12px 10px;
+            padding: 4px 4px;
+            /* 더 좁게 표시 */
+            font-size: 0.85rem;
             border-bottom: 1px solid #ddd;
             text-align: center;
+        }
+
+        .filter-row th {
+            padding: 4px;
+            background-color: #2c3e50;
+            top: 36px;
+            /* 두 번째 줄 고정을 위해 추가 */
+        }
+
+        .filter-row input,
+        .filter-row select {
+            width: 100%;
+            padding: 3px;
+            font-size: 0.85em;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        .search-wrap {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .search-wrap label {
+            margin-right: 10px;
+            font-weight: bold;
+            color: #34495e;
+        }
+
+        .search-wrap input {
+            padding: 6px 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            width: 250px;
         }
 
         th {
@@ -114,12 +153,13 @@
         }
 
         .badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.85em;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 0.8em;
             font-weight: bold;
             color: white;
             display: inline-block;
+            line-height: 1.2;
         }
 
         .bg-success {
@@ -182,20 +222,64 @@
         <!-- 통계가 여기에 렌더링 됩니다 -->
     </div>
 
+    <div class="search-wrap">
+        <label for="global-search">전체 검색</label>
+        <input type="text" id="global-search" placeholder="검색어를 입력하세요...">
+    </div>
+
     <div class="table-responsive">
         <table>
             <thead>
                 <tr>
-                    <th>No</th>
-                    <th>매칭 결과</th>
-                    <th>상태 (관리대장)</th>
-                    <th>충전소명 (관리대장)</th>
-                    <th>주소 (관리대장)</th>
-                    <th>충전소명 (API)</th>
-                    <th>영업상태 (API)</th>
-                    <th>현재상태 (API)</th>
-                    <th>대기차량 (API)</th>
-                    <th>충전소통화 (API)</th>
+                    <th style="min-width: 40px; width: 40px;">No</th>
+                    <th style="min-width: 110px; width: 110px;">매칭 결과</th>
+                    <th style="min-width: 110px; width: 110px;">상태 (관리대장)</th>
+                    <th style="min-width: 160px; width: 160px;">충전소명 (관리대장)</th>
+                    <th style="min-width: 200px; width: 200px;">주소 (관리대장)</th>
+                    <th style="min-width: 160px; width: 160px;">충전소명 (API)</th>
+                    <th style="min-width: 100px; width: 100px;">영업상태 (API)</th>
+                    <th style="min-width: 120px; width: 120px;">현재상태 (API)</th>
+                    <th style="min-width: 80px; width: 80px;">대기차량 (API)</th>
+                    <th style="min-width: 120px; width: 120px;">충전소통화 (API)</th>
+                </tr>
+                <tr class="filter-row">
+                    <th></th>
+                    <th>
+                        <select id="filter-match" onchange="runFilter()">
+                            <option value="">전체</option>
+                            <option value="매칭성공">매칭성공</option>
+                            <option value="매칭실패">매칭실패</option>
+                            <option value="관리대장 없음">관리대장 없음(-)</option>
+                        </select>
+                    </th>
+                    <th>
+                        <select id="filter-hs-status" onchange="runFilter()">
+                            <option value="">전체</option>
+                            <option value="운영중">운영중</option>
+                            <option value="구축중">구축중</option>
+                            <option value="용역부지">용역부지</option>
+                        </select>
+                    </th>
+                    <th><input type="text" id="filter-hs-name" oninput="runFilter()" placeholder="이름 검색"></th>
+                    <th><input type="text" id="filter-hs-addr" oninput="runFilter()" placeholder="주소 검색"></th>
+                    <th><input type="text" id="filter-api-name" oninput="runFilter()" placeholder="API이름 검색"></th>
+                    <th>
+                        <select id="filter-api-oper" onchange="runFilter()">
+                            <option value="">전체</option>
+                            <option value="운영">운영</option>
+                            <option value="-">-</option>
+                        </select>
+                    </th>
+                    <th>
+                        <select id="filter-api-state" onchange="runFilter()">
+                            <option value="">전체</option>
+                            <option value="운영중">운영중</option>
+                            <option value="영업마감">영업마감</option>
+                            <option value="-">-</option>
+                        </select>
+                    </th>
+                    <th></th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody id="table-body">
@@ -233,6 +317,8 @@
                 .replace(/휴게소.*/, '휴게소')       // 휴게소 뒤의 방향 등 제거
                 .toLowerCase();
         }
+
+        let globalResultList = [];
 
         function init() {
             // 1. API 데이터 병합 (h2infoData + h2curData)
@@ -352,10 +438,6 @@
             `;
             document.getElementById('stats-container').innerHTML = statsHtml;
 
-            // 5. 테이블 렌더링
-            const tbody = document.getElementById('table-body');
-            let trHtml = '';
-
             // 정렬: 매칭실패 -> 매칭성공(운영중) -> API에만 존재 -> 구축중 등등 기타
             resultList.sort((a, b) => {
                 const getOrder = (type) => {
@@ -367,7 +449,77 @@
                 return getOrder(a.matchType) - getOrder(b.matchType);
             });
 
-            resultList.forEach((row, idx) => {
+            globalResultList = resultList;
+
+            // 전역 이벤트 리스너 세팅
+            document.getElementById('global-search').addEventListener('input', runFilter);
+
+            // 초기 렌더링
+            runFilter();
+        }
+
+        function runFilter() {
+            const globalQ = document.getElementById('global-search').value.toLowerCase();
+            const fMatch = document.getElementById('filter-match').value;
+            const fHsStatus = document.getElementById('filter-hs-status').value;
+            const fHsName = document.getElementById('filter-hs-name').value.toLowerCase();
+            const fHsAddr = document.getElementById('filter-hs-addr').value.toLowerCase();
+            const fApiName = document.getElementById('filter-api-name').value.toLowerCase();
+            const fApiOper = document.getElementById('filter-api-oper').value;
+            const fApiState = document.getElementById('filter-api-state').value;
+
+            const filteredData = globalResultList.filter(row => {
+                let isMatch = true;
+
+                if (globalQ) {
+                    const fullText = [
+                        row.matchType,
+                        row.hs ? row.hs.statusType : '',
+                        row.hs ? row.hs.st_name : '',
+                        row.hs ? row.hs.addr : '',
+                        row.api ? row.api.chrstn_nm : '',
+                        row.api ? row.api.oper_sttus_nm : ''
+                    ].join(' ').toLowerCase();
+                    if (!fullText.includes(globalQ)) isMatch = false;
+                }
+
+                if (fMatch) {
+                    if (fMatch === '매칭성공' && !row.matchType.startsWith('매칭성공')) isMatch = false;
+                    if (fMatch === '매칭실패' && row.matchType !== '매칭실패') isMatch = false;
+                    if (fMatch === '관리대장 없음' && row.matchType !== '관리대장 없음' && row.matchType !== '-') isMatch = false;
+                }
+
+                if (fHsStatus && (!row.hs || row.hs.statusType !== fHsStatus)) isMatch = false;
+                if (fHsName && (!row.hs || !row.hs.st_name || !row.hs.st_name.toLowerCase().includes(fHsName))) isMatch = false;
+                if (fHsAddr && (!row.hs || !row.hs.addr || !row.hs.addr.toLowerCase().includes(fHsAddr))) isMatch = false;
+                if (fApiName && (!row.api || !row.api.chrstn_nm || !row.api.chrstn_nm.toLowerCase().includes(fApiName))) isMatch = false;
+
+                if (fApiOper) {
+                    const o_yn = row.api ? (row.api.oper_yn === 'Y' ? '운영' : '-') : '-';
+                    if (o_yn !== fApiOper) isMatch = false;
+                }
+
+                if (fApiState) {
+                    const originalStnm = row.api ? (row.api.oper_sttus_nm || '-') : '-';
+                    const stnm = originalStnm.replace(/\s+/g, '');
+                    if (fApiState === '-') {
+                        if (stnm !== '-' && originalStnm !== '상태정보없음') isMatch = false;
+                    } else {
+                        if (!stnm.includes(fApiState.replace(/\s+/g, ''))) isMatch = false;
+                    }
+                }
+
+                return isMatch;
+            });
+
+            renderTable(filteredData);
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('table-body');
+            let trHtml = '';
+
+            data.forEach((row, idx) => {
                 let matchSpan = '';
                 if (row.matchType.startsWith('매칭성공')) {
                     const distMatch = row.matchType.match(/\((\d+)m\)/);
@@ -396,11 +548,13 @@
                 let apiOperBadge = '-';
                 let apiCurrentBadge = '-';
                 if (row.api) {
-                    const o_yn = row.api.oper_yn === 'Y' ? '운영' : '미운영';
-                    apiOperBadge = `<span class="badge ${o_yn === '운영' ? 'bg-success' : 'bg-warning'}">${o_yn}</span>`;
+                    const o_yn = row.api.oper_yn === 'Y' ? '운영' : '-';
+                    apiOperBadge = o_yn === '-' ? '-' : `<span class="badge bg-success">${o_yn}</span>`;
 
-                    const stnm = row.api.oper_sttus_nm || '상태정보없음';
-                    if (stnm.includes("영업중") || stnm.includes("운영중")) {
+                    const stnm = row.api.oper_sttus_nm || '-';
+                    if (stnm === '-' || stnm === '상태정보없음') {
+                        apiCurrentBadge = '-';
+                    } else if (stnm.includes("영업중") || stnm.includes("운영중")) {
                         apiCurrentBadge = `<span class="badge bg-success">${stnm}</span>`;
                     } else if (stnm.includes("점검") || stnm.includes("고장")) {
                         apiCurrentBadge = `<span class="badge bg-danger">${stnm}</span>`;
