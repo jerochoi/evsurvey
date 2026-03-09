@@ -242,9 +242,12 @@
 
         <!-- Data Table -->
         <div class="card shadow-sm">
-            <div class="card-header py-3">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <h6 class="m-0 font-weight-bold text-primary" id="listTitle">전체 데이터 목록 <span
                         class="badge bg-secondary ms-2" id="totalCount">0</span></h6>
+                <div id="headerToggleButtons" class="d-flex flex-wrap gap-2 align-items-center">
+                    <!-- Toggle buttons populated via JS -->
+                </div>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -304,6 +307,7 @@
             const table = document.getElementById('dataTable');
             const icon = document.getElementById(`icon-${grpId}`);
             const groupHeader = document.getElementById(`group-th-${grpId}`);
+            const headerBtn = document.getElementById(`header-btn-${grpId}`);
 
             table.classList.toggle(`collapsed-${grpId}`);
             const isCollapsed = table.classList.contains(`collapsed-${grpId}`);
@@ -313,6 +317,16 @@
                     icon.classList.replace('fa-minus', 'fa-plus');
                 } else {
                     icon.classList.replace('fa-plus', 'fa-minus');
+                }
+            }
+            
+            if (headerBtn) {
+                if (isCollapsed) {
+                    headerBtn.classList.remove('btn-primary', 'shadow-sm');
+                    headerBtn.classList.add('btn-outline-secondary', 'text-muted');
+                } else {
+                    headerBtn.classList.remove('btn-outline-secondary', 'text-muted');
+                    headerBtn.classList.add('btn-primary', 'shadow-sm');
                 }
             }
 
@@ -358,7 +372,22 @@
             // Initialization
             init();
 
+            function initHeaderToggles() {
+                const headerToggleButtons = document.getElementById('headerToggleButtons');
+                let buttonsHtml = '<span class="text-secondary small fw-bold me-2"><i class="fa-solid fa-table-columns me-1"></i>항목 표시:</span>';
+
+                Object.keys(toggleGroups).forEach(category => {
+                    const grpId = toggleGroups[category];
+                    const colCount = hsDataMeta[category] ? hsDataMeta[category].length : 0;
+                    buttonsHtml += `<button type="button" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm" id="header-btn-${grpId}" onclick="window.toggleColumnGroup('${grpId}', ${colCount})">
+                        ${category}
+                    </button>`;
+                });
+                headerToggleButtons.innerHTML = buttonsHtml;
+            }
+
             function init() {
+                initHeaderToggles();
                 let regionsSet = new Set();
                 hsDataDemo.forEach(item => {
                     const region = item.groups['기본현황']?.[15];
