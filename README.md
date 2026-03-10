@@ -11,6 +11,8 @@ survey2/survey4.html 충전소, 건물 정보<br>
 * 수소충전소 <br>
 hs/hs4.html 관리대장<br>
 hs/hs2.html 관리대장 현황 지도<br>
+hs/hs_map1.html 시도 현황<br>
+hs/hs_map2.html 수소충전소 찾기<br>
 hs/hs3.html 관리대장 Hying 비교<br>
 
 * 지도서비스<br>

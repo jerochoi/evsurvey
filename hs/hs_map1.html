@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시도별 수소충전소 현황</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+            background-color: #f4f7f6;
+        }
+
+        #layout {
+            display: flex;
+            height: 100%;
+        }
+
+        #sidebar {
+            width: 400px;
+            background: white;
+            border-right: 1px solid #ddd;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        #map {
+            flex: 1;
+            height: 100%;
+            background: #e9ecef;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: #2c3e50;
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .stats-container {
+            padding: 20px;
+        }
+
+        /* Stat Box Style */
+        .sido-box {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .sido-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-color: #3498db;
+        }
+
+        .sido-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .sido-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .stat-value {
+            font-size: 1rem;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .value-blue { color: #2980b9; }
+        .value-red { color: #c0392b; }
+
+        /* Map Legend */
+        .info {
+            padding: 8px 10px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            color: #333;
+        }
+
+        .info h4 {
+            margin: 0 0 5px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .legend {
+            line-height: 20px;
+            color: #555;
+        }
+        
+        .legend-inner {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend i {
+            width: 18px;
+            height: 18px;
+            display: inline-block;
+            opacity: 0.8;
+            border-radius: 3px;
+        }
+
+        /* Map Label */
+        .map-label {
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            padding: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+            pointer-events: none; /* Let hover events pass through to map layer */
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="layout">
+        <div id="sidebar">
+            <div class="sidebar-header">
+                시도별 수소충전소 현황
+            </div>
+            <div class="stats-container" id="sido-list">
+                <!-- Data will be injected here -->
+                <div style="text-align:center; padding: 20px; color:#7f8c8d;">데이터 로딩 중...</div>
+            </div>
+        </div>
+        <div id="map"></div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+        const map = L.map('map').setView([35.9, 127.8], 7);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        let geojsonLayer;
+        let activeGeoData = null;
+
+        function style(feature) {
+            return {
+                fillColor: '#3498db',
+                weight: 2,
+                opacity: 1,
+                color: '#fff',
+                dashArray: '3',
+                fillOpacity: 0.15
+            };
+        }
+
+        function highlightFeature(e) {
+            const layer = e.target;
+            layer.setStyle({
+                weight: 3,
+                color: '#666',
+                dashArray: '',
+                fillOpacity: 0.9
+            });
+            if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                layer.bringToFront();
+            }
+        }
+
+        function resetHighlight(e) {
+            geojsonLayer.resetStyle(e.target);
+        }
+
+        function zoomToFeature(e) {
+            map.fitBounds(e.target.getBounds());
+            
+            // Scroll to sidebar item
+            const name = e.target.feature.properties.name;
+            const element = document.getElementById(`box-${name}`);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Add temporary highlight effect
+                element.style.boxShadow = '0 0 10px #3498db';
+                setTimeout(() => {
+                    element.style.boxShadow = '';
+                }, 1500);
+            }
+        }
+
+        function onEachFeature(feature, layer) {
+            const name = feature.properties.name;
+            const stats = feature.properties.stats || { "운영중_소": 0, "운영중_기": 0, "구축중_소": 0, "구축중_기": 0 };
+            
+            layer.on({
+                mouseover: highlightFeature,
+                mouseout: resetHighlight,
+                click: zoomToFeature
+            });
+
+            // Center text label logic
+            if (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon') {
+                // Approximate center
+                let center = layer.getBounds().getCenter();
+                // Custom adjustments for some provinces to fit label better
+                if (name === '경기도') center = L.latLng(37.3, 127.35); // 서울 남동쪽으로 이동
+                if (name === '서울특별시') center = L.latLng(37.56, 126.98); // 서울 중심
+                if (name === '인천광역시') center = L.latLng(37.46, 126.70); // 섬 말고 내륙 쪽으로 표출
+                if (name === '강원도') center = L.latLng(37.6, 128.3);
+                if (name === '충청남도') center = L.latLng(36.65, 126.8);
+                if (name === '전라남도') center = L.latLng(34.8, 126.9);
+                if (name === '전라북도') center = L.latLng(35.7, 127.1);
+                if (name === '경상북도') center = L.latLng(36.3, 128.6); // 좌측 내륙으로 이동
+                
+                const tooltipContent = `
+                    <div style="text-align:center;">
+                        <strong style="font-size:0.95rem; color:#2c3e50;">${name}</strong>
+                        <div style="margin-top:2px; text-align:left; font-size:0.8rem; line-height:1.3;">
+                            운영: <span style="color:#2980b9; font-weight:bold;">${stats["운영중_소"]}소 / ${stats["운영중_기"]}기</span><br/>
+                            구축: <span style="color:#c0392b; font-weight:bold;">${stats["구축중_소"]}소 / ${stats["구축중_기"]}기</span>
+                        </div>
+                    </div>
+                `;
+                
+                L.marker(center, {
+                    icon: L.divIcon({
+                        className: 'map-label',
+                        html: tooltipContent,
+                        iconSize: [100, 52],
+                        iconAnchor: [50, 26]
+                    }),
+                    interactive: false
+                }).addTo(map);
+            }
+        }
+
+        function renderSidebar(data) {
+            const container = document.getElementById('sido-list');
+            container.innerHTML = '';
+            
+            // Sort states by legal region order (법정동 코드 순서)
+            const regionOrder = [
+                "서울특별시", "부산광역시", "대구광역시", "인천광역시", "광주광역시", 
+                "대전광역시", "울산광역시", "세종특별자치시", "경기도", "강원도", 
+                "충청북도", "충청남도", "전라북도", "전라남도", "경상북도", 
+                "경상남도", "제주특별자치도"
+            ];
+            
+            const sortedFeatures = [...data.geo.features].sort((a, b) => {
+                let idxA = regionOrder.indexOf(a.properties.name);
+                let idxB = regionOrder.indexOf(b.properties.name);
+                // IF not found in the predefined array, push to the end
+                if (idxA === -1) idxA = 999;
+                if (idxB === -1) idxB = 999;
+                
+                return idxA - idxB;
+            });
+
+            let totalOpSo = 0, totalOpGi = 0, totalUcSo = 0, totalUcGi = 0;
+
+            sortedFeatures.forEach(feature => {
+                const name = feature.properties.name;
+                const stats = feature.properties.stats || { "운영중_소": 0, "운영중_기": 0, "구축중_소": 0, "구축중_기": 0 };
+                
+                totalOpSo += stats["운영중_소"];
+                totalOpGi += stats["운영중_기"];
+                totalUcSo += stats["구축중_소"];
+                totalUcGi += stats["구축중_기"];
+
+                const box = document.createElement('div');
+                box.className = 'sido-box';
+                box.id = `box-${name}`;
+                box.innerHTML = `
+                    <div class="sido-title">
+                        <span>${name}</span>
+                        <span style="color:#7f8c8d; font-size:0.9rem;">총 ${stats["운영중_기"] + stats["구축중_기"]}기</span>
+                    </div>
+                    <div class="sido-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">운영중</div>
+                            <div class="stat-value value-blue">${stats["운영중_소"]}소 / ${stats["운영중_기"]}기</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">구축중</div>
+                            <div class="stat-value value-red">${stats["구축중_소"]}소 / ${stats["구축중_기"]}기</div>
+                        </div>
+                    </div>
+                `;
+                
+                box.onclick = () => {
+                    // Find layer and zoom
+                    geojsonLayer.eachLayer(layer => {
+                        if (layer.feature.properties.name === name) {
+                            map.fitBounds(layer.getBounds());
+                            layer.fire('mouseover');
+                            setTimeout(() => layer.fire('mouseout'), 2000);
+                        }
+                    });
+                };
+                
+                container.appendChild(box);
+            });
+            
+            // Add total at the top
+            const totalBox = document.createElement('div');
+            totalBox.className = 'sido-box';
+            totalBox.style.backgroundColor = '#ecf0f1';
+            totalBox.style.borderColor = '#bdc3c7';
+            totalBox.innerHTML = `
+                <div class="sido-title">
+                    <span>전국 합계</span>
+                    <span style="color:#2c3e50; font-size:1rem;">총 ${totalOpGi + totalUcGi}기</span>
+                </div>
+                <div class="sido-stats">
+                    <div class="stat-item">
+                        <div class="stat-label">운영중</div>
+                        <div class="stat-value value-blue">${totalOpSo}소 / ${totalOpGi}기</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">구축중</div>
+                        <div class="stat-value value-red">${totalUcSo}소 / ${totalUcGi}기</div>
+                    </div>
+                </div>
+            `;
+            container.insertBefore(totalBox, container.firstChild);
+        }
+
+        // Fetch data and initialize
+        fetch('data/hs_map1_data.json')
+            .then(response => response.json())
+            .then(data => {
+                activeGeoData = data.geo;
+                
+                geojsonLayer = L.geoJSON(activeGeoData, {
+                    style: style,
+                    onEachFeature: onEachFeature
+                }).addTo(map);
+
+                renderSidebar(data);
+                
+                map.fitBounds(geojsonLayer.getBounds());
+            })
+            .catch(error => {
+                console.error('Error loading config:', error);
+                document.getElementById('sido-list').innerHTML = `
+                    <div style="padding:20px; color:red; text-align:center;">
+                        데이터를 불러오는 중 오류가 발생했습니다.<br/>
+                        ${error.message}
+                    </div>
+                `;
+            });
+    </script>
+</body>
+</html>
