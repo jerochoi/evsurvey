@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시스템 오류 신고 및 의견 제안 UI (Gemini 연동)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+        }
+
+        /* 라디오 버튼 커스텀 스타일링을 위한 유틸리티 */
+        .type-radio:checked+div {
+            border-color: #3b82f6;
+            /* blue-500 */
+            background-color: #eff6ff;
+            /* blue-50 */
+            color: #1d4ed8;
+            /* blue-700 */
+        }
+
+        .type-radio:checked+div svg {
+            color: #3b82f6;
+        }
+
+        /* 로딩 스피너 애니메이션 */
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-100 min-h-screen relative overflow-hidden flex flex-col items-center justify-center">
+
+    <!-- 가상의 사내 시스템 배경 화면 -->
+    <div class="text-center space-y-4 opacity-50 select-none">
+        <svg class="w-24 h-24 mx-auto text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+        </svg>
+        <h1 class="text-3xl font-bold text-slate-400">사내 시스템 메인 화면</h1>
+        <p class="text-slate-400">업무 중 우측 하단의 플로팅 버튼을 클릭하여 문의를 남겨보세요.</p>
+    </div>
+
+    <!-- 플로팅 액션 버튼 (FAB) -->
+    <button onclick="openInquiryModal()" class="fixed bottom-8 right-8 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center group z-40 border border-blue-500">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+        </svg>
+        <span class="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs group-hover:ml-3 group-hover:pr-2 transition-all duration-300 ease-in-out font-semibold text-sm">오류 신고 및 문의</span>
+    </button>
+
+    <!-- 문의 접수 폼 모달 -->
+    <div id="inquiry-modal" class="fixed inset-0 bg-slate-900/50 z-50 hidden flex-col items-center justify-center backdrop-blur-sm transition-opacity" onclick="closeInquiryModal()">
+
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col max-h-[90vh] transform transition-all" onclick="event.stopPropagation()">
+
+            <!-- 모달 헤더 -->
+            <div class="p-6 border-b border-slate-100 flex justify-between items-start shrink-0">
+                <div>
+                    <!-- 접속 정보 인디케이터 추가 -->
+                    <div class="flex items-center mb-3">
+                        <span class="bg-blue-100 text-blue-700 text-[11px] font-bold px-2 py-0.5 rounded shadow-sm shrink-0">통합관리시스템</span>
+                        <span class="text-slate-300 text-[10px] mx-2 shrink-0">▶</span>
+
+                        <!-- 메뉴 변경 선택 UI -->
+                        <div class="relative shrink-0 flex items-center group">
+                            <select id="menu-select" class="text-slate-600 text-[12px] font-semibold bg-white border border-slate-200 group-hover:border-blue-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none rounded pl-2 pr-6 py-0.5 appearance-none cursor-pointer transition-colors max-w-[200px] truncate" title="문의가 발생한 화면/메뉴를 변경할 수 있습니다.">
+                                <option value="차량 제원 관리 > 제원 목록" selected>차량 제원 관리 &gt; 제원 목록</option>
+                                <option value="차량 제원 관리 > 형식 승인 번호 등록">차량 제원 관리 &gt; 형식 승인 번호 등록</option>
+                                <option value="보조금 업무 시스템 > 지원 현황 조회">보조금 업무 시스템 &gt; 지원 현황 조회</option>
+                                <option value="마이페이지 > 제작사 권한 관리">마이페이지 &gt; 제작사 권한 관리</option>
+                                <option value="기타 (특정 메뉴 아님)">기타 (특정 메뉴/화면 아님)</option>
+                            </select>
+                            <svg class="w-3 h-3 text-slate-400 absolute right-2 pointer-events-none group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+
+                        <span class="text-slate-300 text-[10px] mx-2 shrink-0">|</span>
+                        <span class="text-green-600 bg-green-50 px-2 py-0.5 rounded text-[11px] font-bold border border-green-100 shrink-0">제작사</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800 tracking-tight">무엇을 도와드릴까요?</h2>
+                    <p class="text-slate-500 text-sm mt-1.5">현재 화면에 대한 문의나 기능 제안을 남겨주세요.</p>
+                </div>
+                
+                <div class="flex flex-col items-end gap-3 shrink-0 ml-4">
+                    <button onclick="closeInquiryModal()" class="text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                    <!-- ✨ 관련 가이드 찾기 버튼 (우측 상단) -->
+                    <button type="button" class="text-xs font-bold text-blue-600 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors flex items-center gap-1.5 shadow-sm mt-5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                        현재 화면 관련 가이드 찾기
+                    </button>
+                </div>
+            </div>
+
+            <!-- 모달 폼 본문 -->
+            <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                <form id="inquiry-form" class="space-y-6">
+
+                    <!-- 문의 유형 선택 -->
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-3">문의 유형 <span class="text-red-500">*</span></label>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <label class="cursor-pointer relative">
+                                <input type="radio" name="inquiry_type" value="bug" class="type-radio sr-only" checked>
+                                <div class="h-full flex flex-col items-center justify-center p-3 border-2 border-slate-200 rounded-xl hover:border-blue-200 hover:bg-slate-50 transition-colors text-slate-600">
+                                    <svg class="w-6 h-6 mb-1.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                    </svg>
+                                    <span class="text-sm font-semibold">오류/버그</span>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer relative">
+                                <input type="radio" name="inquiry_type" value="feature" class="type-radio sr-only">
+                                <div class="h-full flex flex-col items-center justify-center p-3 border-2 border-slate-200 rounded-xl hover:border-blue-200 hover:bg-slate-50 transition-colors text-slate-600">
+                                    <svg class="w-6 h-6 mb-1.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                    </svg>
+                                    <span class="text-sm font-semibold">기능 제안</span>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer relative">
+                                <input type="radio" name="inquiry_type" value="permission" class="type-radio sr-only">
+                                <div class="h-full flex flex-col items-center justify-center p-3 border-2 border-slate-200 rounded-xl hover:border-blue-200 hover:bg-slate-50 transition-colors text-slate-600">
+                                    <svg class="w-6 h-6 mb-1.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                                    </svg>
+                                    <span class="text-sm font-semibold">권한/접근</span>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer relative">
+                                <input type="radio" name="inquiry_type" value="other" class="type-radio sr-only">
+                                <div class="h-full flex flex-col items-center justify-center p-3 border-2 border-slate-200 rounded-xl hover:border-blue-200 hover:bg-slate-50 transition-colors text-slate-600">
+                                    <svg class="w-6 h-6 mb-1.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                    </svg>
+                                    <span class="text-sm font-semibold">기타 문의</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 제목 -->
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">제목 <span class="text-red-500">*</span></label>
+                        <input type="text" id="inquiry_title" required placeholder="예) 비용 결의서 승인 버튼 클릭 시 무반응 현상" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow text-sm text-slate-800 placeholder-slate-400">
+                    </div>
+
+                    <!-- 상세 내용 -->
+                    <div>
+                        <div class="flex justify-between items-end mb-2">
+                            <label class="block text-sm font-bold text-slate-700">상세 내용 <span class="text-red-500">*</span></label>
+                        </div>
+                        <textarea id="inquiry_desc" required rows="5" placeholder="발생한 증상이나 요청 사항을 편하게 적어주세요. 우측 상단의 '관련 가이드 찾기' 버튼을 클릭하면 현재 메뉴에 해당하는 도움말을 바로 확인할 수 있습니다." class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none transition-shadow text-sm text-slate-800 placeholder-slate-400"></textarea>
+                    </div>
+
+                    <!-- 파일 첨부 -->
+                    <div>
+                        <div class="flex justify-between items-end mb-2">
+                            <label class="block text-sm font-bold text-slate-700">화면 캡처 첨부</label>
+                            <span class="text-xs text-slate-400">선택사항 (최대 10MB)</span>
+                        </div>
+                        <div class="border-2 border-dashed border-slate-300 bg-slate-50 rounded-lg p-6 text-center hover:bg-slate-100 hover:border-blue-300 transition-colors cursor-pointer group">
+                            <svg class="mx-auto h-8 w-8 text-slate-400 group-hover:text-blue-500 transition-colors mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <p class="text-sm text-slate-600 font-medium">여기를 클릭하거나 파일을 끌어다 놓으세요</p>
+                            <p class="text-xs text-slate-400 mt-1">PNG, JPG, MP4 지원</p>
+                        </div>
+                    </div>
+
+                    <!-- 스마트 환경 수집 안내 -->
+                    <div class="bg-blue-50/50 border border-blue-100 p-4 rounded-xl flex items-start gap-3 mt-6">
+                        <div class="bg-blue-100 text-blue-600 p-1.5 rounded-lg shrink-0 mt-0.5">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-blue-900 mb-1">스마트 환경 수집 안내</h4>
+                            <p class="text-xs text-blue-700/80 leading-relaxed">
+                                빠른 문제 파악을 위해 <strong>사번, 소속 부서, 접속 중인 URL, 브라우저 정보, 최근 에러 로그</strong>가 관리자에게 안전하게 자동 전송됩니다. 일일이 내 PC 환경을 적지 않으셔도 됩니다.
+                            </p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 모달 푸터 (액션 버튼) -->
+            <div class="p-5 border-t border-slate-100 bg-slate-50 flex justify-end gap-3 rounded-b-2xl shrink-0">
+                <button type="button" onclick="closeInquiryModal()" class="px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-200">
+                    취소
+                </button>
+                <button type="button" onclick="submitInquiry()" class="px-6 py-2.5 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 shadow-sm shadow-blue-600/20">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                    </svg>
+                    문의 접수하기
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 처리 완료 토스트 알림 -->
+    <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 transform -translate-y-20 opacity-0 transition-all duration-300 z-[60]">
+        <div class="bg-green-500 text-white rounded-full p-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+            </svg>
+        </div>
+        <span class="font-medium text-sm">성공적으로 접수되었습니다. (자동 수집 데이터 포함)</span>
+    </div>
+
+    <!-- Gemini API 및 모달 제어 자바스크립트 -->
+    <script>
+        const apiKey = ""; // API Key (실행 환경에서 자동 주입됨)
+        const modal = document.getElementById('inquiry-modal');
+        const form = document.getElementById('inquiry-form');
+        const toast = document.getElementById('toast');
+
+        // 모달 열 때 폼 초기화
+        function openInquiryModal() {
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.add('flex'); }, 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeInquiryModal() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+
+        function submitInquiry() {
+            const title = document.getElementById('inquiry_title').value;
+            const desc = document.getElementById('inquiry_desc').value;
+
+            if (!title || !desc) {
+                alert('제목과 상세 내용을 모두 입력해주세요.');
+                return;
+            }
+
+            closeInquiryModal();
+            form.reset();
+            showToast();
+        }
+
+        function showToast() {
+            toast.classList.remove('-translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('-translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수소충전소 찾기</title>
+
+    <!-- jQuery & Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Malgun Gothic', sans-serif;
+        }
+
+        .container-fluid {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .main-wrapper {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 60px);
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 380px;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Status Bar (Progress) */
+        .status-container {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+        }
+
+        .status-header {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #34495e;
+            margin-bottom: 10px;
+        }
+
+        .progress {
+            height: 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        .progress-bar-op {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .progress-bar-cl {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .progress-bar-su {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .legend-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        /* Nearby Stations List */
+        .nearby-header {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #34495e;
+            margin: 15px 0 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .loc-btn {
+            font-size: 0.8rem;
+            padding: 2px 8px;
+        }
+
+        .station-item {
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #fafafa;
+        }
+
+        .station-item:hover {
+            border-color: #3498db;
+            background: #f0f8ff;
+        }
+
+        .st-name {
+            font-weight: bold;
+            font-size: 1rem;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .st-dist {
+            color: #e67e22;
+            font-weight: bold;
+            font-size: 0.9rem;
+            float: right;
+        }
+
+        .st-status-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: white;
+            font-weight: bold;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .st-price {
+            font-size: 0.9rem;
+            color: #2980b9;
+            font-weight: bold;
+        }
+
+        .st-hour {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .st-addr {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-top: 2px;
+        }
+
+        /* Map */
+        #map {
+            flex: 1;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Custom Map Marker */
+        .custom-marker {
+            background-color: white;
+            border: 2px solid #34495e;
+            /* Default, overridden inline */
+            border-radius: 20px;
+            padding: 4px 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .text-op {
+            color: #2ecc71;
+        }
+
+        .text-cl {
+            color: #95a5a6;
+        }
+
+        .text-su {
+            color: #e74c3c;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        <div class="header">수소충전소 찾기</div>
+        <div class="main-wrapper">
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="status-container">
+                    <div class="status-header">수소충전소 운영 현황</div>
+                    <div class="progress" id="statusBar">
+                        <!-- Progress bars injected via JS -->
+                    </div>
+                    <div class="legend-container">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background:#2ecc71;"></div>운영 (<span id="cntOp">0</span>)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background:#95a5a6;"></div>마감 (<span id="cntCl">0</span>)
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background:#e74c3c;"></div>중단 (<span id="cntSu">0</span>)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nearby-header">
+                    내 주변 이용가능 충전소
+                    <button class="btn btn-outline-primary loc-btn" onclick="requestLocation()">내 위치 갱신</button>
+                </div>
+
+                <div id="stationList">
+                    <div class="text-center text-muted mt-4" style="font-size: 0.9rem;">
+                        위치 정보를 허용해주세요.<br>현재 위치 기반 목록을 불러옵니다.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map -->
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <script>
+        let map;
+        let stations = [];
+        let currentPos = { lat: 37.5665, lng: 126.9780 }; // Default: Seoul City Hall
+        let markers = [];
+        let userMarker = null;
+        let userCircle = null;
+
+        // Initialize Map
+        function initMap() {
+            map = L.map('map').setView([currentPos.lat, currentPos.lng], 7);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            loadStationData();
+        }
+
+        // Determine Station Status
+        function getStatusInfo(station) {
+            let notice = station.limitYn || "";
+
+            // Check Suspension
+            const susKeywords = ["중단", "정지", "불가", "고장", "수리", "점검", "종료"];
+            if (susKeywords.some(kw => notice.includes(kw))) {
+                return { code: "SU", label: "운영중단", color: "#e74c3c" };
+            }
+
+            // Check Closed (마감) keyword in notice if any
+            if (notice.includes("마감")) {
+                return { code: "CL", label: "영업마감", color: "#95a5a6" };
+            }
+
+            // Default to Operating based on CSV data absence of error keywords
+            return { code: "OP", label: "운영중", color: "#2ecc71" };
+        }
+
+        // Load Data
+        function loadStationData() {
+            $.getJSON('data/hs_map2_data.json', function (data) {
+                // Filter and process validity
+                stations = data.filter(d => d.lat !== "" && d.lng !== "").map(d => {
+                    let st = getStatusInfo(d);
+                    d.statusCode = st.code;
+                    d.statusLabel = st.label;
+                    d.color = st.color;
+                    d.lat = parseFloat(d.lat);
+                    d.lng = parseFloat(d.lng);
+                    return d;
+                });
+
+                updateStatusBar();
+                drawMarkers();
+
+                // Try geolocation immediately
+                requestLocation();
+            }).fail(function () {
+                alert("데이터를 불러오는데 실패했습니다.");
+            });
+        }
+
+        // Update Overall Status Bar
+        function updateStatusBar() {
+            let cntOp = 0, cntCl = 0, cntSu = 0;
+            stations.forEach(s => {
+                if (s.statusCode === 'OP') cntOp++;
+                else if (s.statusCode === 'CL') cntCl++;
+                else cntSu++;
+            });
+
+            let total = stations.length;
+            if (total === 0) return;
+
+            let pctOp = (cntOp / total * 100).toFixed(1);
+            let pctCl = (cntCl / total * 100).toFixed(1);
+            let pctSu = (cntSu / total * 100).toFixed(1);
+
+            $('#cntOp').text(cntOp);
+            $('#cntCl').text(cntCl);
+            $('#cntSu').text(cntSu);
+
+            let html = `
+            <div class="progress-bar progress-bar-op" style="width: ${pctOp}%">${pctOp}%</div>
+            <div class="progress-bar progress-bar-cl" style="width: ${pctCl}%">${pctCl}%</div>
+            <div class="progress-bar progress-bar-su" style="width: ${pctSu}%">${pctSu}%</div>
+        `;
+            $('#statusBar').html(html);
+        }
+
+        // Draw Map Markers
+        function drawMarkers() {
+            // Clear old markers
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+
+            stations.forEach(s => {
+                let htmlMarker = `
+                <div class="custom-marker" style="border-color: ${s.color};">
+                    <span class="dot" style="background:${s.color};"></span>
+                    <span style="color:#2c3e50; font-weight:bold; font-size: 0.85rem;">${s.price || '가격미정'}</span>
+                </div>
+            `;
+                let icon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: htmlMarker,
+                    iconSize: [0, 0],
+                    iconAnchor: [40, 15],
+                });
+
+                let marker = L.marker([s.lat, s.lng], { icon: icon }).addTo(map);
+
+                // Popup info
+                let popupHtml = `
+                <div style="min-width: 200px;">
+                    <h6 style="margin:0 0 5px 0; font-weight:bold; color:#2c3e50;">${s.statNm}</h6>
+                    <p style="margin:0; font-size:12px; color:#7f8c8d;">${s.addr}</p>
+                    <hr style="margin:8px 0;">
+                    <p style="margin:2px 0; font-size:13px;"><b>상태:</b> <span style="color:${s.color}">${s.statusLabel}</span></p>
+                    <p style="margin:2px 0; font-size:13px;"><b>이용시간:</b> ${s.busiTp}</p>
+                    <p style="margin:2px 0; font-size:13px;"><b>요금:</b> ${s.price}</p>
+                    <p style="margin:2px 0; font-size:13px;"><b>비고:</b> ${s.limitYn || '없음'}</p>
+                </div>
+            `;
+                marker.bindPopup(popupHtml);
+                marker.stationData = s;
+                markers.push(marker);
+            });
+        }
+
+        // Distance Calculation Formula (Haversine)
+        function getDistance(lat1, lon1, lat2, lon2) {
+            function rad(x) { return x * Math.PI / 180; }
+            let R = 6371; // Earth radii in km
+            let dLat = rad(lat2 - lat1);
+            let dLong = rad(lon2 - lon1);
+            let a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(rad(lat1)) * Math.cos(rad(lat2)) *
+                Math.sin(dLong / 2) * Math.sin(dLong / 2);
+            let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            let d = R * c;
+            return d;
+        }
+
+        // Request Geo Location
+        function requestLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    currentPos.lat = position.coords.latitude;
+                    currentPos.lng = position.coords.longitude;
+                    updateNearbyList();
+                    map.setView([currentPos.lat, currentPos.lng], 11);
+
+                    // Remove old user marker/circle if exist
+                    if (userMarker) map.removeLayer(userMarker);
+                    if (userCircle) map.removeLayer(userCircle);
+
+                    // Add current location marker
+                    userMarker = L.marker([currentPos.lat, currentPos.lng], {
+                        icon: L.divIcon({
+                            className: 'my-loc-icon',
+                            html: '<div style="background:#3498db; width:16px;height:16px; border:3px solid white; border-radius:50%; box-shadow:0 0 5px rgba(0,0,0,0.5);"></div>',
+                            iconSize: [16, 16],
+                            iconAnchor: [8, 8]
+                        })
+                    }).addTo(map);
+
+                    // Add 5km radius circle
+                    userCircle = L.circle([currentPos.lat, currentPos.lng], {
+                        color: '#3498db',
+                        fillColor: '#3498db',
+                        fillOpacity: 0.1,
+                        radius: 5000 // 5km in meters
+                    }).addTo(map);
+
+                }, function (error) {
+                    alert("위치 정보를 가져올 수 없습니다. 기본 위치(서울시청)를 기준으로 표시합니다.");
+                    updateNearbyList(true); // force draw marker on default loc
+                });
+            } else {
+                alert("이 브라우저는 위치 정보를 지원하지 않습니다. 기본 위치(서울시청)를 기준으로 표시합니다.");
+                updateNearbyList(true);
+            }
+        }
+
+        // Update List Based on Current Pos
+        function updateNearbyList(isFallback = false) {
+            
+            // if fallback to default, draw the default location marker & circle
+            if (isFallback) {
+                map.setView([currentPos.lat, currentPos.lng], 11);
+                
+                if (userMarker) map.removeLayer(userMarker);
+                if (userCircle) map.removeLayer(userCircle);
+
+                userMarker = L.marker([currentPos.lat, currentPos.lng], {
+                    icon: L.divIcon({
+                        className: 'my-loc-icon',
+                        html: '<div style="background:#3498db; width:16px;height:16px; border:3px solid white; border-radius:50%; box-shadow:0 0 5px rgba(0,0,0,0.5);"></div>',
+                        iconSize: [16, 16],
+                        iconAnchor: [8, 8]
+                    })
+                }).addTo(map);
+
+                userCircle = L.circle([currentPos.lat, currentPos.lng], {
+                    color: '#3498db',
+                    fillColor: '#3498db',
+                    fillOpacity: 0.1,
+                    radius: 5000 
+                }).addTo(map);
+            }
+            // Calculate dist
+            stations.forEach(s => {
+                s.distKm = getDistance(currentPos.lat, currentPos.lng, s.lat, s.lng);
+            });
+
+            // Sort by distance
+            stations.sort((a, b) => a.distKm - b.distKm);
+
+            // Filter out suspended? Instruction: "현재 위치 기준 근처 충전소 현황과 이용 가능 충전소 표출"
+            // Let's just show top 15 and mark operating vs closed.
+            let nearby = stations.slice(0, 15);
+
+            let html = "";
+            nearby.forEach(s => {
+                html += `
+                <div class="station-item" onclick="moveToStation(${s.lat}, ${s.lng})">
+                    <span class="st-dist">${s.distKm.toFixed(1)} km</span>
+                    <div class="st-name">${s.statNm}</div>
+                    <div>
+                        <span class="st-status-badge" style="background:${s.color}">${s.statusLabel}</span>
+                        <span class="st-price">${s.price || ''}</span>
+                    </div>
+                    <div class="st-hour">시간: ${s.busiTp}</div>
+                    <div class="st-addr">${s.addr}</div>
+                </div>
+            `;
+            });
+            $('#stationList').html(html);
+        }
+
+        // Pan to Station
+        function moveToStation(lat, lng) {
+            map.setView([lat, lng], 14);
+            // Find marker and open popup
+            markers.forEach(m => {
+                if (m.stationData.lat === lat && m.stationData.lng === lng) {
+                    m.openPopup();
+                }
+            });
+        }
+
+        // On Load
+        $(document).ready(function () {
+            initMap();
+            setInterval(function () {
+                // Re-evaluate operating status every minute
+                loadStationData();
+            }, 60000);
+        });
+
+    </script>
+
+</body>
+
+</html>

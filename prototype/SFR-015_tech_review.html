@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>수소연료공급시설 설치계획서 기술검토 의견</title>
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="common.css">
+    <link type="text/css" rel="stylesheet" href="common_styles.css">
+    <link type="text/css" rel="stylesheet" href="hdCommon.css">
+    <style>
+        .document-page {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 40px;
+            background: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .main-title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 40px;
+            border: 2px solid #000;
+            padding: 15px;
+            letter-spacing: 2px;
+        }
+
+        .section-header {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1976d2;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-header span {
+            display: inline-block;
+            width: 22px;
+            height: 22px;
+            text-align: center;
+            line-height: 22px;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+
+        .table-doc {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            table-layout: fixed;
+        }
+
+        .table-doc th,
+        .table-doc td {
+            border: 1px solid #333;
+            padding: 10px;
+            font-size: 14px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .table-doc th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .editor-wrap {
+            position: relative;
+            width: 100%;
+        }
+
+        .editor-toolbar {
+            display: flex;
+            gap: 5px;
+            padding: 5px;
+            background: #f8f8f8;
+            border: 1px solid #ccc;
+            border-bottom: none;
+            align-items: center;
+        }
+
+        .editor-toolbar button,
+        .editor-toolbar select {
+            padding: 2px 4px;
+            font-size: 11px;
+            cursor: pointer;
+            background: #fff;
+            border: 1px solid #bbb;
+            border-radius: 2px;
+        }
+
+        .editor-content {
+            border: 1px solid #ccc;
+            min-height: 50px;
+            padding: 12px;
+            text-align: left;
+            background: #fff;
+            outline: none;
+            line-height: 1.6;
+            word-break: break-all;
+        }
+
+        .category-select {
+            width: 115px;
+            font-weight: bold;
+            color: #1976d2;
+            border: 1px solid #1976d2 !important;
+            margin-right: 10px;
+        }
+
+        .row-ctrl {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+        }
+
+        .btn-circle {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: none;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .btn-add {
+            background: #1976d2;
+        }
+
+        .btn-del {
+            background: #d32f2f;
+        }
+
+        .photo-area {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .photo-item {
+            flex: 1;
+        }
+
+        .photo-box {
+            border: 1px dashed #ccc;
+            height: 180px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f9f9f9;
+            color: #aaa;
+        }
+
+        .footer-sign {
+            margin-top: 40px;
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .footer-recipient {
+            margin-top: 15px;
+            text-align: right;
+            font-size: 24px;
+            font-weight: bold;
+            padding-right: 20px;
+        }
+
+        .t-a-l {
+            text-align: left !important;
+        }
+
+        .small-parentheses {
+            font-size: 11px;
+            color: #666;
+            font-weight: normal;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="all-container">
+        <div class="container" style="margin-top: 25px;">
+            <div class="inner">
+                <div class="con-right" style="width: 100%;">
+                    <div class="document-page">
+                        <div class="main-title">수소연료공급시설 설치계획서 기술검토 의견</div>
+
+                        <div class="section-header"><span>■</span>시설개요</div>
+                        <table class="table-doc">
+                            <colgroup>
+                                <col width="15%">
+                                <col width="35%">
+                                <col width="15%">
+                                <col width="35%">
+                            </colgroup>
+                            <tbody>
+                                <tr>
+                                    <th>설치사업자</th>
+                                    <td>하이스원 주식회사</td>
+                                    <th>관리번호</th>
+                                    <td>24-001</td>
+                                </tr>
+                                <tr>
+                                    <th>부지 위치(주소)</th>
+                                    <td>대구광역시 수성구 범물동 105일원</td>
+                                    <th>부지면적</th>
+                                    <td>7,298 ㎡</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <table class="table-doc">
+                            <thead>
+                                <tr>
+                                    <th>사업구분</th>
+                                    <th>설치비용</th>
+                                    <th>사업기간</th>
+                                    <th>충전대상</th>
+                                    <th>충전용량</th>
+                                    <th>충전기(기)</th>
+                                    <th>공급방식</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>민간보조사업</td>
+                                    <td>63억원</td>
+                                    <td>'26.01 ~ '26.08</td>
+                                    <td>특수(버스, 화물)</td>
+                                    <td>300kg/hr</td>
+                                    <td>3기</td>
+                                    <td>튜브트레일러</td>
+                                </tr>
+                                <tr>
+                                    <th>현장 조사일</th>
+                                    <td colspan="6">
+                                        <input type="text" class="selc_style02" style="width: 200px; text-align: center;" value="2026. 02. 03. (화)">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="section-header"><span>■</span>검토의견</div>
+                        <p style="margin-bottom: 10px;">○ 대기환경보전법 제58조의11 및 동법 시행령 제52조의6에 의하여 설치부지, 용량 및 공급방식, 설계도서,
+                            공정일정표, 설치비용 소요기간 및 조달계획 검토</p>
+                        <table class="table-doc" id="review-table">
+                            <colgroup>
+                                <col width="15%">
+                                <col width="77%">
+                                <col width="8%">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th>검토항목</th>
+                                    <th>검토의견</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- 설치부지 섹션 (이미지 완벽 복원) -->
+                                <tr class="category-row" data-category="설치부지">
+                                    <th rowspan="5" class="cat-label">설치부지</th>
+                                    <td class="t-a-l">
+                                        <div class="editor-wrap">
+                                            <div class="editor-toolbar">
+                                                <select class="category-select">
+                                                    <option value="(법적사항)" selected>(법적사항)</option>
+                                                    <option value="(증설검토)">(증설검토)</option>
+                                                    <option value="(설치현황)">(설치현황)</option>
+                                                    <option value="(기타사항)">(기타사항)</option>
+                                                </select>
+                                                <button type="button" onclick="modifySelectionStyle('fontSize', 1)">T+</button><button type="button" onclick="modifySelectionStyle('fontSize', -1)">T-</button>
+                                                <button type="button" onclick="modifySelectionStyle('letterSpacing', 0.5)">↔+</button><button type="button" onclick="modifySelectionStyle('letterSpacing', -0.5)">↔-</button>
+                                                <button type="button" onclick="formatSimple('bold')"><b>B</b></button><button type="button" onclick="formatSimple('removeFormat')">↺</button>
+                                            </div>
+                                            <div class="editor-content" contenteditable="true">자연녹지지역으로 국토계획법 시행령
+                                                제71조<span class="small-parentheses">(용도지역 안에서의 건축제한)</span> 및 대구광역시 도시계획
+                                                조례 등에 의거 구축 가능</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="row-ctrl"><button class="btn-circle btn-add" onclick="addRow(this)">+</button></div>
+                                    </td>
+                                </tr>
+                                <tr class="category-row" data-category="설치부지">
+                                    <td class="t-a-l">
+                                        <div class="editor-wrap">
+                                            <div class="editor-toolbar">
+                                                <select class="category-select">
+                                                    <option value="(법적사항)" selected>(법적사항)</option>
+                                                    <option value="(증설검토)">(증설검토)</option>
+                                                    <option value="(설치현황)">(설치현황)</option>
+                                                    <option value="(기타사항)">(기타사항)</option>
+                                                </select>
+                                                <button type="button" onclick="modifySelectionStyle('fontSize', 1)">T+</button><button type="button" onclick="modifySelectionStyle('fontSize', -1)">T-</button>
+                                                <button type="button" onclick="modifySelectionStyle('letterSpacing', 0.5)">↔+</button><button type="button" onclick="modifySelectionStyle('letterSpacing', -0.5)">↔-</button>
+                                                <button type="button" onclick="formatSimple('bold')"><b>B</b></button><button type="button" onclick="formatSimple('removeFormat')">↺</button>
+                                            </div>
+                                            <div class="editor-content" contenteditable="true">개발제한구역 지정 및 관리에 관한 특별조치법에
+                                                따라 건축허가 완료로 구축 용이</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="row-ctrl"><button class="btn-circle btn-del" onclick="delRow(this)">-</button></div>
+                                    </td>
+                                </tr>
+                                <tr class="category-row" data-category="설치부지">
+                                    <td class="t-a-l">
+                                        <div class="editor-wrap">
+                                            <div class="editor-toolbar">
+                                                <select class="category-select">
+                                                    <option value="(법적사항)">(법적사항)</option>
+                                                    <option value="(증설검토)" selected>(증설검토)</option>
+                                                    <option value="(설치현황)">(설치현황)</option>
+                                                    <option value="(기타사항)">(기타사항)</option>
+                                                </select>
+                                                <button type="button" onclick="modifySelectionStyle('fontSize', 1)">T+</button><button type="button" onclick="modifySelectionStyle('fontSize', -1)">T-</button>
+                                                <button type="button" onclick="modifySelectionStyle('letterSpacing', 0.5)">↔+</button><button type="button" onclick="modifySelectionStyle('letterSpacing', -0.5)">↔-</button>
+                                                <button type="button" onclick="formatSimple('bold')"><b>B</b></button><button type="button" onclick="formatSimple('removeFormat')">↺</button>
+                                            </div>
+                                            <div class="editor-content" contenteditable="true">향후 자동차정류장 면적 확장 등으로 구축
+                                                용이로 판단됨</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="row-ctrl"><button class="btn-circle btn-del" onclick="delRow(this)">-</button></div>
+                                    </td>
+                                </tr>
+                                <tr class="category-row" data-category="설치부지">
+                                    <td class="t-a-l">
+                                        <div class="editor-wrap">
+                                            <div class="editor-toolbar">
+                                                <select class="category-select">
+                                                    <option value="(법적사항)">(법적사항)</option>
+                                                    <option value="(증설검토)">(증설검토)</option>
+                                                    <option value="(설치현황)" selected>(설치현황)</option>
+                                                    <option value="(기타사항)">(기타사항)</option>
+                                                </select>
+                                                <button type="button" onclick="modifySelectionStyle('fontSize', 1)">T+</button><button type="button" onclick="modifySelectionStyle('fontSize', -1)">T-</button>
+                                                <button type="button" onclick="modifySelectionStyle('letterSpacing', 0.5)">↔+</button><button type="button" onclick="modifySelectionStyle('letterSpacing', -0.5)">↔-</button>
+                                                <button type="button" onclick="formatSimple('bold')"><b>B</b></button><button type="button" onclick="formatSimple('removeFormat')">↺</button>
+                                            </div>
+                                            <div class="editor-content" contenteditable="true">수소 소유차 중심 충전편의 개선을 위한 구축
+                                                적정</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="row-ctrl"><button class="btn-circle btn-del" onclick="delRow(this)">-</button></div>
+                                    </td>
+                                </tr>
+                                <tr class="category-row" data-category="설치부지">
+                                    <td class="t-a-l">
+                                        <div class="editor-wrap">
+                                            <div class="editor-toolbar">
+                                                <select class="category-select">
+                                                    <option value="(법적사항)">(법적사항)</option>
+                                                    <option value="(증설검토)">(증설검토)</option>
+                                                    <option value="(설치현황)">(설치현황)</option>
+                                                    <option value="(기타사항)" selected>(기타사항)</option>
+                                                </select>
+                                                <button type="button" onclick="modifySelectionStyle('fontSize', 1)">T+</button><button type="button" onclick="modifySelectionStyle('fontSize', -1)">T-</button>
+                                                <button type="button" onclick="modifySelectionStyle('letterSpacing', 0.5)">↔+</button><button type="button" onclick="modifySelectionStyle('letterSpacing', -0.5)">↔-</button>
+                                                <button type="button" onclick="formatSimple('bold')"><b>B</b></button><button type="button" onclick="formatSimple('removeFormat')">↺</button>
+                                            </div>
+                                            <div class="editor-content" contenteditable="true">수소는 튜브트레일러로 외부에서 반입 계획임
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="row-ctrl"><button class="btn-circle btn-del" onclick="delRow(this)">-</button></div>
+                                    </td>
+                                </tr>
+
+                                <!-- 용량 및 공급방식 섹션 -->
+                                <tr class="category-row" data-category="용량공급">
+                                    <th rowspan="2" class="cat-label">용량 및<br>공급방식</th>
+                                    <td class="t-a-l">
+                                        <div class="editor-wrap">
+                                            <div class="editor-toolbar">
+                                                <select class="category-select">
+                                                    <option value="(용량 및 공급방식)" selected>(용량 및 공급방식)</option>
+                                                    <option value="(기타사항)">(기타사항)</option>
+                                                </select>
+                                                <button type="button" onclick="modifySelectionStyle('fontSize', 1)">T+</button><button type="button" onclick="modifySelectionStyle('fontSize', -1)">T-</button>
+                                                <button type="button" onclick="modifySelectionStyle('letterSpacing', 0.5)">↔+</button><button type="button" onclick="modifySelectionStyle('letterSpacing', -0.5)">↔-</button>
+                                                <button type="button" onclick="formatSimple('bold')"><b>B</b></button><button type="button" onclick="formatSimple('removeFormat')">↺</button>
+                                            </div>
+                                            <div class="editor-content" contenteditable="true">저장설비·저장능력 및 처리설비에 대한
+                                                기술검토는 완료되어 별도 의견 사항 없음</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="row-ctrl"><button class="btn-circle btn-add" onclick="addRow(this)">+</button></div>
+                                    </td>
+                                </tr>
+                                <tr class="category-row" data-category="용량공급">
+                                    <td class="t-a-l">
+                                        <div class="editor-wrap">
+                                            <div class="editor-toolbar">
+                                                <select class="category-select">
+                                                    <option value="(용량 및 공급방식)">(용량 및 공급방식)</option>
+                                                    <option value="(기타사항)" selected>(기타사항)</option>
+                                                </select>
+                                                <button type="button" onclick="modifySelectionStyle('fontSize', 1)">T+</button><button type="button" onclick="modifySelectionStyle('fontSize', -1)">T-</button>
+                                                <button type="button" onclick="modifySelectionStyle('letterSpacing', 0.5)">↔+</button><button type="button" onclick="modifySelectionStyle('letterSpacing', -0.5)">↔-</button>
+                                                <button type="button" onclick="formatSimple('bold')"><b>B</b></button><button type="button" onclick="formatSimple('removeFormat')">↺</button>
+                                            </div>
+                                            <div class="editor-content" contenteditable="true">300kg/hr(3기) 가동 시 약
+                                                3,600kg/day 충전 가능하여 추진 적정함</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="row-ctrl"><button class="btn-circle btn-del" onclick="delRow(this)">-</button></div>
+                                    </td>
+                                </tr>
+
+                                <!-- 정적 항목 섹션 -->
+                                <tr class="other-row" data-item="설계 도서">
+                                    <th>설계 도서</th>
+                                    <td class="t-a-l">
+                                        <div class="editor-content" contenteditable="true">설계도서 검토 사항은 건축허가 완료 등으로 별도 의견
+                                            사항 없음</div>
+                                    </td>
+                                    <td></td>
+                                </tr>
+                                <tr class="other-row" data-item="공사 일정표">
+                                    <th>공사 일정표</th>
+                                    <td class="t-a-l">
+                                        <div class="editor-content" contenteditable="true">공사 및 시운전 일정 등이 적합함</div>
+                                    </td>
+                                    <td></td>
+                                </tr>
+                                <tr class="other-row" data-item="설치 비용">
+                                    <th>설치 비용</th>
+                                    <td class="t-a-l">
+                                        <div class="editor-content" contenteditable="true">사업비 총 63억원으로 산정 내역이 적합함</div>
+                                    </td>
+                                    <td></td>
+                                </tr>
+                                <tr class="other-row" data-item="소요 시간">
+                                    <th>소요 시간</th>
+                                    <td class="t-a-l">
+                                        <div class="editor-content" contenteditable="true">약 7개월로 계획되어 동절기 공사 중지 등을 고려해도
+                                            적정한 수준임</div>
+                                    </td>
+                                    <td></td>
+                                </tr>
+                                <tr class="other-row" data-item="조달 계획">
+                                    <th>조달 계획</th>
+                                    <td class="t-a-l">
+                                        <div class="editor-content" contenteditable="true">국고금(42억원) 및 자기부담금(21억원) 조달계획이
+                                            적합함</div>
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="section-header"><span>●</span>사진대지</div>
+                        <div class="photo-area">
+                            <div class="photo-item">
+                                <div class="photo-box">현장사진 #1 (클릭하여 업로드)</div>
+                            </div>
+                            <div class="photo-item">
+                                <div class="photo-box">현장사진 #2 (클릭하여 업로드)</div>
+                            </div>
+                        </div>
+
+                        <div class="footer-sign">2026. 02. 03.<br><br>검토자 : ________________ (인)</div>
+                        <div class="footer-recipient">한국환경공단 이사장 귀하</div>
+                    </div>
+
+                    <div class="btn-wrap" style="text-align: center; margin-top: 30px; margin-bottom: 50px;">
+                        <button type="button" class="btn_square btn_navy" style="width: 150px;" onclick="history.back()">목록보기</button>
+                        <button type="button" class="btn_square btn_blue02_bg" style="width: 150px;" onclick="fnSave()">기술검토 완료</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function fnSave() {
+            const reviewData = [];
+            $('.category-row').each(function () {
+                const row = $(this);
+                reviewData.push({ category: row.data('category'), subType: row.find('.category-select').val(), content: row.find('.editor-content').html() });
+            });
+            $('.other-row').each(function () {
+                const row = $(this);
+                reviewData.push({ item: row.data('item'), content: row.find('.editor-content').html() });
+            });
+            console.log("=== 서버 데이터 샘플 ===\n", JSON.stringify(reviewData, null, 2));
+            alert("기술검토 결과가 수집되었습니다.");
+        }
+
+        function modifySelectionStyle(prop, delta) {
+            const selection = window.getSelection();
+            if (!selection.rangeCount || selection.isCollapsed) return;
+            document.execCommand('styleWithCSS', false, true);
+            const dummyCmd = prop === 'fontSize' ? 'foreColor' : 'hiliteColor';
+            const dummyVal = prop === 'fontSize' ? 'rgba(0,0,0,0.01)' : 'rgba(0,0,0,0.02)';
+            document.execCommand(dummyCmd, false, dummyVal);
+            const editor = $(selection.anchorNode).closest('.editor-content')[0];
+            const elements = editor.querySelectorAll(`span[style*="${dummyCmd}"]`);
+            elements.forEach(el => {
+                const computed = window.getComputedStyle(el);
+                let currentVal = parseFloat(computed[prop]) || (prop === 'fontSize' ? 14 : 0);
+                el.style[prop] = (currentVal + delta) + "px";
+                el.style.color = ""; el.style.backgroundColor = "";
+            });
+        }
+
+        function formatSimple(cmd) { document.execCommand(cmd, false, null); }
+
+        function addRow(btn) {
+            const tr = $(btn).closest('tr');
+            const cat = tr.data('category');
+            const sectionRows = $(`tr[data-category="${cat}"]`);
+            const header = sectionRows.first().find('.cat-label');
+            header.attr('rowspan', parseInt(header.attr('rowspan')) + 1);
+            const options = (cat === '설치부지')
+                ? '<option value="(법적사항)">(법적사항)</option><option value="(증설검토)">(증설검토)</option><option value="(설치현황)">(설치현황)</option><option value="(기타사항)">(기타사항)</option>'
+                : '<option value="(용량 및 공급방식)">(용량 및 공급방식)</option><option value="(기타사항)">(기타사항)</option>';
+            const newRow = $(`<tr class="category-row" data-category="${cat}">
+            <td class="t-a-l">
+                <div class="editor-wrap">
+                    <div class="editor-toolbar">
+                        <select class="category-select">${options}</select>
+                        <button type="button" onclick="modifySelectionStyle('fontSize', 1)">T+</button><button type="button" onclick="modifySelectionStyle('fontSize', -1)">T-</button>
+                        <button type="button" onclick="modifySelectionStyle('letterSpacing', 0.5)">↔+</button><button type="button" onclick="modifySelectionStyle('letterSpacing', -0.5)">↔-</button>
+                        <button type="button" onclick="formatSimple('bold')"><b>B</b></button><button type="button" onclick="formatSimple('removeFormat')">↺</button>
+                    </div><div class="editor-content" contenteditable="true"></div>
+                </div>
+            </td><td><div class="row-ctrl"><button class="btn-circle btn-del" onclick="delRow(this)">-</button></div></td></tr>`);
+            sectionRows.last().after(newRow);
+        }
+
+        function delRow(btn) {
+            const tr = $(btn).closest('tr');
+            const cat = tr.data('category');
+            const sectionRows = $(`tr[data-category="${cat}"]`);
+            if (sectionRows.length <= 1) return;
+            const header = sectionRows.first().find('.cat-label');
+            header.attr('rowspan', parseInt(header.attr('rowspan')) - 1);
+            if (tr.find('.cat-label').length > 0) {
+                const nextRow = tr.next();
+                const label = tr.find('.cat-label').detach();
+                nextRow.prepend(label);
+            }
+            tr.remove();
+        }
+    </script>
+</body>
+
+</html>

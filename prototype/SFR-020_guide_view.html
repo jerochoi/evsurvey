@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이용 가이드 - EV Infra</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0F62FE;
+            --primary-hover: #0353E9;
+            --bg-body: #FFFFFF;
+            --bg-alt: #F4F7FB;
+            --text-main: #161616;
+            --text-secondary: #525252;
+            --border-color: #E0E0E0;
+            --radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* Nav Header */
+        header { height: 60px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; position: sticky; top: 0; background: #fff; z-index: 100; }
+        .logo { font-weight: 700; color: var(--primary); font-size: 18px; }
+        .user { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 12px; }
+
+        /* Content Layout */
+        .manual-layout { display: flex; max-width: 1400px; margin: 0 auto; min-height: calc(100vh - 60px); }
+        
+        /* Sidebar Navigation */
+        .manual-sidebar { width: 340px; border-right: 1px solid var(--border-color); padding: 40px; background: var(--bg-alt); position: sticky; top: 60px; height: calc(100vh - 60px); overflow-y: auto; }
+        .sidebar-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 24px; letter-spacing: 1px; }
+        .nav-tree { list-style: none; }
+        .nav-node { margin-bottom: 12px; }
+        .nav-node-link { display: flex; align-items: flex-start; gap: 12px; text-decoration: none; color: var(--text-secondary); padding: 12px; border-radius: 8px; transition: all 0.2s; font-size: 14px; font-weight: 500; }
+        .nav-node-link:hover { background: #E0EFFF; color: var(--primary); }
+        .nav-node-link.active { background: #fff; color: var(--primary); font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
+        .nav-idx { background: #DDE1E6; color: #161616; min-width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 11px; font-weight: 700; }
+        .active .nav-idx { background: var(--primary); color: #fff; }
+
+        /* Main Viewer */
+        .manual-viewer { flex-grow: 1; padding: 60px 100px; max-width: 900px; }
+
+        .manual-header { margin-bottom: 60px; }
+        .manual-badge { display: inline-block; background: #E0EFFF; color: var(--primary); padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 700; margin-bottom: 16px; }
+        .manual-header h1 { font-size: 40px; font-weight: 700; color: #161616; margin-bottom: 16px; letter-spacing: -1.5px; }
+        .manual-header p { font-size: 18px; color: var(--text-secondary); }
+
+        /* Step Card */
+        .view-step { margin-bottom: 80px; scroll-margin-top: 100px; }
+        .step-tag { font-size: 13px; font-weight: 800; color: var(--primary); margin-bottom: 12px; display: block; border-bottom: 2px solid #E0EFFF; width: fit-content; padding-bottom: 4px; text-transform: uppercase; }
+        .step-content h2 { font-size: 24px; font-weight: 700; margin-bottom: 20px; color: #161616; }
+        .step-desc { font-size: 16px; color: var(--text-secondary); margin-bottom: 32px; line-height: 1.8; }
+        
+        .step-img-box { background: var(--bg-alt); border: 1px solid var(--border-color); border-radius: 16px; padding: 12px; margin-bottom: 24px; position: relative; overflow: hidden; }
+        .step-img { display: block; width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); background: #fff; min-height: 200px; }
+        
+        .tip-box { background: #FFF9E6; border-left: 4px solid #F1C21B; padding: 20px; border-radius: 0 8px 8px 0; font-size: 14px; margin-top: 24px; }
+        .tip-box b { color: #8A6D00; }
+
+        .footer-nav { display: flex; justify-content: space-between; margin-top: 100px; padding-top: 40px; border-top: 1px solid var(--border-color); }
+        .nav-btn { display: flex; flex-direction: column; text-decoration: none; color: var(--text-secondary); }
+        .nav-btn span { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+        .nav-btn h4 { font-size: 16px; color: var(--text-main); }
+        .nav-btn:hover h4 { color: var(--primary); }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">⚡ EV Infra Smart Portal</div>
+        <div class="user">
+            <span>홍길동 <b>관리자</b></span>
+            <button style="background:none; border: 1px solid #ccc; padding: 4px 10px; border-radius: 4px; cursor: pointer;">Home</button>
+        </div>
+    </header>
+
+    <div class="manual-layout">
+        <aside class="manual-sidebar">
+            <div class="sidebar-title">콘텐츠 구성</div>
+            <ul class="nav-tree">
+                <li class="nav-node">
+                    <a href="#step1" class="nav-node-link active">
+                        <span class="nav-idx">01</span>
+                        <span>통합 승인 현황 확인</span>
+                    </a>
+                </li>
+                <li class="nav-node">
+                    <a href="#step2" class="nav-node-link">
+                        <span class="nav-idx">02</span>
+                        <span>검토 의견 상세 대조</span>
+                    </a>
+                </li>
+                <li class="nav-node">
+                    <a href="#step3" class="nav-node-link">
+                        <span class="nav-idx">03</span>
+                        <span>최종 승인 및 통보</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="manual-viewer">
+            <div class="manual-header">
+                <div class="manual-badge">Central Admin Guide</div>
+                <h1>기술검토 승인 결과 확인 <br> 및 통보 프로세스</h1>
+                <p>본사 관리자가 통합 검토 결과를 최종 승인하고 사업자에게 통보하는 단계를 상세 안내합니다.</p>
+            </div>
+
+            <section class="view-step" id="step1">
+                <span class="step-tag">Phase 01</span>
+                <div class="step-content">
+                    <h2>통합 승인 현황 확인</h2>
+                    <p class="step-desc">상단 메인 메뉴에서 '통합승인' 탭을 선택한 후, 전체 목록 중 본인의 담당 구역에 해당하는 승인 요청 건을 필터링하여 확인합니다.</p>
+                    
+                    <div class="step-img-box">
+                        <div style="padding: 100px 0; text-align: center; color: #aaa; font-size: 13px; background: #fff; border: 1px dashed #ddd; border-radius: 8px;">
+                            [ 가이드 이미지 영역: 통합 승인 리스트 화면 스크린샷 ]
+                        </div>
+                    </div>
+
+                    <div class="tip-box">
+                        <b>💡 운영 꿀팁:</b> 배정된 요청 건이 많을 경우 '접수일자' 기준 오름차순으로 정렬하면 처리 지연 건을 우선적으로 확인할 수 있습니다.
+                    </div>
+                </div>
+            </section>
+
+            <section class="view-step" id="step2">
+                <span class="step-tag">Phase 02</span>
+                <div class="step-content">
+                    <h2>검토 의견 상세 대조</h2>
+                    <p class="step-desc">외부 검토위원이 작성한 1차 의견서를 열람하여 설치 기술 기준(전기, 소방, 건축) 적합성 여부를 기재된 서류상의 데이터와 대조합니다.</p>
+                    
+                    <div class="step-img-box">
+                        <div style="padding: 100px 0; text-align: center; color: #aaa; font-size: 13px; background: #fff; border: 1px dashed #ddd; border-radius: 8px;">
+                            [ 가이드 이미지 영역: 상세 검토서 대조 화면 ]
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="footer-nav">
+                <a href="#" class="nav-btn">
+                    <span>Previous Step</span>
+                    <h4>-</h4>
+                </a>
+                <a href="#step2" class="nav-btn" style="text-align: right;">
+                    <span>Next Step</span>
+                    <h4>검토 의견 상세 대조</h4>
+                </a>
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>헬프 센터 가이드 작성기 (빌더)</title>
+    <!-- Tailwind CSS (스타일링용) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 스크롤바 스타일링 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        .editor-container {
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .editor-sidebar {
+            width: 500px;
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .preview-area {
+            flex: 1;
+            background: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 폼 요소 스타일 */
+        .block-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            background: #f8fafc;
+            position: relative;
+        }
+
+        .block-card:hover {
+            border-color: #cbd5e1;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            color: #ef4444;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            margin-top: 4px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            ring: 2px solid #3b82f6;
+        }
+
+        /* 텍스트 영역 가변 높이 대응 */
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* 파일 업로드 버튼 커스텀 */
+        input[type="file"]::file-selector-button {
+            border: 1px solid #cbd5e1;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: #f1f5f9;
+            color: #475569;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            margin-right: 8px;
+        }
+
+        input[type="file"]::file-selector-button:hover {
+            background-color: #e2e8f0;
+        }
+    </style>
+</head>
+
+<body class="text-slate-800">
+
+    <div class="editor-container">
+
+        <!-- 좌측: 에디터 영역 -->
+        <div class="editor-sidebar">
+            <div class="p-5 border-b border-slate-200 bg-white shrink-0">
+                <h1 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <span class="text-blue-600">📝</span> 가이드 문서 작성기
+                </h1>
+                <p class="text-sm text-slate-500 mt-1 mb-4">블록을 추가하고 내용을 길게 입력하셔도 모두 렌더링 됩니다.</p>
+                
+                <!-- 문서 설정(공개여부, 시스템명, 대상권한) 영역 -->
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 grid grid-cols-2 gap-3 text-sm">
+                    <div class="col-span-2">
+                        <label class="block font-bold text-slate-700 mb-1">시스템명</label>
+                        <select id="doc-system" class="block-input bg-white !mt-0 !py-1.5" onchange="updateDocSettings()">
+                            <option value="무공해차 통합누리집">무공해차 통합누리집</option>
+                            <option value="보조금 업무 시스템">보조금 업무 시스템</option>
+                            <option value="충전인프라 관리시스템">충전인프라 관리시스템</option>
+                            <option value="통합모니터링 (관제센터)">통합모니터링 (관제센터)</option>
+                        </select>
+                    </div>
+                    <div class="col-span-2 pt-2 border-t border-slate-200 mt-1">
+                        <label class="block font-bold text-slate-700 mb-2">대상 권한 (다중 선택)</label>
+                        <div class="flex flex-wrap gap-x-4 gap-y-2">
+                            <label class="flex items-center gap-1.5 text-slate-700 cursor-pointer hover:text-blue-600 transition">
+                                <input type="checkbox" name="doc-auth" value="전체(로그인 무관)" onchange="updateDocSettings()" class="w-4 h-4 cursor-pointer text-blue-600 rounded border-slate-300 focus:ring-0">
+                                <span>전체</span>
+                            </label>
+                            <label class="flex items-center gap-1.5 text-slate-700 cursor-pointer hover:text-blue-600 transition">
+                                <input type="checkbox" name="doc-auth" value="일반사용자" onchange="updateDocSettings()" class="w-4 h-4 cursor-pointer text-blue-600 rounded border-slate-300 focus:ring-0">
+                                <span>일반사용자</span>
+                            </label>
+                            <label class="flex items-center gap-1.5 text-slate-700 cursor-pointer hover:text-blue-600 transition">
+                                <input type="checkbox" name="doc-auth" value="시스템 관리자" onchange="updateDocSettings()" class="w-4 h-4 cursor-pointer text-blue-600 rounded border-slate-300 focus:ring-0" checked>
+                                <span class="font-bold">시스템 관리자</span>
+                            </label>
+                            <label class="flex items-center gap-1.5 text-slate-700 cursor-pointer hover:text-blue-600 transition">
+                                <input type="checkbox" name="doc-auth" value="지자체 담당자" onchange="updateDocSettings()" class="w-4 h-4 cursor-pointer text-blue-600 rounded border-slate-300 focus:ring-0">
+                                <span>지자체 담당자</span>
+                            </label>
+                            <label class="flex items-center gap-1.5 text-slate-700 cursor-pointer hover:text-blue-600 transition">
+                                <input type="checkbox" name="doc-auth" value="제조사/영업사원" onchange="updateDocSettings()" class="w-4 h-4 cursor-pointer text-blue-600 rounded border-slate-300 focus:ring-0">
+                                <span>제조사/영업사원</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="col-span-2 pt-2 border-t border-slate-200 mt-1">
+                        <label class="block font-bold text-slate-700 mb-2">공개 여부</label>
+                        <div class="flex items-center gap-5">
+                            <label class="flex items-center gap-1.5 cursor-pointer group">
+                                <input type="radio" name="doc-status" value="공개" onchange="updateDocSettings()" class="w-4 h-4 cursor-pointer text-blue-600 border-slate-300 focus:ring-0" checked>
+                                <span class="font-bold text-blue-700 group-hover:text-blue-800 transition">공개 (오픈)</span>
+                            </label>
+                            <label class="flex items-center gap-1.5 cursor-pointer group">
+                                <input type="radio" name="doc-status" value="비공개" onchange="updateDocSettings()" class="w-4 h-4 cursor-pointer text-slate-500 border-slate-300 focus:ring-0">
+                                <span class="text-slate-600 font-medium group-hover:text-slate-800 transition">비공개</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 블록 추가 버튼 영역 -->
+            <div class="p-4 grid grid-cols-2 gap-2 border-b border-slate-200 bg-slate-50 shrink-0 shadow-sm">
+                <button onclick="addBlock('title')" class="px-3 py-2 bg-white border border-slate-300 rounded shadow-sm text-sm font-medium hover:bg-slate-50 text-slate-700 flex items-center justify-center gap-1">
+                    <span class="text-lg">T</span> 메인 제목 추가
+                </button>
+                <button onclick="addBlock('desc')" class="px-3 py-2 bg-white border border-slate-300 rounded shadow-sm text-sm font-medium hover:bg-slate-50 text-slate-700 flex items-center justify-center gap-1">
+                    <span class="text-lg">≣</span> 설명 텍스트
+                </button>
+                <button onclick="addBlock('warning')" class="px-3 py-2 bg-amber-50 border border-amber-200 rounded shadow-sm text-sm font-medium hover:bg-amber-100 text-amber-800 flex items-center justify-center gap-1">
+                    <span class="text-lg">⚠️</span> 주의/안내문
+                </button>
+                <button onclick="addBlock('step')" class="px-3 py-2 bg-blue-50 border border-blue-200 rounded shadow-sm text-sm font-medium hover:bg-blue-100 text-blue-800 flex items-center justify-center gap-1">
+                    <span class="text-lg">1️⃣</span> 단계별 스텝
+                </button>
+            </div>
+
+            <!-- 입력 폼 리스트 (스크롤 자동 적용) -->
+            <div class="flex-1 overflow-y-auto p-4 bg-white" id="editor-form-list">
+                <!-- 여기에 동적으로 입력 필드가 추가됩니다. -->
+            </div>
+
+            <div class="p-4 border-t border-slate-200 bg-white shrink-0">
+                <button onclick="saveAndPreview()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                    미리보기 갱신하기
+                </button>
+            </div>
+        </div>
+
+        <!-- 우측: 사용자 화면 미리보기 영역 -->
+        <div class="preview-area">
+            <div class="bg-slate-200 p-2 text-center text-xs font-bold text-slate-500 uppercase tracking-widest shrink-0 shadow-sm z-10 w-full relative">
+                사용자 화면 미리보기 (Live Preview)
+            </div>
+
+            <!-- 스크롤 활성화 영역 -->
+            <div class="flex-1 overflow-y-auto w-full flex justify-center bg-slate-100 p-6 md:p-10">
+                <!-- 실제 사용자가 보는 화면과 동일한 너비와 디자인 컨테이너 -->
+                <div class="bg-white rounded-xl shadow-lg border border-slate-200 w-full max-w-4xl min-h-[800px] h-fit block">
+                    <div id="preview-content" class="p-8 md:p-12 w-full">
+                        <!-- 콘텐츠 렌더링 영역 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 라이트박스(이미지 확대) 모달 -->
+    <div id="lightbox" class="fixed inset-0 bg-black/80 z-50 hidden flex-col items-center justify-center backdrop-blur-sm" onclick="closeLightbox()">
+        <div class="text-white absolute top-4 right-4 cursor-pointer p-2 bg-white/10 rounded hover:bg-white/20">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </div>
+        <div class="bg-white p-4 rounded-xl max-w-5xl w-full mx-4" onclick="event.stopPropagation()">
+            <!-- 동적 이미지가 들어갑니다. (목업의 경우 가상의 고해상도 박스) -->
+            <div id="lightbox-content" class="bg-slate-800 h-[60vh] rounded flex items-center justify-center text-slate-400">
+                실제 적용 시 이 영역에 원본 고해상도 이미지가 표시됩니다.
+            </div>
+        </div>
+        <div class="text-white mt-4 text-sm">아무 곳이나 클릭하여 닫기</div>
+    </div>
+
+    <!-- 메뉴(바로가기) 선택 옵션 데이터 -->
+    <script>
+        const MENU_OPTIONS = [
+            { id: '', name: '바로가기 선택 안함 (메뉴 숨김)' },
+            { id: '/evhtml/sample/car_reg.html', name: '▶ 차량 제원 등록 화면' },
+            { id: '/evhtml/sample/SFR-020_guide_mgmt_list.html', name: '▶ 사용자가이드 관리 목록 화면' },
+            { id: '/evhtml/sample/example_dashboard.html', name: '▶ 대시보드 메인 화면' }
+        ];
+
+        function getMenuSelectHTML(id, selectedValue) {
+            let optionsStr = MENU_OPTIONS.map(opt =>
+                `<option value="${opt.id}" ${selectedValue === opt.id ? 'selected' : ''}>${opt.name}</option>`
+            ).join('');
+
+            return `
+                <div class="mt-4 pt-3 border-t border-slate-200">
+                    <div class="text-xs font-bold text-slate-500 mb-1">🔗 연관 메뉴 바로가기 버튼 제공</div>
+                    <select class="block-input bg-white w-full" data-id="${id}" data-key="linkMenu" onchange="updateData('${id}', 'linkMenu', this.value)">
+                        ${optionsStr}
+                    </select>
+                </div>
+            `;
+        }
+
+        function getImageUploadHTML(id, imageValue) {
+            if (imageValue && imageValue !== '') {
+                // "html-mockup" 이라는 특수 키워드일 때의 예외 처리
+                const displaySrc = imageValue === 'html-mockup' ? 'https://dummyimage.com/150x50/3b82f6/fff.png&text=HTML+MOCKUP' : imageValue;
+                const displayText = imageValue === 'html-mockup' ? 'HTML 템플릿(코드) 반영됨 ✅' : '이미지 등록됨 완료 ✅';
+
+                return `
+                    <div class="mt-4 pt-3 border-t border-slate-200">
+                        <div class="text-xs font-bold text-slate-500 mb-2">🖼️ 스크린샷 이미지 등록</div>
+                        <div class="flex items-center gap-3 p-2 bg-slate-100 rounded border border-slate-300">
+                            <img src="${displaySrc}" class="w-16 h-12 object-cover rounded border border-slate-200 bg-white">
+                            <span class="text-sm text-green-600 font-bold flex-1">${displayText}</span>
+                            <button onclick="removeImage('${id}')" class="text-xs font-medium text-red-600 hover:text-red-700 px-3 py-1.5 bg-white border border-red-200 hover:border-red-300 rounded shadow-sm transition">변경/삭제</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="mt-4 pt-3 border-t border-slate-200">
+                        <div class="text-xs font-bold text-slate-500 mb-2">🖼️ 스크린샷 이미지 등록 (선택)</div>
+                        <input type="file" accept="image/*" class="block-input bg-white w-full cursor-pointer" onchange="handleImageUpload('${id}', this)">
+                        <div class="text-[11px] text-slate-400 mt-1">※ 이미지를 업로드하지 않으면 우측에 이미지 영역이 노출되지 않습니다.</div>
+                    </div>
+                `;
+            }
+        }
+
+        function handleImageUpload(id, input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    updateData(id, 'image', e.target.result);
+                    renderEditor();
+                    saveAndPreview();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeImage(id) {
+            updateData(id, 'image', '');
+            renderEditor();
+            saveAndPreview();
+        }
+
+        let docSettings = {
+            system: '무공해차 통합누리집',
+            auth: ['시스템 관리자'],
+            status: '공개'
+        };
+
+        function updateDocSettings() {
+            docSettings.system = document.getElementById('doc-system').value;
+            
+            // 다중 체크박스(대상 권한) 값 배열 추출
+            const authChecked = document.querySelectorAll('input[name="doc-auth"]:checked');
+            docSettings.auth = Array.from(authChecked).map(cb => cb.value);
+            
+            // 라디오(공개여부) 값 추출
+            const statusChecked = document.querySelector('input[name="doc-status"]:checked');
+            if(statusChecked) docSettings.status = statusChecked.value;
+            
+            saveAndPreview();
+        }
+
+        // 초기 데이터 세팅 ('html-mockup' 이 지정되어 있습니다.)
+        let blocks = [
+            { id: 'b1', type: 'title', title: '차량등록 업무 상세 가이드', stepNum: 0 },
+            { id: 'b2', type: 'desc', content: '이 가이드는 차량등록에 관한 업무에 대한 설명입니다.', stepNum: 0 },
+            { id: 'b3', type: 'warning', title: '권한 안내', content: '차량등록을 위해서는 제조사 권한이 필요합니다.', stepNum: 0 },
+            { id: 'b4', type: 'step', title: '차량 제원 등록 화면 이동', content: '로그인 후 > 메뉴1 > 메뉴2', stepNum: 1, linkMenu: '/evhtml/sample/car_reg.html', image: 'html-mockup' },
+            { id: 'b5', type: 'step', title: '차량 제원 입력 후 승인 요청', content: '필수 항목 모두 입력하여 저장 후, 승인 요청', stepNum: 2, linkMenu: '', image: '' },
+            { id: 'b6', type: 'step', title: '검토 후 적용', content: '등록한 내용 검토 후 승인 시 통합 누리집에서 확인 가능합니다.', stepNum: 3, linkMenu: '', image: '' },
+            { id: 'b7', type: 'warning', title: '승인 반려/취소', content: '승인된 내용에 문제가 있을 시, 즉시 감추기 가능합니다. 다시 표출하기 위해서는 승인 요청해야 합니다.', stepNum: 0 }
+        ];
+
+        let blockCounter = 10;
+
+        function renderEditor() {
+            const listData = document.getElementById('editor-form-list');
+            listData.innerHTML = '';
+
+            blocks.forEach(block => {
+                const blockCard = document.createElement('div');
+                blockCard.className = 'block-card shadow-sm hover:shadow-md transition-shadow';
+                blockCard.id = block.id;
+
+                let html = `<button class="delete-btn" onclick="removeBlock('${block.id}')">✕ 삭제</button>`;
+
+                const valContent = block.content ? block.content.replace(/"/g, '&quot;') : '';
+                const valTitle = block.title || '';
+
+                if (block.type === 'title') {
+                    html += `
+                        <div class="text-sm font-bold text-slate-700 mb-2">🏷️ 메인 제목</div>
+                        <input type="text" value="${valTitle}" class="block-input" data-id="${block.id}" data-key="title" placeholder="가이드 문서의 제목을 입력하세요." oninput="updateData('${block.id}', 'title', this.value)">
+                    `;
+                } else if (block.type === 'desc') {
+                    html += `
+                        <div class="text-sm font-bold text-slate-700 mb-2 pr-14 flex justify-between items-center">
+                            <span>≣ 일반 텍스트 설명 (장문 대응)</span>
+                            <div class="flex gap-1">
+                                <button onclick="applyBold('${block.id}_content', '${block.id}', 'content')" class="px-2 py-1 text-[11px] bg-slate-200 hover:bg-slate-300 rounded font-bold text-slate-700 transition" title="텍스트 부분 드래그 후 클릭하여 굵은 글씨 적용">B 굵게</button>
+                                <button onclick="removeBold('${block.id}_content', '${block.id}', 'content')" class="px-2 py-1 text-[11px] bg-white border border-slate-300 hover:bg-slate-100 rounded text-slate-600 transition" title="선택 영역의 굵은 글씨(태그) 해제">취소</button>
+                            </div>
+                        </div>
+                        <textarea id="${block.id}_content" class="block-input" data-id="${block.id}" data-key="content" rows="4" placeholder="안내 내용을 상세히 입력하세요." oninput="updateData('${block.id}', 'content', this.value)">${block.content || ''}</textarea>
+                    `;
+                } else if (block.type === 'warning') {
+                    html += `
+                        <div class="text-sm font-bold text-amber-700 mb-2 pr-14 flex justify-between items-center">
+                            <span>⚠️ 주의/경고 알림 박스</span>
+                            <div class="flex gap-1">
+                                <button onclick="applyBold('${block.id}_warn_content', '${block.id}', 'content')" class="px-2 py-1 text-[11px] bg-amber-200 hover:bg-amber-300 rounded font-bold text-amber-900 transition" title="텍스트 부분 드래그 후 클릭하여 굵은 글씨 적용">B 굵게</button>
+                                <button onclick="removeBold('${block.id}_warn_content', '${block.id}', 'content')" class="px-2 py-1 text-[11px] bg-white border border-amber-300 hover:bg-amber-100 rounded text-amber-700 transition" title="선택 영역의 굵은 글씨(태그) 해제">취소</button>
+                            </div>
+                        </div>
+                        <input type="text" value="${valTitle}" class="block-input font-bold mb-2" data-id="${block.id}" data-key="title" placeholder="경고 상자 제목" oninput="updateData('${block.id}', 'title', this.value)">
+                        <textarea id="${block.id}_warn_content" class="block-input bg-amber-50" data-id="${block.id}" data-key="content" rows="3" placeholder="주의해야 할 사항이나 안내 문구를 입력하세요." oninput="updateData('${block.id}', 'content', this.value)">${block.content || ''}</textarea>
+                    `;
+                } else if (block.type === 'step') {
+                    html += `
+                        <div class="text-sm font-bold text-blue-700 mb-2 pr-14 flex justify-between items-center">
+                            <span>1️⃣ 단계 스텝 (STEP ${block.stepNum})</span>
+                            <div class="flex gap-1">
+                                <button onclick="applyBold('${block.id}_step_content', '${block.id}', 'content')" class="px-2 py-1 text-[11px] bg-blue-200 hover:bg-blue-300 rounded font-bold text-blue-900 transition" title="텍스트 부분 드래그 후 클릭하여 굵은 글씨 적용">B 굵게</button>
+                                <button onclick="removeBold('${block.id}_step_content', '${block.id}', 'content')" class="px-2 py-1 text-[11px] bg-white border border-blue-300 hover:bg-blue-100 rounded text-blue-700 transition" title="선택 영역의 굵은 글씨(태그) 해제">취소</button>
+                            </div>
+                        </div>
+                        <input type="text" value="${valTitle}" class="block-input font-bold mb-2 border-blue-300" data-id="${block.id}" data-key="title" placeholder="스텝 소제목 (예: 차량 제원 등록 화면 이동)" oninput="updateData('${block.id}', 'title', this.value)">
+                        <textarea id="${block.id}_step_content" class="block-input bg-blue-50 border-blue-200" data-id="${block.id}" data-key="content" rows="3" placeholder="경로 등 상세 설명을 적어주세요." oninput="updateData('${block.id}', 'content', this.value)">${block.content || ''}</textarea>
+                        
+                        ${getImageUploadHTML(block.id, block.image)}
+                        ${getMenuSelectHTML(block.id, block.linkMenu)}
+                    `;
+                }
+
+                blockCard.innerHTML = html;
+                listData.appendChild(blockCard);
+            });
+        }
+
+        function addBlock(type) {
+            const id = 'block_' + (blockCounter++);
+            blocks.push({ id, type, content: '', title: '', stepNum: getNextStepNum(), linkMenu: '', image: '' });
+            renderEditor();
+
+            // 새로 추가된 카드로 스크롤 자동 이동 (Timeout은 렌더링 직후를 위해)
+            setTimeout(() => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                    el.querySelector('.block-input').focus();
+                }
+            }, 50);
+        }
+
+        function getNextStepNum() {
+            const stepBlocks = blocks.filter(b => b.type === 'step');
+            return stepBlocks.length + 1;
+        }
+
+        function removeBlock(id) {
+            blocks = blocks.filter(b => b.id !== id);
+
+            // Step 번호 재정렬
+            let currentStep = 1;
+            blocks.forEach(b => {
+                if (b.type === 'step') b.stepNum = currentStep++;
+            });
+
+            renderEditor();
+        }
+
+        function updateData(id, key, value) {
+            const block = blocks.find(b => b.id === id);
+            if (block) {
+                block[key] = value;
+            }
+        }
+
+        function saveAndPreview() {
+            const previewContainer = document.getElementById('preview-content');
+
+            let previewHTML = '';
+
+            blocks.forEach((block) => {
+                let safeContent = (block.content || '').replace(/\n/g, '<br>');
+                let safeTitle = block.title || '';
+
+                if (block.type === 'title') {
+                    // 권한 텍스트 가공
+                    const authText = docSettings.auth.length > 0 
+                                   ?  docSettings.auth.join(', ') + ' 전용' 
+                                   : '<span class="text-red-500 font-bold">권한 미지정</span>';
+
+                    // 상단 설정값 기반으로 라벨 색상 지정
+                    const statusBadge = docSettings.status === '공개' 
+                                      ? '<span class="bg-blue-100 text-blue-700 border border-blue-200 px-2 py-0.5 rounded text-xs ml-2 align-middle font-bold tracking-wide">오픈(공개)</span>'
+                                      : '<span class="bg-slate-200 text-slate-600 border border-slate-300 px-2 py-0.5 rounded text-xs ml-2 align-middle font-bold tracking-wide">비공개</span>';
+                                      
+                    previewHTML += `
+                        <div class="border-b border-slate-200 pb-6 mb-6">
+                            <div class="text-[13px] font-bold text-slate-500 mb-3 flex items-center gap-2">
+                                <span class="text-blue-600">${docSettings.system}</span>
+                                <span class="text-slate-300">|</span>
+                                <span>${authText}</span>
+                                ${statusBadge}
+                            </div>
+                            <h1 class="text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">${safeTitle === '' ? '제목 없음' : safeTitle}</h1>
+                            <p class="text-slate-500 mt-4 text-sm flex gap-3 opacity-70">
+                                <span>최종 편집일: 2026-03-25</span>
+                                <span>|</span>
+                                <span class="font-medium">작성자: 통합 관리자</span>
+                            </p>
+                        </div>
+                    `;
+                } else if (block.type === 'desc') {
+                    previewHTML += `
+                        <p class="text-slate-700 text-base lg:text-lg leading-relaxed mb-8 break-keep">${safeContent === '' ? '내용이 없습니다.' : safeContent}</p>
+                    `;
+                } else if (block.type === 'warning') {
+                    previewHTML += `
+                        <div class="bg-amber-50 border-l-4 border-amber-400 p-5 mb-8 rounded-r-lg flex flex-col sm:flex-row gap-4">
+                            <div class="text-amber-500 mt-0.5 shrink-0">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-amber-900 text-[17px]">${safeTitle === '' ? '주의 사항' : safeTitle}</h3>
+                                <p class="text-amber-800 text-[15px] mt-2 leading-relaxed break-keep">${safeContent}</p>
+                            </div>
+                        </div>
+                    `;
+                } else if (block.type === 'step') {
+                    // 메뉴 바로가기 버튼 렌더링
+                    let btnHtml = '';
+                    if (block.linkMenu && block.linkMenu !== '') {
+                        btnHtml = `
+                            <div class="mt-5">
+                                <a href="${block.linkMenu}" class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-900 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition shadow-sm">
+                                    메뉴 바로가기
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                    </svg>
+                                </a>
+                            </div>
+                        `;
+                    }
+
+                    let imageHtml = '';
+                    // 이미지가 있으면 왼쪽/오른쪽 Split View 형태
+                    if (block.image && block.image !== '') {
+                        let btnHtmlContent = `<div class="lg:w-2/5 flex flex-col justify-center order-2 lg:order-1">
+                                            <div class="inline-block bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded mb-4 w-max shadow-sm">STEP ${block.stepNum}</div>
+                                            <h3 class="text-xl font-bold text-slate-800 mb-3 leading-snug break-keep">${safeTitle === '' ? '스텝 제목 입력' : safeTitle}</h3>
+                                            <p class="text-slate-600 text-[15px] leading-relaxed break-keep">${safeContent}</p>
+                                            ${btnHtml}
+                                          </div>`;
+
+                        // 사용자가 지정한 HTML Mockup으로 대체하는 분기
+                        if (block.image === 'html-mockup') {
+                            imageHtml = `
+                                <div class="lg:w-3/5 order-1 lg:order-2 bg-slate-100 rounded-lg p-2 border border-slate-200 relative group cursor-pointer" onclick="openLightbox()">
+                                    <!-- 가상의 화면 스크린샷 흉내 -->
+                                    <div class="bg-white rounded border shadow-sm h-64 relative overflow-hidden flex">
+                                        <div class="w-1/4 bg-slate-800 h-full p-2">
+                                            <div class="h-2 w-1/2 bg-slate-600 rounded mb-4"></div>
+                                            <!-- Callout (빨간 박스 강조) -->
+                                            <div class="border-2 border-red-500 bg-red-500/10 p-2 rounded">
+                                                <div class="h-2 w-3/4 bg-white rounded mb-2"></div>
+                                                <div class="h-2 w-1/2 bg-white rounded"></div>
+                                                <div class="absolute -left-6 top-6 bg-red-500 text-white text-xs px-2 py-1 rounded shadow-lg animate-bounce">Click!</div>
+                                            </div>
+                                        </div>
+                                        <div class="w-3/4 bg-slate-50 h-full p-4">
+                                            <div class="h-4 w-1/3 bg-slate-200 rounded mb-4"></div>
+                                            <div class="h-full w-full bg-white border rounded"></div>
+                                        </div>
+                                    </div>
+                                    <!-- 확대 힌트 아이콘 -->
+                                    <div class="absolute bottom-4 right-4 bg-slate-800/70 text-white p-2 rounded opacity-0 group-hover:opacity-100 transition">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            // 일반 이미지 렌더링 + 모달 기능 연동
+                            imageHtml = `
+                                <div class="lg:w-3/5 order-1 lg:order-2 bg-white rounded-xl p-2 w-full flex items-center justify-center relative shadow ring-1 ring-slate-200 overflow-hidden cursor-pointer group" onclick="openLightbox('${block.image}')">
+                                    <img src="${block.image}" class="w-full h-auto object-cover rounded-lg group-hover:scale-[1.02] transition-transform duration-300" alt="스텝 설명 이미지">
+                                    <!-- 확대 힌트 아이콘 -->
+                                    <div class="absolute bottom-4 right-4 bg-slate-800/70 text-white p-2 rounded opacity-0 group-hover:opacity-100 transition">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                            `;
+                        }
+
+                        previewHTML += `
+                            <div class="flex flex-col lg:flex-row gap-10 items-stretch mb-12 pb-12 border-b border-slate-200 last:border-0 last:mb-0 last:pb-0 relative">
+                                ${btnHtmlContent}
+                                ${imageHtml}
+                            </div>
+                        `;
+                    } else {
+                        // 이미지가 없는 경우 (텍스트만 출력)
+                        previewHTML += `
+                            <div class="mb-12 pb-12 border-b border-slate-200 last:border-0 last:mb-0 last:pb-0 block relative">
+                                <div class="inline-block bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded mb-4 shadow-sm w-max transition">STEP ${block.stepNum}</div>
+                                <h3 class="text-xl font-bold text-slate-800 mb-3 leading-snug break-keep">${safeTitle === '' ? '스텝 제목 입력' : safeTitle}</h3>
+                                <div class="p-6 bg-slate-50 border border-slate-100 rounded-xl mt-3">
+                                    <p class="text-slate-700 text-[15px] leading-relaxed break-keep">${safeContent}</p>
+                                    ${btnHtml}
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+            });
+
+            previewContainer.innerHTML = previewHTML;
+
+            // 깜빡임 효과 (업데이트 피드백)
+            const parent = previewContainer.parentElement;
+            parent.style.transition = 'none';
+            parent.style.opacity = '0.5';
+            parent.style.transform = 'translateY(4px)';
+            setTimeout(() => {
+                parent.style.transition = 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+                parent.style.opacity = '1';
+                parent.style.transform = 'translateY(0)';
+            }, 50);
+        }
+
+        // 라이트박스 열기/닫기 스크립트
+        function openLightbox(imageSrc) {
+            const lightbox = document.getElementById('lightbox');
+            const content = document.getElementById('lightbox-content');
+
+            // 전달받은 이미지 데이터가 있으면 이미지 태그로 대체, 없으면 기본 메시지 (Mockup용)
+            if (imageSrc && imageSrc.startsWith('data:image')) {
+                content.innerHTML = `<img src="${imageSrc}" class="w-full h-auto rounded object-contain max-h-[80vh]">`;
+            } else {
+                content.innerHTML = `실제 적용 시 이 영역에 원본 고해상도 이미지가 표시됩니다.`;
+            }
+
+            lightbox.classList.remove('hidden');
+            lightbox.classList.add('flex');
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.add('hidden');
+            lightbox.classList.remove('flex');
+        }
+
+        // 특정 영역 굵은 글씨 변환 함수
+        function applyBold(elementId, blockId, key) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            
+            const start = el.selectionStart;
+            const end = el.selectionEnd;
+            
+            if (start === end) {
+                alert("글씨를 굵게 변경하려면 먼저 변경할 텍스트 영역을 마우스로 드래그해서 지정해주세요.");
+                return;
+            }
+            
+            const txt = el.value;
+            const selected = txt.substring(start, end);
+            const replaced = txt.substring(0, start) + '<strong>' + selected + '</strong>' + txt.substring(end);
+            
+            el.value = replaced;
+            updateData(blockId, key, replaced);
+            
+            // 입력 포커스 및 선택 영역 유지
+            el.focus();
+            el.setSelectionRange(start, start + selected.length + 17); // 17은 <strong></strong> 길이 합
+            
+            saveAndPreview();
+        }
+
+        // 특정 영역 굵은 글씨 취소(해제) 함수
+        function removeBold(elementId, blockId, key) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            
+            const start = el.selectionStart;
+            const end = el.selectionEnd;
+            
+            if (start === end) {
+                alert("굵게 표시를 해제하려면 태그(<strong>...</strong>)가 포함된 텍스트 영역을 마우스로 드래그해서 지정해주세요.");
+                return;
+            }
+            
+            const txt = el.value;
+            let selected = txt.substring(start, end);
+            
+            // 선택된 영역 안의 <strong>, </strong> 태그를 모두 제거
+            const oldLength = selected.length;
+            selected = selected.replace(/<\/?strong>/gi, '');
+            const lengthDiff = oldLength - selected.length;
+            
+            const replaced = txt.substring(0, start) + selected + txt.substring(end);
+            
+            el.value = replaced;
+            updateData(blockId, key, replaced);
+            
+            // 입력 포커스 및 선택 영역 유지
+            el.focus();
+            el.setSelectionRange(start, end - lengthDiff);
+            
+            saveAndPreview();
+        }
+
+        // 최초 1회 실행
+        renderEditor();
+        saveAndPreview();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>한국환경공단 - 기술검토 제출</title>
+    <link type="text/css" rel="stylesheet" href="common.css">
+    <link type="text/css" rel="stylesheet" href="common_styles.css">
+    <link type="text/css" rel="stylesheet" href="hdCommon.css">
+    <link type="text/css" rel="stylesheet" href="jquery-ui.css">
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="common.js"></script>
+    <style>
+        .file-upload-table th {
+            background-color: #f9f9f9;
+        }
+
+        .btn-upload {
+            padding: 5px 15px;
+            background: #666;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .required::after {
+            content: ' *';
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="all-container">
+        <!-- Header (Simplified for example) -->
+        <div class="container-fluid top-frame">
+            <div class="top-title off">
+                <div class="top-left">
+                    <img class="top-logo" src="hev_logo.png">
+                </div>
+                <div class="top-right">
+                    <div class="user-wrap">
+                        <div class="user-name"><img class="user-icon" src="icon_account.png"> 시설담당자
+                            님</div>
+                        <button class="btn-black"><span>로그아웃</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container" style="margin-top: 25px;">
+            <div class="inner">
+                <div class="con-right" style="width: 100%; padding: 0;">
+                    <div class="con m-b-20">
+                        <div class="content-title">
+                            <p class="txt-icon">
+                                <span class="home">홈</span>
+                                <span>기술검토</span>
+                                <span class="on">설치계획서 제출</span>
+                            </p>
+                            <div>기술검토 및 설치계획서 제출</div>
+                        </div>
+                    </div>
+
+                    <!-- 시설개요 -->
+                    <div class="con m-b-30">
+                        <div class="section-header" style="margin-bottom: 15px;">
+                            <h2>1. 시설개요</h2>
+                        </div>
+
+                        <!-- 1~2행: 2열 배치 -->
+                        <table class="table-left m-b-10">
+                            <colgroup>
+                                <col width="15%">
+                                <col width="35%">
+                                <col width="15%">
+                                <col width="35%">
+                            </colgroup>
+                            <tbody>
+                                <tr>
+                                    <th class="required">설치사업자</th>
+                                    <td><input type="text" class="selc_style02" style="width: 100%;" value="테스트에너지(주)">
+                                    </td>
+                                    <th>관리번호</th>
+                                    <td><input type="text" class="selc_style02" style="width: 100%;"
+                                            placeholder="예: 24-001"></td>
+                                </tr>
+                                <tr>
+                                    <th class="required">부지위치(주소)</th>
+                                    <td>
+                                        <div style="display: flex; gap: 5px;">
+                                            <input type="text" class="selc_style02" style="width: 70%;"
+                                                placeholder="주소를 선택하세요." readonly>
+                                            <button class="btn_small02 btn_navy_bg" style="width: 30%;">주소찾기</button>
+                                        </div>
+                                    </td>
+                                    <th>부지면적(㎡)</th>
+                                    <td><input type="number" class="selc_style02" style="width: 100%;"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- 3~4행: 3열 배치 (복합 구조) -->
+                        <table class="table-left m-b-10">
+                            <colgroup>
+                                <col width="15%">
+                                <col width="18%">
+                                <col width="15%">
+                                <col width="18%">
+                                <col width="15%">
+                                <col width="19%">
+                            </colgroup>
+                            <tbody>
+                                <tr>
+                                    <th class="required">사업구분</th>
+                                    <td>
+                                        <select class="selc_style02" style="width: 100%;">
+                                            <option>민간지원</option>
+                                            <option>자체사업</option>
+                                        </select>
+                                    </td>
+                                    <th>설치비용(억원)</th>
+                                    <td><input type="text" class="selc_style02" style="width: 100%;"></td>
+                                    <th>사업기간</th>
+                                    <td><input type="text" class="selc_style02" style="width: 100%;"
+                                            placeholder="'26.01~'26.08"></td>
+                                </tr>
+                                <tr>
+                                    <th>충전대상</th>
+                                    <td><input type="text" class="selc_style02" style="width: 100%;"
+                                            placeholder="버스, 화물 등"></td>
+                                    <th>충전용량</th>
+                                    <td><input type="text" class="selc_style02" style="width: 100%;"
+                                            placeholder="300kg/hr"></td>
+                                    <th>충전기(기)</th>
+                                    <td><input type="number" class="selc_style02" style="width: 100%;" value="3"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- 5행: 공급방식 -->
+                        <table class="table-left">
+                            <colgroup>
+                                <col width="15%">
+                                <col width="85%">
+                            </colgroup>
+                            <tbody>
+                                <tr>
+                                    <th>공급방식</th>
+                                    <td>
+                                        <select class="selc_style02" style="width: 200px;">
+                                            <option value="">선택하세요</option>
+                                            <option selected>튜브트레일러</option>
+                                            <option>파이프라인</option>
+                                            <option>온사이트(개질)</option>
+                                            <option>수전해</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 첨부서류 -->
+                    <div class="con m-b-30">
+                        <h2>2. 첨부 서류 제출</h2>
+                        <table class="table-center">
+                            <colgroup>
+                                <col width="5%">
+                                <col width="30%">
+                                <col width="50%">
+                                <col width="15%">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>구분</th>
+                                    <th>파일명</th>
+                                    <th>파일선택</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td class="t-a-left">설치계획 승인 신청서 (스캔본)</td>
+                                    <td id="file_name_1" class="t-a-left" style="color: #999;">파일을 선택해주세요.</td>
+                                    <td><button class="btn_small02 btn_navy_bg"
+                                            onclick="$('#file_1').click()">찾아보기</button><input type="file" id="file_1"
+                                            style="display:none"></td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td class="t-a-left">시설개요서 (양식 기반)</td>
+                                    <td id="file_name_2" class="t-a-left" style="color: #999;">파일을 선택해주세요.</td>
+                                    <td><button class="btn_small02 btn_navy_bg"
+                                            onclick="$('#file_2').click()">찾아보기</button><input type="file" id="file_2"
+                                            style="display:none"></td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td class="t-a-left">설계도면 (평면도, 입면도 등)</td>
+                                    <td id="file_name_3" class="t-a-left" style="color: #999;">파일을 선택해주세요.</td>
+                                    <td><button class="btn_small02 btn_navy_bg"
+                                            onclick="$('#file_3').click()">찾아보기</button><input type="file" id="file_3"
+                                            style="display:none"></td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td class="t-a-left">기타 증빙서류</td>
+                                    <td id="file_name_4" class="t-a-left" style="color: #999;">파일을 선택해주세요.</td>
+                                    <td><button class="btn_small02 btn_navy_bg"
+                                            onclick="$('#file_4').click()">찾아보기</button><input type="file" id="file_4"
+                                            style="display:none"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="btn-wrap t-a-center m-b-50">
+                        <button class="btn_square btn_navy" style="width: 150px;" 
+                            onclick="location.href='SFR-015_tech_list.html'">취소</button>
+                        <button class="btn_square btn_blue02_bg" style="width: 150px;"
+                            onclick="alert('제출되었습니다. 환경청 확인 후 공단으로 기술검토가 요청됩니다.'); location.href='SFR-015_tech_list.html'">제출하기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            $('input[type="file"]').on('change', function () {
+                var id = $(this).attr('id');
+                var fileName = $(this).val().split('\\').pop();
+                if (fileName) {
+                    $('#file_name_' + id.split('_')[1]).text(fileName).css('color', '#333');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

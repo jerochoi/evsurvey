@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이용안내 콘텐츠 작성 - EV Infra</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0F62FE;
+            --primary-hover: #0353E9;
+            --bg-body: #F4F7FB;
+            --bg-card: #FFFFFF;
+            --text-main: #161616;
+            --text-secondary: #525252;
+            --border-color: #E0E0E0;
+            --radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        .edit-container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        
+        .breadcrumb { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; display: flex; gap: 8px; }
+        .breadcrumb span:last-child { color: var(--text-main); font-weight: 600; }
+
+        .editor-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; border-bottom: 1px solid var(--border-color); padding-bottom: 24px; }
+        .header-left h1 { font-size: 24px; font-weight: 700; color: #161616; margin-bottom: 4px; }
+        .header-left p { color: var(--text-secondary); font-size: 14px; }
+
+        .editor-grid { display: grid; grid-template-columns: 320px 1fr; gap: 32px; align-items: start; }
+
+        /* Form Controls */
+        .card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border-color); padding: 32px; box-shadow: var(--shadow); }
+        .form-group { margin-bottom: 24px; }
+        .form-label { display: block; font-size: 14px; font-weight: 600; color: #161616; margin-bottom: 8px; }
+        .form-control { width: 100%; padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-color); outline: none; transition: border-color 0.2s; font-size: 14px; }
+        .form-control:focus { border-color: var(--primary); }
+        textarea.form-control { height: 120px; resize: none; }
+
+        /* Target User Tags */
+        .user-tag-box { border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; min-height: 48px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+        .user-tag { background: #E0EFFF; color: var(--primary); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .user-tag .remove { cursor: pointer; opacity: 0.6; }
+
+        /* Step Builder */
+        .steps-wrapper { margin-top: 32px; }
+        .step-card { background: #fff; border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; margin-bottom: 20px; position: relative; border-left: 4px solid var(--primary); }
+        .step-num { font-size: 12px; font-weight: 700; color: var(--primary); margin-bottom: 12px; display: block; }
+        .step-delete { position: absolute; top: 20px; right: 20px; color: var(--text-secondary); cursor: pointer; font-size: 14px; }
+        .step-delete:hover { color: #DA1E28; }
+
+        /* Dropzone Mockup */
+        .dropzone { border: 2px dashed var(--border-color); border-radius: 8px; padding: 24px; text-align: center; color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: all 0.2s; margin-top: 12px; }
+        .dropzone:hover { border-color: var(--primary); background: #F8FAFF; color: var(--primary); }
+
+        /* Buttons */
+        .btn { display: inline-flex; align-items: center; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; gap: 8px; }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-color); }
+        .btn-full { width: 100%; justify-content: center; }
+
+        /* Modal Overlay */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal { background: #fff; border-radius: 16px; width: 600px; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column; }
+        .modal-header { padding: 24px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { padding: 24px; overflow-y: auto; }
+        .modal-footer { padding: 24px; border-top: 1px solid #eee; text-align: right; }
+
+    </style>
+</head>
+<body>
+
+    <div class="edit-container">
+        <nav class="breadcrumb">
+            <span>콘텐츠 관리</span> > <span>이용안내 관리</span> > <span>새 가이드 작성</span>
+        </nav>
+
+        <header class="editor-header">
+            <div class="header-left">
+                <h1>새 이용 가이드 등록</h1>
+                <p>사용자 역할에 따른 맞춤형 콘텐츠를 단계별로 구성합니다.</p>
+            </div>
+            <div class="header-right" style="display: flex; gap: 12px;">
+                <button class="btn btn-ghost" onclick="location.href='SFR-020_guide_mgmt_list.html'">취소</button>
+                <button class="btn btn-ghost" onclick="location.href='SFR-020_guide_view.html'">미리보기</button>
+                <button class="btn btn-primary" onclick="alert('저장되었습니다.')">게시하기</button>
+            </div>
+        </header>
+
+        <div class="editor-grid">
+            <!-- 기본 설정 (Sticky) -->
+            <aside style="position: sticky; top: 40px;">
+                <div class="card" style="padding: 24px;">
+                    <h3 style="font-size: 16px; margin-bottom: 20px;">콘텐츠 설정</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">대상 사용자 선정</label>
+                        <div class="user-tag-box">
+                            <span class="user-tag">중앙 관리자 <span class="remove">×</span></span>
+                            <span class="user-tag">검토 위원 <span class="remove">×</span></span>
+                        </div>
+                        <button class="btn btn-ghost btn-full" style="font-size: 12px; margin-top: 8px;" onclick="openModal()">+ 사용자 추가 조회</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">노출 우선순위</label>
+                        <select class="form-control">
+                            <option>1 (가장 높음)</option>
+                            <option>2</option>
+                            <option>3</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">상태</label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                            <input type="radio" name="st" checked> 즉시 게시
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; margin-top: 8px;">
+                            <input type="radio" name="st"> 임시 저장
+                        </label>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 메인 에디터 -->
+            <main>
+                <div class="card">
+                    <div class="form-group">
+                        <label class="form-label">가이드 제목</label>
+                        <input type="text" class="form-control" placeholder="사용자가 인지하기 쉬운 명확한 제목을 입력하세요." value="기술검토 승인 결과 확인 및 통보 프로세스">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">안내 요약 문구 (Description)</label>
+                        <textarea class="form-control" placeholder="가이드의 주요 목적을 한 줄로 요약해 주세요."></textarea>
+                    </div>
+
+                    <div class="steps-wrapper">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <h3 style="font-size: 18px; font-weight: 700;">가이드 구성 단계</h3>
+                            <button class="btn btn-ghost" style="padding: 8px 16px;">+ 단계 추가</button>
+                        </div>
+
+                        <!-- Step Cards -->
+                        <div class="step-card">
+                            <span class="step-num">STEP 01</span>
+                            <div class="step-delete">🗑️ 삭제</div>
+                            <div class="form-group" style="margin-bottom: 16px;">
+                                <label class="form-label">단계 제목</label>
+                                <input type="text" class="form-control" placeholder="예: 로그인 및 대시보드 진입" value="통합 승인 현황 확인">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">상세 안내 내용</label>
+                                <textarea class="form-control" style="height: 100px;">상단 메인 메뉴에서 '통합승인' 탭을 선택한 후, 전체 목록 중 본인의 담당 구역에 해당하는 승인 요청 건을 필터링하여 확인합니다.</textarea>
+                            </div>
+                            <div class="dropzone">
+                                <div>📷 화면 캡처 또는 설명 이미지 업로드</div>
+                                <div style="font-size: 11px; margin-top: 4px; opacity: 0.7;">PNG, JPG 최대 5MB</div>
+                            </div>
+                        </div>
+
+                        <div class="step-card">
+                            <span class="step-num">STEP 02</span>
+                            <div class="step-delete">🗑️ 삭제</div>
+                            <div class="form-group" style="margin-bottom: 16px;">
+                                <label class="form-label">단계 제목</label>
+                                <input type="text" class="form-control" value="검토 의견 상세 대조">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">상세 안내 내용</label>
+                                <textarea class="form-control" style="height: 100px;">외부 검토위원이 작성한 1차 의견서를 열람하여 설치 기술 기준(전기, 소방) 적합성 여부를 기재된 데이터값과 대조합니다.</textarea>
+                            </div>
+                            <div style="margin-top: 12px; display: flex; align-items: center; gap: 12px;">
+                                <div style="background: #F4F7FB; padding: 12px; border-radius: 8px; flex-grow: 1; font-size: 13px; color: var(--primary);">
+                                    📎 attached_reference_screen.png
+                                </div>
+                                <button class="btn btn-ghost" style="padding: 8px;">🔄 변경</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 사용자 조회 모달 -->
+    <div class="modal-overlay" id="userModal">
+        <div class="modal">
+            <header class="modal-header">
+                <h2 style="font-size: 18px;">사용자 그룹 상세 조회</h2>
+                <span style="cursor: pointer;" onclick="closeModal()">✕</span>
+            </header>
+            <div class="modal-body">
+                <div class="search-box" style="margin-bottom: 20px; position: relative;">
+                    <input type="text" class="form-control" placeholder="사용자명, 아이디, 소속 부서 검색">
+                </div>
+                
+                <table style="width: 100%; font-size: 13px;">
+                    <thead style="background: #F4F7FB;">
+                        <tr>
+                            <th style="padding: 12px; text-align: left;"><input type="checkbox"></th>
+                            <th style="padding: 12px; text-align: left;">성명</th>
+                            <th style="padding: 12px; text-align: left;">부서/소속</th>
+                            <th style="padding: 12px; text-align: left;">권한 레벨</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 12px;"><input type="checkbox"></td>
+                            <td style="padding: 12px;">홍길동</td>
+                            <td style="padding: 12px;">시스템운영팀</td>
+                            <td style="padding: 12px;">Total Admin</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 12px;"><input type="checkbox"></td>
+                            <td style="padding: 12px;">이영희</td>
+                            <td style="padding: 12px;">관리팀</td>
+                            <td style="padding: 12px;">Manager</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 12px;"><input type="checkbox"></td>
+                            <td style="padding: 12px;">김철수</td>
+                            <td style="padding: 12px;">심사위원회</td>
+                            <td style="padding: 12px;">Reviewer</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <footer class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal()">닫기</button>
+                <button class="btn btn-primary" onclick="closeModal()">선택 추가</button>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        function openModal() { document.getElementById('userModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('userModal').style.display = 'none'; }
+    </script>
+
+</body>
+</html>
