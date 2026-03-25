@@ -1,0 +1,57 @@
+@charset "utf-8";
+
+@import url('font.css');
+
+* {margin:0; padding:0;}
+body {
+	color: #333333;
+	font-family: 'Noto Sans KR', sans-serif;
+	font-size: 12px;
+	line-height: 17px;
+	font-weight: 500;
+}
+a:link	{
+	color:#232323;
+	text-decoration:none;
+}
+a:visited	{
+	color:#232323;
+	text-decoration:none;
+}
+/* a:hover	{
+	color:#e95a1b;
+}
+a:active	{
+	color:#e95a1b;
+} */
+
+ul, ol {list-style:none;}
+table {border-collapse:collapse; font-size:12px;}
+img, fieldset, form {border:none; vertical-align:middle;}
+select {vertical-align:middle;font-size: 12px; font-family: 'Noto Sans KR', sans-serif;}
+legend,caption {display:none;position:absolute;}
+h1, h2, h3, h4, h5, h6	{font-size:12px;}
+input	{font-size: 12px;font-family: 'Noto Sans KR', sans-serif;vertical-align:middle;}
+.mt30	{margin-top:30px;}
+.mt20	{margin-top:20px;}
+.mt15	{margin-top:15px;}
+.mt10	{margin-top:10px;}
+.mt5	{margin-top:5px;}
+.bold	{font-weight:bold;}
+.nor	{font-weight:normal;}
+.tar	{clear:both;text-align:right;}
+.tac	{clear:both;text-align:center;}
+.c01	{color:#155099;}/*블루¨*/
+.c02	{color:#858585;}/*회색*/
+.c03	{color:#f24a00;}/*오렌지*/
+.fs	{font-size:11px;}
+.fl	{float:left;}
+.fr	{float:right;}
+.clear	{clear:both;}
+.db	{display:block;}
+.oh	{overflow:hidden;}
+.hidden	{display:none;}
+hr	{
+	visibility:hidden;font-size:0; width:0; height:0; line-height:0;overflow:hidden; position:absolute; top:0; left:0
+}
+.after:after{content: ''; display: block; clear: both;}

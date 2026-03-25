@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>부지검토 결과 보고서 - Help Desk</title>
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="common.css">
+    <link type="text/css" rel="stylesheet" href="common_styles.css">
+    <link type="text/css" rel="stylesheet" href="hdCommon.css">
+    <style>
+        .document-page {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 40px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-top: 5px solid #1976d2;
+            position: relative;
+        }
+
+        .preview-btn-top {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+        }
+
+        @media print {
+
+            .preview-btn-top,
+            .btn-wrap,
+            .editor-toolbar,
+            .t-a-right,
+            .btn-circle {
+                display: none !important;
+            }
+
+            .document-page {
+                margin: 0;
+                border: none;
+                width: 100%;
+                max-width: none;
+            }
+        }
+
+        .main-title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .table-doc {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+            table-layout: fixed;
+        }
+
+        .table-doc th,
+        .table-doc td {
+            border: 1px solid #333;
+            padding: 10px;
+            font-size: 14px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .table-doc th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .t-a-l {
+            text-align: left !important;
+        }
+
+        .section-sub-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #1976d2;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-sub-title::before {
+            content: '■';
+            margin-right: 8px;
+            font-size: 14px;
+        }
+
+        .editor-wrap {
+            display: flex;
+            width: 100%;
+            border: 1px solid #ccc;
+            background: #fff;
+            min-height: 40px;
+        }
+
+        .editor-toolbar {
+            display: grid;
+            grid-template-columns: repeat(2, 28px);
+            grid-template-rows: repeat(2, 28px);
+            gap: 4px;
+            padding: 8px;
+            background: #f1f3f4;
+            border-right: 1px solid #ccc;
+            align-content: flex-start;
+            justify-content: center;
+        }
+
+        .editor-toolbar button {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            background: #fff;
+            border-radius: 4px;
+            padding: 0;
+            transition: all 0.2s;
+        }
+
+        .editor-toolbar button:hover {
+            background: #e8f0fe;
+            border-color: #1976d2;
+        }
+
+        .editor-toolbar button svg {
+            width: 16px;
+            height: 16px;
+            fill: #555;
+        }
+
+        .editor-content {
+            flex: 1;
+            padding: 12px 15px;
+            text-align: left;
+            outline: none;
+            line-height: 1.6;
+            font-size: 14px;
+            word-break: break-all;
+            background: #fff;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .photo-box {
+            border: 1px solid #eee;
+            height: 220px;
+            display: flex;
+            flex-direction: column;
+            background: #fcfcfc;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .photo-label {
+            background: #555;
+            color: #fff;
+            width: 100%;
+            text-align: center;
+            padding: 6px 0;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .photo-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #bbb;
+            font-style: italic;
+        }
+
+        .map-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .map-box {
+            border: 1px solid #eee;
+            height: 250px;
+            position: relative;
+            background: #f0f0f0;
+        }
+
+        .map-box .label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            padding: 3px 8px;
+            font-size: 11px;
+            z-index: 10;
+            border-radius: 3px;
+        }
+
+        .btn-circle {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: none;
+            color: #fff;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+
+        .btn-add {
+            background: #1976d2;
+        }
+
+        .btn-del {
+            background: #d32f2f;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="all-container">
+        <div class="container">
+            <div class="inner">
+                <div class="con-right" style="width: 100%;">
+                    <div class="document-page">
+                        <div class="preview-btn-top">
+                            <button class="btn_small02 btn_navy_bg" onclick="window.print()">보고서 미리보기</button>
+                        </div>
+                        <div class="main-title">부지검토 결과 보고서</div>
+
+                        <div class="section-sub-title">문의 부지 정보</div>
+                        <table class="table-doc">
+                            <colgroup>
+                                <col width="15%">
+                                <col width="35%">
+                                <col width="15%">
+                                <col width="35%">
+                            </colgroup>
+                            <tbody>
+                                <tr>
+                                    <th>사업구분</th>
+                                    <td>민간보조사업(일반)</td>
+                                    <th>충전대상</th>
+                                    <td>액화</td>
+                                </tr>
+                                <tr>
+                                    <th>부지위치</th>
+                                    <td colspan="3">세종특별자치시 어진동 501 일원</td>
+                                </tr>
+                                <tr>
+                                    <th>면적</th>
+                                    <td>2,500 ㎡</td>
+                                    <th></th>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <th rowspan="2">지역지구<br>지정여부</th>
+                                    <th>국토계획법</th>
+                                    <td colspan="2" class="t-a-l">도시지역, 중심상업지역, 지구단위계획구역 등</td>
+                                </tr>
+                                <tr>
+                                    <th>다른법령</th>
+                                    <td colspan="2" class="t-a-l">해당없음</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="section-sub-title">위성사진 (확대/축소)</div>
+                        <div class="map-container">
+                            <div class="map-box">
+                                <div class="label">위성사진(축소)</div>
+                                <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#ccc;">MAP AREA (ZOOM-OUT)</div>
+                            </div>
+                            <div class="map-box">
+                                <div class="label">위성사진(확대)</div>
+                                <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#ccc;">MAP AREA (ZOOM-IN)</div>
+                            </div>
+                        </div>
+
+                        <div class="section-sub-title">현장사진</div>
+                        <div class="photo-grid">
+                            <div class="photo-box">
+                                <div class="photo-label">현장사진 #1</div>
+                                <div class="photo-content">이미지를 업로드하세요</div>
+                            </div>
+                            <div class="photo-box">
+                                <div class="photo-label">현장사진 #2</div>
+                                <div class="photo-content">이미지를 업로드하세요</div>
+                            </div>
+                        </div>
+
+                        <div class="section-sub-title">토지e음 캡처 화면</div>
+                        <div style="border: 1px solid #ddd; height: 180px; margin-bottom: 25px; background: #fafafa; display: flex; align-items: center; justify-content: center; color: #ccc; font-style: italic;">
+                            이미지를 업로드하세요
+                        </div>
+
+
+                        <div class="section-sub-title">세부 검토의견</div>
+                        <div class="t-a-right m-b-10">
+                            <button class="btn_small02 btn_blue_bg" onclick="addCategory()" style="width: 100px;">+ 항목 추가</button>
+                            <button class="btn_small02 btn_navy_bg" onclick="location.href='help_law.html'" style="margin-left: 5px;">법령관리 이동</button>
+                        </div>
+                        <table class="table-doc" id="review-table">
+                            <colgroup>
+                                <col width="15%">
+                                <col width="77%">
+                                <col width="8%">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th>검토항목</th>
+                                    <th>검토의견</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="item-row" data-cat="cat_perm">
+                                    <th rowspan="1" class="cat-label">인허가</th>
+                                    <td class="t-a-l">
+                                        <div class="editor-wrap">
+                                            <div class="editor-toolbar">
+                                                <button type="button" onclick="modifyStyle(this, 'fontSize', 1)" title="글자 크게"><svg viewBox="0 0 24 24">
+                                                        <path d="M5.12 14L7.5 7.67 9.87 14M6.5 5L1 19h2.25l1.12-3h6.25l1.12 3H14L8.5 5h-2zM18 7l-5 5.07 1.41 1.43L17 10.9V17h2v-6.1l2.59 2.6L23 12.07 18 7z" />
+                                                    </svg></button>
+                                                <button type="button" onclick="modifyStyle(this, 'fontSize', -1)" title="글자 작게"><svg viewBox="0 0 24 24">
+                                                        <path d="M5.12 14L7.5 7.67 9.87 14M6.5 5L1 19h2.25l1.12-3h6.25l1.12 3H14L8.5 5h-2zM18 17l5-5.07-1.41-1.43L19 13.1V7h-2v6.1l-2.59-2.6L13 11.93 18 17z" />
+                                                    </svg></button>
+                                                <button type="button" onclick="modifyStyle(this, 'letterSpacing', 0.5)" title="자간 넓게"><svg viewBox="0 0 24 24">
+                                                        <path d="M12 5l-2 2h3v10h-3l2 2 2-2h-2V7h2l-2-2zM5 19l2-2H4V7h3l-2-2-2 2h2v10H3l2 2zM19 5l-2 2h3v10h-3l2 2 2-2h-2V7h2l-2-2z" />
+                                                    </svg></button>
+                                                <button type="button" onclick="modifyStyle(this, 'letterSpacing', -0.5)" title="자간 좁게"><svg viewBox="0 0 24 24">
+                                                        <path d="M11 7l-2 2h2v6H9l2 2 2-2h-2V9h2l-2-2zM2 12l3 3v-2h2v-2H5V9l-3 3zM22 12l-3-3v2h-2v2h2v2l3-3z" />
+                                                    </svg></button>
+                                            </div>
+                                            <div class="editor-content" contenteditable="true">해당 부지는 자연녹지지역 및 도시지역인 <b>복합지역</b>으로 국토의 계획 및 이용에 관한 법률 ...</div>
+                                        </div>
+                                    </td>
+                                    <td><button class="btn-circle btn-add" onclick="addRow(this)">+</button></td>
+                                </tr>
+                                <tr class="item-row" data-cat="cat_site">
+                                    <th rowspan="1" class="cat-label">부지</th>
+                                    <td class="t-a-l">
+                                        <div class="editor-wrap">
+                                            <div class="editor-toolbar">
+                                                <button type="button" onclick="modifyStyle(this, 'fontSize', 1)" title="글자 크게"><svg viewBox="0 0 24 24">
+                                                        <path d="M5.12 14L7.5 7.67 9.87 14M6.5 5L1 19h2.25l1.12-3h6.25l1.12 3H14L8.5 5h-2zM18 7l-5 5.07 1.41 1.43L17 10.9V17h2v-6.1l2.59 2.6L23 12.07 18 7z" />
+                                                    </svg></button>
+                                                <button type="button" onclick="modifyStyle(this, 'fontSize', -1)" title="글자 작게"><svg viewBox="0 0 24 24">
+                                                        <path d="M5.12 14L7.5 7.67 9.87 14M6.5 5L1 19h2.25l1.12-3h6.25l1.12 3H14L8.5 5h-2zM18 17l5-5.07-1.41-1.43L19 13.1V7h-2v6.1l-2.59-2.6L13 11.93 18 17z" />
+                                                    </svg></button>
+                                                <button type="button" onclick="modifyStyle(this, 'letterSpacing', 0.5)" title="자간 넓게"><svg viewBox="0 0 24 24">
+                                                        <path d="M12 5l-2 2h3v10h-3l2 2 2-2h-2V7h2l-2-2zM5 19l2-2H4V7h3l-2-2-2 2h2v10H3l2 2zM19 5l-2 2h3v10h-3l2 2 2-2h-2V7h2l-2-2z" />
+                                                    </svg></button>
+                                                <button type="button" onclick="modifyStyle(this, 'letterSpacing', -0.5)" title="자간 좁게"><svg viewBox="0 0 24 24">
+                                                        <path d="M11 7l-2 2h2v6H9l2 2 2-2h-2V9h2l-2-2zM2 12l3 3v-2h2v-2H5V9l-3 3zM22 12l-3-3v2h-2v2h2v2l3-3z" />
+                                                    </svg></button>
+                                            </div>
+                                            <div class="editor-content" contenteditable="true">고압가스시설과의 고압선 및 ...</div>
+                                        </div>
+                                    </td>
+                                    <td><button class="btn-circle btn-add" onclick="addRow(this)">+</button></td>
+                                </tr>
+                                <tr class="item-row" data-cat="cat_demand">
+                                    <th rowspan="1" class="cat-label">수요</th>
+                                    <td class="t-a-l">
+                                        <div class="editor-wrap">
+                                            <div class="editor-toolbar">
+                                                <button type="button" onclick="modifyStyle(this, 'fontSize', 1)" title="글자 크게"><svg viewBox="0 0 24 24">
+                                                        <path d="M5.12 14L7.5 7.67 9.87 14M6.5 5L1 19h2.25l1.12-3h6.25l1.12 3H14L8.5 5h-2zM18 7l-5 5.07 1.41 1.43L17 10.9V17h2v-6.1l2.59 2.6L23 12.07 18 7z" />
+                                                    </svg></button>
+                                                <button type="button" onclick="modifyStyle(this, 'fontSize', -1)" title="글자 작게"><svg viewBox="0 0 24 24">
+                                                        <path d="M5.12 14L7.5 7.67 9.87 14M6.5 5L1 19h2.25l1.12-3h6.25l1.12 3H14L8.5 5h-2zM18 17l5-5.07-1.41-1.43L19 13.1V7h-2v6.1l-2.59-2.6L13 11.93 18 17z" />
+                                                    </svg></button>
+                                                <button type="button" onclick="modifyStyle(this, 'letterSpacing', 0.5)" title="자간 넓게"><svg viewBox="0 0 24 24">
+                                                        <path d="M12 5l-2 2h3v10h-3l2 2 2-2h-2V7h2l-2-2zM5 19l2-2H4V7h3l-2-2-2 2h2v10H3l2 2zM19 5l-2 2h3v10h-3l2 2 2-2h-2V7h2l-2-2z" />
+                                                    </svg></button>
+                                                <button type="button" onclick="modifyStyle(this, 'letterSpacing', -0.5)" title="자간 좁게"><svg viewBox="0 0 24 24">
+                                                        <path d="M11 7l-2 2h2v6H9l2 2 2-2h-2V9h2l-2-2zM2 12l3 3v-2h2v-2H5V9l-3 3zM22 12l-3-3v2h-2v2h2v2l3-3z" />
+                                                    </svg></button>
+                                            </div>
+                                            <div class="editor-content" contenteditable="true">인근 물류 센터 및 버스 차고지 인접으로 수요 충분.</div>
+                                        </div>
+                                    </td>
+                                    <td><button class="btn-circle btn-add" onclick="addRow(this)">+</button></td>
+                                </tr>
+                                <tr class="item-row" data-cat="cat_complaint">
+                                    <th rowspan="1" class="cat-label">민원</th>
+                                    <td class="t-a-l">
+                                        <div class="editor-wrap">
+                                            <div class="editor-toolbar">
+                                                <button type="button" onclick="modifyStyle(this, 'fontSize', 1)" title="글자 크게"><svg viewBox="0 0 24 24">
+                                                        <path d="M5.12 14L7.5 7.67 9.87 14M6.5 5L1 19h2.25l1.12-3h6.25l1.12 3H14L8.5 5h-2zM18 7l-5 5.07 1.41 1.43L17 10.9V17h2v-6.1l2.59 2.6L23 12.07 18 7z" />
+                                                    </svg></button>
+                                                <button type="button" onclick="modifyStyle(this, 'fontSize', -1)" title="글자 작게"><svg viewBox="0 0 24 24">
+                                                        <path d="M5.12 14L7.5 7.67 9.87 14M6.5 5L1 19h2.25l1.12-3h6.25l1.12 3H14L8.5 5h-2zM18 17l5-5.07-1.41-1.43L19 13.1V7h-2v6.1l-2.59-2.6L13 11.93 18 17z" />
+                                                    </svg></button>
+                                                <button type="button" onclick="modifyStyle(this, 'letterSpacing', 0.5)" title="자간 넓게"><svg viewBox="0 0 24 24">
+                                                        <path d="M12 5l-2 2h3v10h-3l2 2 2-2h-2V7h2l-2-2zM5 19l2-2H4V7h3l-2-2-2 2h2v10H3l2 2zM19 5l-2 2h3v10h-3l2 2 2-2h-2V7h2l-2-2z" />
+                                                    </svg></button>
+                                                <button type="button" onclick="modifyStyle(this, 'letterSpacing', -0.5)" title="자간 좁게"><svg viewBox="0 0 24 24">
+                                                        <path d="M11 7l-2 2h2v6H9l2 2 2-2h-2V9h2l-2-2zM2 12l3 3v-2h2v-2H5V9l-3 3zM22 12l-3-3v2h-2v2h2v2l3-3z" />
+                                                    </svg></button>
+                                            </div>
+                                            <div class="editor-content" contenteditable="true">이격거리 내 민가 없음. 민원 발생 우려 낮음.</div>
+                                        </div>
+                                    </td>
+                                    <td><button class="btn-circle btn-add" onclick="addRow(this)">+</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <table class="table-doc">
+                            <colgroup>
+                                <col width="12%">
+                                <col width="10%">
+                                <col>
+                                <col width="20%">
+                            </colgroup>
+                            <tbody>
+                                <tr class="fixed-row">
+                                    <th colspan="3" style="background: #f8f9fa;">관련법령 검토</th>
+                                    <th>기준일자 <br> <input type="date" class="selc_style02" style="width: 80px;" value="2026-03-17"></th>
+                                </tr>
+                                <tr class="item-row">
+                                    <td colspan="4" style="padding: 0;">
+                                        <table class="table-doc" style="margin-bottom: 0; border: none;">
+                                            <colgroup>
+                                                <col width="20%">
+                                                <col width="20%">
+                                                <col width="45%">
+                                                <col width="15%">
+                                            </colgroup>
+                                            <thead>
+                                                <tr style="background: #fdfdfd;">
+                                                    <th style="border-left: none;">관련법령</th>
+                                                    <th>관련조항</th>
+                                                    <th>주요내용</th>
+                                                    <th style="border-right: none;">검토결과</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td style="border-left: none;">국토의 계획 및 이용에 관한 법률 시행령</td>
+                                                    <td>제71조</td>
+                                                    <td class="t-a-l">용도지역 안에서의 건축제한...</td>
+                                                    <td style="border-right: none;">
+                                                        <div style="display: flex; gap: 5px; justify-content: center;">
+                                                            <label style="cursor: pointer;"><input type="radio" name="res1" value="O" checked> ○</label>
+                                                            <label style="cursor: pointer;"><input type="radio" name="res1" value="T"> △</label>
+                                                            <label style="cursor: pointer;"><input type="radio" name="res1" value="X"> ×</label>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="border-left: none;">교육환경 보호에 관한 법률</td>
+                                                    <td>제9조</td>
+                                                    <td class="t-a-l">절대보호구역 : 50m 이내 설치 금지 등...</td>
+                                                    <td style="border-right: none;">
+                                                        <div style="display: flex; gap: 5px; justify-content: center;">
+                                                            <label style="cursor: pointer;"><input type="radio" name="res2" value="O" checked> ○</label>
+                                                            <label style="cursor: pointer;"><input type="radio" name="res2" value="T"> △</label>
+                                                            <label style="cursor: pointer;"><input type="radio" name="res2" value="X"> ×</label>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr class="fixed-row">
+                                    <th>종합의견</th>
+                                    <td style="border-right: none;">
+                                        <div style="display: flex; gap: 5px; justify-content: center;">
+                                            <label style="cursor: pointer;"><input type="radio" name="result" value="O" checked> ○</label>
+                                            <label style="cursor: pointer;"><input type="radio" name="result" value="T"> △</label>
+                                            <label style="cursor: pointer;"><input type="radio" name="result" value="X"> ×</label>
+                                        </div>
+                                    </td>
+                                    <td class="t-a-l" colspan="2" style="background: #fff9e6;">
+                                        <div class="editor-content" contenteditable="true" style="font-weight: bold;">[적정] 종합적으로 수소충전소 설치에 적합한 부지로 판단됨.</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="btn-wrap t-a-center m-t-30">
+                            <button class="btn_square btn_navy" onclick="location.href='help_list.html'">목록보기</button>
+                            <button class="btn_square btn_navy_bg" onclick="window.print()" style="margin: 0 5px;">보고서 미리보기</button>
+                            <button class="btn_square btn_blue02_bg" onclick="alert('부지검토 답변이 전송되었습니다.'); location.href='help_list.html'">검토완료</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function modifyStyle(btn, prop, delta) {
+            const editor = $(btn).closest('.editor-wrap').find('.editor-content')[0];
+            const selection = window.getSelection();
+            if (!selection.rangeCount || selection.isCollapsed) {
+                const cur = parseFloat($(editor).css(prop)) || (prop === 'fontSize' ? 14 : 0);
+                $(editor).css(prop, (cur + delta) + "px");
+                return;
+            }
+            document.execCommand('styleWithCSS', false, true);
+            const dummy = prop === 'fontSize' ? 'foreColor' : 'hiliteColor';
+            const dummyVal = prop === 'fontSize' ? 'rgba(0,0,0,0.01)' : 'rgba(0,0,0,0.02)';
+            document.execCommand(dummy, false, dummyVal);
+            const elements = editor.querySelectorAll(`span[style*="${dummy}"]`);
+            elements.forEach(el => {
+                const cur = parseFloat(window.getComputedStyle(el)[prop]) || (prop === 'fontSize' ? 14 : 0);
+                el.style[prop] = (cur + delta) + "px";
+                el.style.color = ""; el.style.backgroundColor = "";
+            });
+        }
+
+        function addCategory() {
+            const catName = prompt("추가할 검토항목 명칭을 입력하세요.", "기타");
+            if (!catName) return;
+            const tbody = $('#review-table tbody');
+            const newCatId = 'cat_' + Date.now();
+            const newRow = $(`
+                <tr class="item-row" data-cat="${newCatId}">
+                    <th rowspan="1" class="cat-label">
+                        <div style="display:flex; flex-direction:column; gap:5px; align-items:center;">
+                            <span contenteditable="true">${catName}</span>
+                            <button class="btn_small02 btn_red_bg" style="font-size:10px; padding:2px 4px; min-width:auto; height:20px; line-height:16px;" onclick="delCategory(this)">항목삭제</button>
+                        </div>
+                    </th>
+                    <td class="t-a-l">
+                        <div class="editor-wrap">
+                            <div class="editor-toolbar">
+                                <button type="button" onclick="modifyStyle(this, 'fontSize', 1)" title="글자 크게"><svg viewBox="0 0 24 24"><path d="M5.12 14L7.5 7.67 9.87 14M6.5 5L1 19h2.25l1.12-3h6.25l1.12 3H14L8.5 5h-2zM18 7l-5 5.07 1.41 1.43L17 10.9V17h2v-6.1l2.59 2.6L23 12.07 18 7z"/></svg></button>
+                                <button type="button" onclick="modifyStyle(this, 'fontSize', -1)" title="글자 작게"><svg viewBox="0 0 24 24"><path d="M5.12 14L7.5 7.67 9.87 14M6.5 5L1 19h2.25l1.12-3h6.25l1.12 3H14L8.5 5h-2zM18 17l5-5.07-1.41-1.43L19 13.1V7h-2v6.1l-2.59-2.6L13 11.93 18 17z"/></svg></button>
+                                <button type="button" onclick="modifyStyle(this, 'letterSpacing', 0.5)" title="자간 넓게"><svg viewBox="0 0 24 24"><path d="M12 5l-2 2h3v10h-3l2 2 2-2h-2V7h2l-2-2zM5 19l2-2H4V7h3l-2-2-2 2h2v10H3l2 2zM19 5l-2 2h3v10h-3l2 2 2-2h-2V7h2l-2-2z"/></svg></button>
+                                <button type="button" onclick="modifyStyle(this, 'letterSpacing', -0.5)" title="자간 좁게"><svg viewBox="0 0 24 24"><path d="M11 7l-2 2h2v6H9l2 2 2-2h-2V9h2l-2-2zM2 12l3 3v-2h2v-2H5V9l-3 3zM22 12l-3-3v2h-2v2h2v2l3-3z"/></svg></button>
+                            </div>
+                            <div class="editor-content" contenteditable="true"></div>
+                        </div>
+                    </td>
+                    <td><button class="btn-circle btn-add" onclick="addRow(this)">+</button></td>
+                </tr>
+            `);
+            tbody.append(newRow);
+        }
+
+        function delCategory(btn) {
+            if (!confirm("이 검토항목 전체를 삭제하시겠습니까?")) return;
+            const tr = $(btn).closest('tr');
+            const cat = tr.data('cat');
+            $(`tr[data-cat="${cat}"]`).remove();
+        }
+
+        function addRow(btn) {
+            const tr = $(btn).closest('tr');
+            const cat = tr.data('cat');
+            const rows = $(`tr[data-cat="${cat}"]`);
+            const header = rows.first().find('th.cat-label');
+            header.attr('rowspan', parseInt(header.attr('rowspan')) + 1);
+            const newRow = $(`<tr class="item-row" data-cat="${cat}">
+                <td class="t-a-l">
+                    <div class="editor-wrap">
+                        <div class="editor-toolbar">
+                            <button type="button" onclick="modifyStyle(this, 'fontSize', 1)" title="글자 크게"><svg viewBox="0 0 24 24"><path d="M5.12 14L7.5 7.67 9.87 14M6.5 5L1 19h2.25l1.12-3h6.25l1.12 3H14L8.5 5h-2zM18 7l-5 5.07 1.41 1.43L17 10.9V17h2v-6.1l2.59 2.6L23 12.07 18 7z"/></svg></button>
+                            <button type="button" onclick="modifyStyle(this, 'fontSize', -1)" title="글자 작게"><svg viewBox="0 0 24 24"><path d="M5.12 14L7.5 7.67 9.87 14M6.5 5L1 19h2.25l1.12-3h6.25l1.12 3H14L8.5 5h-2zM18 17l5-5.07-1.41-1.43L19 13.1V7h-2v6.1l-2.59-2.6L13 11.93 18 17z"/></svg></button>
+                            <button type="button" onclick="modifyStyle(this, 'letterSpacing', 0.5)" title="자간 넓게"><svg viewBox="0 0 24 24"><path d="M12 5l-2 2h3v10h-3l2 2 2-2h-2V7h2l-2-2zM5 19l2-2H4V7h3l-2-2-2 2h2v10H3l2 2zM19 5l-2 2h3v10h-3l2 2 2-2h-2V7h2l-2-2z"/></svg></button>
+                            <button type="button" onclick="modifyStyle(this, 'letterSpacing', -0.5)" title="자간 좁게"><svg viewBox="0 0 24 24"><path d="M11 7l-2 2h2v6H9l2 2 2-2h-2V9h2l-2-2zM2 12l3 3v-2h2v-2H5V9l-3 3zM22 12l-3-3v2h-2v2h2v2l3-3z"/></svg></button>
+                        </div>
+                        <div class="editor-content" contenteditable="true"></div>
+                    </div>
+                </td>
+                <td><button class="btn-circle btn-del" onclick="delRow(this)">-</button></td></tr>`);
+            rows.last().after(newRow);
+        }
+
+        function delRow(btn) {
+            const tr = $(btn).closest('tr');
+            const cat = tr.data('cat');
+            const rows = $(`tr[data-cat="${cat}"]`);
+            if (rows.length <= 1) return;
+            const header = rows.first().find('th.cat-label');
+            header.attr('rowspan', parseInt(header.attr('rowspan')) - 1);
+            if (tr.find('th.cat-label').length > 0) {
+                const next = tr.next();
+                next.prepend(tr.find('th.cat-label').detach());
+            }
+            tr.remove();
+        }
+    </script>
+</body>
+
+</html>

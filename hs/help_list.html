@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Help Desk - 수소충전소 인프라</title>
+    <link type="text/css" rel="stylesheet" href="common.css">
+    <link type="text/css" rel="stylesheet" href="common_styles.css">
+    <link type="text/css" rel="stylesheet" href="hdCommon.css">
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="common.js"></script>
+    <style>
+        .container { margin-top: 40px !important; }
+        .status-badge { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
+        .status-wait { background: #fff3e0; color: #f57c00; } /* 답변대기 */
+        .status-done { background: #e8f5e9; color: #388e3c; } /* 답변완료 */
+    </style>
+</head>
+
+<body>
+    <div class="all-container">
+        <!-- Header -->
+        <div class="container-fluid top-frame">
+            <div class="top-title off">
+                <div class="top-left"><img class="top-logo" src="hev_logo.png"></div>
+                <div class="top-right">
+                    <div class="user-wrap">
+                        <div class="user-name"><img class="user-icon" src="icon_account.png"> 담당자 님</div>
+                        <button class="btn-black"><span>로그아웃</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="inner">
+                <div class="con-right" style="width: 100%; padding: 0;">
+                    <div class="con m-b-20">
+                        <div class="content-title">
+                            <p class="txt-icon">
+                                <span class="home">홈</span>
+                                <span>Help Desk</span>
+                                <span class="on">문의 내역 조회</span>
+                            </p>
+                            <div style="font-size: 24px; font-weight: bold; margin-top: 5px;">Help Desk 문의 내역</div>
+                        </div>
+                    </div>
+
+                    <!-- 검색 영역 -->
+                    <div class="con m-b-15">
+                        <div class="page-block search-wrap">
+                            <table class="table-left">
+                                <colgroup>
+                                    <col width="15%"><col width="35%"><col width="15%"><col width="35%">
+                                </colgroup>
+                                <tbody>
+                                    <tr>
+                                        <th>문의대상</th>
+                                        <td>
+                                            <select class="selc_style02" style="width: 150px;">
+                                                <option value="">전체</option>
+                                                <option>부지검토</option>
+                                                <option>인허가문의</option>
+                                                <option>기술문의</option>
+                                                <option>기타</option>
+                                            </select>
+                                        </td>
+                                        <th>제목/내용</th>
+                                        <td><input type="text" class="selc_style02" style="width: 100%;"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="btn-wrap"><button class="btn_square btn_navy_bg">조회</button></div>
+                        </div>
+                    </div>
+
+                    <!-- 목록 영역 -->
+                    <div class="con">
+                        <table class="table-center">
+                            <colgroup>
+                                <col width="5%"><col width="10%"><col width="15%"><col width="30%"><col width="15%"><col width="15%"><col width="10%">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th>순번</th>
+                                    <th>상태</th>
+                                    <th>문의대상</th>
+                                    <th>제목</th>
+                                    <th>작성자</th>
+                                    <th>작성일</th>
+                                    <th>액션</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>2</td>
+                                    <td><span class="status-badge status-wait">답변대기</span></td>
+                                    <td>부지검토</td>
+                                    <td class="t-a-left">세종시 어진동 부지 적정성 검토 요청</td>
+                                    <td>이영희</td>
+                                    <td>2026-03-16</td>
+                                    <td><button class="btn_small02 btn_blue02_bg" onclick="location.href='help_review.html'">답변작성</button></td>
+                                </tr>
+                                <tr>
+                                    <td>1</td>
+                                    <td><span class="status-badge status-done">답변완료</span></td>
+                                    <td>기술문의</td>
+                                    <td class="t-a-left">수소 충전기 노즐 결빙 방지 관련 문의</td>
+                                    <td>김철수</td>
+                                    <td>2026-03-15</td>
+                                    <td><button class="btn_small02 btn_navy_bg" onclick="alert('상세 화면으로 이동합니다.')">상세보기</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div class="btn-wrap t-a-right m-t-20">
+                            <button class="btn_square btn_navy_bg" style="width: 150px; margin-right: 5px;" 
+                                onclick="location.href='help_law.html'">관련법령 관리</button>
+                            <button class="btn_square btn_blue02_bg" style="width: 150px;" 
+                                onclick="location.href='help_submit.html'">문의하기</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
