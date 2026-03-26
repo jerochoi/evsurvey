@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>계정 보안 설정 (SFR027) - 무공해차 통합누리집</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0F62FE;
+            --primary-hover: #0353E9;
+            --bg-body: #F4F7FB;
+            --bg-card: #FFFFFF;
+            --text-main: #161616;
+            --text-secondary: #525252;
+            --border-color: #E0E0E0;
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding-bottom: 60px;
+        }
+
+        .top-header {
+            background-color: #161616;
+            color: #fff;
+            padding: 0 40px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-logo {
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 24px;
+        }
+
+        .page-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab {
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #525252;
+            text-decoration: none;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -1px;
+        }
+
+        .tab:hover {
+            color: var(--primary);
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .card {
+            background: #fff;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--danger);
+            padding-left: 12px;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: #F8F9FA;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #525252;
+        }
+
+        td {
+            border-bottom: 1px solid #E0E0E0;
+            padding: 14px 16px;
+            font-size: 14px;
+        }
+
+        tr:hover td {
+            background-color: #FAFCFF;
+        }
+
+        .di-code {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 12px;
+            background: #F4F4F4;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #B31717;
+            word-break: break-all;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .bg-red {
+            background: #FFF1F1;
+            color: #DA1E28;
+            border: 1px solid #FA4D56;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="top-header">
+        <div class="header-logo">시스템 관리자 <span>| 계정 보안 통제</span></div>
+    </header>
+
+    <div class="container">
+        <header class="page-header">
+            <h1>계정 보안 관리 및 설정</h1>
+            <p>플랫폼 접근 통제, 동시 접속 제한 및 비정상 접근 차단 정책을 설정합니다.</p>
+        </header>
+
+        <div class="tabs">
+            <a href="SFR-027_security_config.html" class="tab">환경 설정</a>
+            <a href="SFR-027_security_access_log.html" class="tab">접근 및 동시접속 이력</a>
+            <a href="SFR-027_security_fail_log.html" class="tab active">인증 실패 내역</a>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">로그인 및 본인인증 실패 추적 로그</h2>
+            <div style="margin-bottom: 16px; font-size: 13px; color: #525252;">
+                비밀번호 연속 불일치 또는 휴대폰/공동인증서 본인인증 실패 시, 동일인의 반복적인 공격을 추적하기 위해 DI(중복가입확인정보) 값을 로깅합니다.
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th width="15%">발생 일시</th>
+                        <th width="15%">계정 ID (입력값)</th>
+                        <th width="15%">실패 유형</th>
+                        <th width="40%">DI (Duplication Information) 기록</th>
+                        <th width="15%">접속 IP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>2026-03-26 15:40:11</td>
+                        <td>park55</td>
+                        <td><span class="badge bg-red">본인인증 실패</span></td>
+                        <td><span class="di-code">MC0GCCqGSIb3DQIJAyEAabc123...xyz987=</span></td>
+                        <td>112.45.67.89</td>
+                    </tr>
+                    <tr>
+                        <td>2026-03-26 15:39:55</td>
+                        <td>park55</td>
+                        <td><span class="badge bg-red">본인인증 실패</span></td>
+                        <td><span class="di-code">MC0GCCqGSIb3DQIJAyEAabc123...xyz987=</span></td>
+                        <td>112.45.67.89</td>
+                    </tr>
+                    <tr>
+                        <td>2026-03-26 15:35:10</td>
+                        <td>unknown_user</td>
+                        <td><span class="badge bg-red">비밀번호 5회 오류</span></td>
+                        <td><span class="di-code">MC0GCCqGSIb3DQIJAyEAz8fje3...l1jA8k=</span></td>
+                        <td>45.12.11.9</td>
+                    </tr>
+                    <tr>
+                        <td>2026-03-25 09:12:33</td>
+                        <td>hong12</td>
+                        <td><span class="badge bg-red">비밀번호 오류</span></td>
+                        <td><span style="color:#8D8D8D; font-size:12px;">(DI 획득 전 단계)</span></td>
+                        <td>211.33.22.11</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>
