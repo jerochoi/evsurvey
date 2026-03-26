@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>대시보드 개인화</title>
+    <!-- Gridstack.js CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/gridstack@10.1.2/dist/gridstack.min.css" rel="stylesheet" />
+
+    <!-- Gridstack.js & ApexCharts JS -->
+    <script src="https://cdn.jsdelivr.net/npm/gridstack@10.1.2/dist/gridstack-all.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <style>
+        body {
+            background-color: #f4f7fa;
+            font-family: 'Malgun Gothic', dotum, sans-serif;
+        }
+
+        .grid-stack {
+            margin-top: 20px;
+            min-height: 600px;
+        }
+
+        .grid-stack-item-content {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e1e8ed;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .portlet-header {
+            padding: 12px 18px;
+            background: #ffffff;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+            z-index: 10;
+        }
+
+        .portlet-header h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #334155;
+            margin: 0;
+        }
+
+        .portlet-content {
+            padding: 15px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            min-height: 100px;
+        }
+
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 10px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .template-selector {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: #fff;
+            padding: 8px 15px;
+            border-radius: 30px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .template-btn {
+            padding: 6px 15px;
+            border: 1px solid #ddd;
+            background: #f8f9fa;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .template-btn:hover {
+            background: #eef2ff;
+            border-color: #004ea1;
+        }
+
+        .template-btn.active {
+            background: #004ea1;
+            color: #fff;
+            border-color: #004ea1;
+        }
+
+        .kpi-container {
+            text-align: center;
+        }
+
+        .kpi-val {
+            font-size: 36px;
+            font-weight: 800;
+            color: #004ea1;
+        }
+
+        .kpi-label {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        /* 위젯 내부 차트 영역 */
+        .chart-container {
+            width: 100%;
+            height: 100%;
+            min-height: 120px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="all-container">
+
+        <div class="container" style="margin-top: 100px;">
+            <div class="inner">
+                <div class="header-controls">
+                    <div class="template-selector">
+                        <span style="font-weight: bold; font-size: 14px; margin-right: 5px;">📊 대시보드 템플릿:</span>
+                        <button class="template-btn active" onclick="loadTemplate('charger')">충전기 현황</button>
+                        <button class="template-btn" onclick="loadTemplate('subsidy')">보조금 집행</button>
+                        <button class="template-btn" onclick="loadTemplate('vehicle')">차량등록 정보</button>
+                    </div>
+
+                    <div>
+                        <button class="btn_square btn_navy_bg" onclick="saveUserLayout()">사용자 레이아웃 저장</button>
+                        <button class="btn_square btn_green_bg" onclick="resetToCurrentTemplate()">템플릿 초기화</button>
+                    </div>
+                </div>
+
+                <div class="grid-stack"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let grid;
+        let currentTemplate = 'charger';
+
+        // 템플릿별 위젯 정의 (id는 매칭용, w/h/x/y는 배치)
+        const TEMPLATES = {
+            'charger': [
+                { id: 'c_kpi1', x: 0, y: 0, w: 3, h: 2, title: '전체 충전기수', type: 'kpi', value: '254,120', sub: '전월대비 ▲1,240' },
+                { id: 'c_chart1', x: 3, y: 0, w: 9, h: 4, title: '전국 충전기 설치 현황 (누적)', type: 'chart', chartType: 'area' },
+                { id: 'c_kpi2', x: 0, y: 2, w: 3, h: 2, title: '급속 보급률', type: 'kpi', value: '28.5%', sub: '목표치 대비 95%' },
+                { id: 'c_chart2', x: 0, y: 4, w: 6, h: 4, title: '운영사별 충전기 점유율', type: 'chart', chartType: 'pie' },
+                { id: 'c_chart3', x: 6, y: 4, w: 6, h: 4, title: '지역별 고장 신고 건수', type: 'chart', chartType: 'bar' }
+            ],
+            'subsidy': [
+                { id: 's_kpi1', x: 0, y: 0, w: 3, h: 2, title: '당해 집행 예산', type: 'kpi', value: '4.2조', sub: '집행률 65%' },
+                { id: 's_chart1', x: 3, y: 0, w: 9, h: 4, title: '월별 보조금 지급 추이', type: 'chart', chartType: 'area' },
+                { id: 's_chart2', x: 0, y: 2, w: 3, h: 4, title: '지역별 잔여 예산 비율', type: 'chart', chartType: 'pie' },
+                { id: 's_list', x: 3, y: 4, w: 9, h: 4, title: '최근 보조금 접수 현황', type: 'list' }
+            ],
+            'vehicle': [
+                { id: 'v_kpi1', x: 0, y: 0, w: 4, h: 2, title: '전체 등록대수 (EV)', type: 'kpi', value: '582,400', sub: '전주대비 ▲8,520' },
+                { id: 'v_chart1', x: 4, y: 0, w: 8, h: 4, title: '연도별 전기차 신규 등록 추이', type: 'chart', chartType: 'bar' },
+                { id: 'v_chart2', x: 0, y: 2, w: 4, h: 4, title: '용도별 비율 (자가용/영업용)', type: 'chart', chartType: 'pie' },
+                { id: 'v_chart3', x: 0, y: 6, w: 12, h: 4, title: '제조사별 등록 점유율 변화', type: 'chart', chartType: 'area' }
+            ]
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            grid = GridStack.init({
+                cellHeight: 80,
+                margin: 10,
+                float: false,
+                resizable: { handles: 'e, se, s, sw, w' }
+            });
+
+            // 기본 템플릿 로드 (저장된 사용자 레이아웃이 있으면 그것을 우선함)
+            const saved = localStorage.getItem('user-layout-' + currentTemplate);
+            if (saved) {
+                renderWidgets(JSON.parse(saved));
+            } else {
+                renderWidgets(TEMPLATES[currentTemplate]);
+            }
+
+            // 위젯 리사이즈 이벤트
+            grid.on('resizestop', function () { window.dispatchEvent(new Event('resize')); });
+        });
+
+        // 템플릿 버튼 클릭 시 실행
+        function loadTemplate(key) {
+            currentTemplate = key;
+
+            // UI 버튼 활성화 표시
+            document.querySelectorAll('.template-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.innerText.includes(
+                    key === 'charger' ? '충전기' : (key === 'subsidy' ? '보조금' : '차량등록')
+                ));
+            });
+
+            // 사용자 저장 레이아웃 확인 후 로드
+            const saved = localStorage.getItem('user-layout-' + key);
+            renderWidgets(saved ? JSON.parse(saved) : TEMPLATES[key]);
+        }
+
+        // 위젯 렌더링 함수
+        function renderWidgets(items) {
+            grid.removeAll();
+            items.forEach(item => {
+                const content = createWidgetContent(item);
+                grid.addWidget({
+                    x: item.x, y: item.y, w: item.w, h: item.h, id: item.id,
+                    content: content
+                });
+
+                // 차트가 있는 경우 초기화 (약간의 딜레이 후 렌더링)
+                if (item.type === 'chart') {
+                    setTimeout(() => initWidgetChart(item), 100);
+                }
+            });
+        }
+
+        // 위젯 타입별 HTML 생성
+        function createWidgetContent(item) {
+            let innerHtml = '<div class="kpi-container">데이터 준비중...</div>';
+
+            if (item.type === 'kpi') {
+                innerHtml = `<div class="kpi-container">
+                                <div class="kpi-val">${item.value}</div>
+                                <div class="kpi-label">${item.sub}</div>
+                             </div>`;
+            } else if (item.type === 'chart') {
+                innerHtml = `<div id="chart_${item.id}" class="chart-container"></div>`;
+            } else if (item.type === 'list') {
+                innerHtml = `<ul style="font-size:12px; list-style:none;">
+                                <li style="padding:5px 0; border-bottom:1px solid #f1f5f9;">[접수] 서울 성동구청 신규 신청 - 2024.03.18</li>
+                                <li style="padding:5px 0; border-bottom:1px solid #f1f5f9;">[승인] 경기 수원시 보조금 확정 - 2024.03.17</li>
+                                <li style="padding:5px 0; border-bottom:1px solid #f1f5f9;">[보완] 부산 해운대구 서류 미비 - 2024.03.17</li>
+                             </ul>`;
+            }
+
+            return `<div class="grid-stack-item-content">
+                        <div class="portlet-header"><h3>${item.title}</h3></div>
+                        <div class="portlet-content">${innerHtml}</div>
+                    </div>`;
+        }
+
+        // 차트 위젯 초기화 전용 함수
+        function initWidgetChart(item) {
+            const el = document.querySelector(`#chart_${item.id}`);
+            if (!el) return;
+
+            let options = {
+                chart: { height: '100%', width: '100%', toolbar: { show: false }, fontFamily: 'Malgun Gothic' },
+                dataLabels: { enabled: false },
+                stroke: { curve: 'smooth', width: 2 },
+                colors: ['#004ea1', '#10b981', '#f59e0b']
+            };
+
+            if (item.chartType === 'area') {
+                options.series = [{ name: 'Data A', data: [31, 40, 28, 51, 42] }];
+                options.chart.type = 'area';
+                options.xaxis = { categories: ['M1', 'M2', 'M3', 'M4', 'M5'] };
+            } else if (item.chartType === 'bar') {
+                options.series = [{ name: 'Count', data: [76, 85, 101, 98, 87] }];
+                options.chart.type = 'bar';
+                options.xaxis = { categories: ['서울', '경기', '인천', '부산', '경남'] };
+            } else if (item.chartType === 'pie') {
+                options.series = [44, 33, 23];
+                options.chart.type = 'donut';
+                options.labels = ['Type A', 'Type B', 'Type C'];
+                options.legend = { position: 'bottom' };
+            }
+
+            new ApexCharts(el, options).render();
+        }
+
+        // 사용자만의 레이아웃 저장
+        function saveUserLayout() {
+            const nodes = grid.save();
+            // grid.save()는 기본 정보만 가져오므로, 템플릿의 원래 메타데이타(title, type 등)와 병합
+            const currentTemplateData = TEMPLATES[currentTemplate];
+            const enriched = nodes.map(node => {
+                const original = currentTemplateData.find(o => o.id === node.id);
+                return { ...original, ...node }; // x,y,w,h는 node에서 가져옴
+            });
+
+            localStorage.setItem('user-layout-' + currentTemplate, JSON.stringify(enriched));
+            alert(`'${document.querySelector('.template-btn.active').innerText}' 레이아웃이 개별 저장되었습니다.`);
+        }
+
+        // 원래 템플릿으로 초기화
+        function resetToCurrentTemplate() {
+            if (confirm("변경하신 설정을 취소하고 원래 템플릿으로 초기화하시겠습니까?")) {
+                localStorage.removeItem('user-layout-' + currentTemplate);
+                renderWidgets(TEMPLATES[currentTemplate]);
+            }
+        }
+    </script>
+</body>
+
+</html>

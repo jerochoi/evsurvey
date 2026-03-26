@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>권한 전환 및 관리 (SFR027) - 무공해차 통합누리집</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0F62FE;
+            --primary-hover: #0353E9;
+            --bg-body: #F4F7FB;
+            --bg-card: #FFFFFF;
+            --text-main: #161616;
+            --text-secondary: #525252;
+            --border-color: #E0E0E0;
+            --radius: 12px;
+            --danger: #DA1E28;
+            --success: #0E7F3D;
+            --warning: #F1C21B;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding-bottom: 60px;
+        }
+
+        /* Fake Top Header for Role Switch Demo */
+        .top-header {
+            background-color: #161616;
+            color: #fff;
+            padding: 0 40px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-logo {
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-logo span {
+            color: #A8A8A8;
+            font-weight: 400;
+            font-size: 14px;
+        }
+
+        .header-tools {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            font-size: 13px;
+            color: #E0E0E0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .role-badge {
+            background: #393939;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn-switch-role {
+            background-color: transparent;
+            border: 1px solid #6F6F6F;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-switch-role:hover {
+            background-color: #393939;
+            border-color: #8D8D8D;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 24px;
+        }
+
+        .page-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .search-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: flex-end;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 24px;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 160px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #525252;
+            margin-bottom: 8px;
+        }
+
+        .form-control,
+        .form-select {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: #F4F7FB;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #525252;
+        }
+
+        td {
+            border-bottom: 1px solid #E0E0E0;
+            padding: 14px;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background-color: #FAFCFF;
+        }
+
+        .auth-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #EEEEEE;
+            color: #525252;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-right: 4px;
+            font-weight: 600;
+        }
+
+        .auth-tag.primary {
+            background: #D0E2FF;
+            color: #0043CE;
+            border: 1px solid #0F62FE;
+        }
+
+        .auth-count {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #FFF1F1;
+            color: #DA1E28;
+            border: 1px solid #FA4D56;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-body {
+            background: #fff;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-body.w-md {
+            width: 500px;
+        }
+
+        .modal-body.w-lg {
+            width: 750px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #525252;
+        }
+
+        .switch-role-item {
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .switch-role-item:hover {
+            border-color: var(--primary);
+            background: #FAFCFF;
+        }
+
+        .switch-role-item.active-role {
+            border-color: var(--primary);
+            background: #E0EFFF;
+            outline: 2px solid var(--primary);
+        }
+
+        .switch-info strong {
+            display: block;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .switch-info span {
+            font-size: 13px;
+            color: #525252;
+        }
+
+        .current-badge {
+            background: #0043CE;
+            color: #fff;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+
+        /* Dynamic Role Assignment Blocks */
+        .user-summary {
+            background: #F4F7FB;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-summary strong {
+            font-size: 15px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .user-summary span {
+            font-size: 13px;
+            color: #525252;
+        }
+
+        .role-block {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            background: #fff;
+            position: relative;
+        }
+
+        .role-block .btn-remove {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: #FFE5E5;
+            color: #DA1E28;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .role-block .btn-remove:hover {
+            background: #FA4D56;
+            color: #fff;
+        }
+
+        .role-head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-right: 80px;
+        }
+
+        .role-params-area {
+            background: #F8F9FA;
+            padding: 16px;
+            border-radius: 6px;
+            border: 1px solid #E0E0E0;
+        }
+
+        .param-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .param-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .param-label {
+            font-size: 13px;
+            color: #525252;
+            font-weight: 600;
+            width: 90px;
+        }
+
+        .add-role-btn {
+            width: 100%;
+            border: 2px dashed #0F62FE;
+            background: #F4F7FB;
+            color: #0F62FE;
+            padding: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .add-role-btn:hover {
+            background: #E0EFFF;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Mockup System Navigation Header -->
+    <header class="top-header">
+        <div class="header-logo">
+            무공해차 통합누리집 <span>시스템 관리자 환경</span>
+        </div>
+        <div class="header-tools">
+            <div class="user-info">
+                <span class="role-badge" id="currentRoleBadge">공단 담당자(총괄)</span>
+                홍길동 님
+            </div>
+            <!-- Role Switch Trigger Button -->
+            <button class="btn-switch-role" onclick="openSwitchModal()">
+                <span>🔄 권한 전환</span>
+            </button>
+            <button class="btn-switch-role" style="border:none;">로그아웃</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Role Switching Explaination Box -->
+        <div style="background: #E0EFFF; border: 1px solid #0F62FE; padding: 16px 20px; border-radius: 8px; margin-bottom: 32px; display: flex; gap: 12px; align-items: flex-start; color: #0043CE;">
+            <div style="font-size: 20px;">💡</div>
+            <div>
+                <strong style="display:block; margin-bottom: 4px;">권한 전환 기능 데모 및 관리자 멀티 권한 확인</strong>
+                <p style="font-size: 13px; color: #2a5b84;">1) 상단 시스템 헤더의 <b>[ 🔄 권한 전환 ]</b>을 눌러 현재 사용자(홍길동)의 세션 권한을 다르게 변경해보세요.<br />2) 하단 "관리" 컬럼의 <b>[권한 변경]</b> 버튼을 누르시면, 사용자의 다중 권한을 블록단위로 개별 추가/수정/삭제하는 화면을 확인할 수 있습니다.</p>
+            </div>
+        </div>
+
+        <nav class="breadcrumb">
+            <span>시스템 관리</span> > <span>사용자/권한 관리</span> > <span>멀티 권한 설정 관리</span>
+        </nav>
+
+        <header class="page-header">
+            <div>
+                <h1>사용자 멀티 권한 부여 관리</h1>
+                <p>시스템 담당자의 기본 권한 외에 민원 응대 및 단위 서비스 대행을 위한 서브 권한을 추가로 부여합니다.</p>
+                <p>시스템 담당자만 멀티 권한을 부여할 수 있습니다.</p>
+            </div>
+        </header>
+
+        <div class="card" style="padding: 0;">
+            <div style="padding: 24px;">
+                <div class="search-area">
+                    <div class="form-group">
+                        <label class="form-label">권한 그룹</label>
+                        <select class="form-select">
+                            <option>전체</option>
+                            <option>공단직원</option>
+                            <option>지자체담당자</option>
+                            <option>제조수입사</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 2;">
+                        <label class="form-label">사용자 검색</label>
+                        <input type="text" class="form-control" placeholder="아이디, 이름, 부서명 조회">
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-primary">검색</button>
+                    </div>
+                </div>
+
+                <div style="font-size: 13px; font-weight: 600; margin-bottom: 12px; color: #525252;">총 4명 조회됨</div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th width="15%">이름 (ID)</th>
+                        <th width="20%">소속 / 부서</th>
+                        <th width="50%">현재 부여된 권한 (기본 권한 외 추가 건수)</th>
+                        <th width="15%" style="text-align:center;">관리</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>홍길동</strong><br /><span style="color:#8D8D8D; font-size:12px;">hong12</span></td>
+                        <td>한국환경공단<br /><span style="color:#8D8D8D; font-size:12px;">부서</span></td>
+                        <td>
+                            <span class="auth-tag primary">★ 통합관리자(총괄)</span>
+                            <span class="auth-count">외 멀티권한 3건 부여됨</span>
+                        </td>
+                        <td align="center"><button class="btn btn-outline" style="padding: 6px 12px; font-size: 12px;" onclick="openAssignModal('홍길동', 'hong12')">권한 변경</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>나서울</strong><br /><span style="color:#8D8D8D; font-size:12px;">seoul11</span></td>
+                        <td>지자체<br /><span style="color:#8D8D8D; font-size:12px;">서울시</span></td>
+                        <td>
+                            <span class="auth-tag primary">지자체담당자</span>
+                        </td>
+                        <td align="center"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- 1. Role Switch Modal (Fake Header Action) -->
+    <div class="modal-overlay" id="roleSwitchModal">
+        <div class="modal-body w-md">
+            <div class="modal-header">
+                <h2>🔄 세션 권한 전환</h2>
+                <button class="modal-close" onclick="closeSwitchModal()">×</button>
+            </div>
+            <p style="font-size: 14px; color: #525252; margin-bottom: 24px;">
+                현재 사용자에게 부여된 전체 권한 목록입니다.<br />
+                테스트 또는 예외 업무 대행을 위해 접속할 역할을 선택해주세요.
+            </p>
+
+            <div class="switch-role-item active-role" onclick="executeSwitch('공단 담당자(총괄)')">
+                <div class="switch-info">
+                    <strong>관리자(총괄)</strong>
+                    <span>한국환경공단 소속 관리자 기본 뷰</span>
+                </div>
+                <div class="current-badge">현재 접속중</div>
+            </div>
+            <div class="switch-role-item" onclick="executeSwitch('기후부')">
+                <div class="switch-info">
+                    <strong>기후부</strong>
+                    <span>승인 및 통계 현황 조회</span>
+                </div>
+            </div>
+            <div class="switch-role-item" onclick="executeSwitch('지자체 담당자 (서울 강남구)')">
+                <div class="switch-info">
+                    <strong>지자체 담당자 / 서울특별시 강남구</strong>
+                    <span>보조금 지급</span>
+                </div>
+            </div>
+            <div class="switch-role-item" onclick="executeSwitch('제조사 대행 (현대자동차)')">
+                <div class="switch-info">
+                    <strong>제조수입사 / 현대자동차</strong>
+                    <span>보조금 신청</span>
+                </div>
+            </div>
+            <div class="switch-role-item" onclick="executeSwitch('제조사 대행 (현대자동차)')">
+                <div class="switch-info">
+                    <strong>제조수입사 / 테슬라</strong>
+                    <span>보조금 신청</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 24px; text-align: right;">
+                <button class="btn btn-ghost" onclick="closeSwitchModal()">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Dynamic Role Assignment User Modal -->
+    <div class="modal-overlay" id="roleAssignModal">
+        <div class="modal-body w-lg">
+            <div class="modal-header">
+                <h2>사용자 권한 개별 설정</h2>
+                <button class="modal-close" onclick="closeAssignModal()">×</button>
+            </div>
+
+            <div class="user-summary">
+                <div>
+                    <strong id="assignUserName">홍길동 (hong12)</strong>
+                    <span id="assignUserDept">한국환경공단 / 부서</span>
+                </div>
+                <div class="auth-tag primary">★ 관리자(총괄)</div>
+            </div>
+
+            <div style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #525252;">부여된 권한 및 세부 조건 트리</div>
+
+            <!-- Dynamic Role Container -->
+            <div id="rolesContainer">
+
+                <!-- Initial Mock Role 1 -->
+                <div class="role-block" id="role_b1">
+                    <button class="btn-remove" onclick="removeRoleBlock('role_b1')">삭제</button>
+                    <div class="role-head">
+                        <span style="font-size: 14px; font-weight: 600;">권한 유형</span>
+                        <select class="form-select" style="max-width:300px;" onchange="renderRoleParams('role_b1', this.value)">
+                            <option value="none">선택</option>
+                            <option value="C05" selected>보조금 관리자</option>
+                            <option value="B01">기후부</option>
+                            <option value="S01">지자체 담당자 (보조금 승인)</option>
+                            <option value="M01">제조수입사 (보조금 신청)</option>
+                        </select>
+                    </div>
+                    <div class="role-params-area" id="paramArea_role_b1" style="display: none;"></div>
+                </div>
+
+                <!-- Initial Mock Role 2 (Local Gov) -->
+                <div class="role-block" id="role_b2">
+                    <button class="btn-remove" onclick="removeRoleBlock('role_b2')">삭제</button>
+                    <div class="role-head">
+                        <span style="font-size: 14px; font-weight: 600;">권한 유형</span>
+                        <select class="form-select" style="max-width:300px;" onchange="renderRoleParams('role_b2', this.value)">
+                            <option value="none">선택</option>
+                            <option value="C05">보조금 관리자</option>
+                            <option value="B01">기후부</option>
+                            <option value="S01" selected>지자체 담당자 (보조금 승인)</option>
+                            <option value="M01">제조수입사 (보조금 신청)</option>
+                        </select>
+                    </div>
+                    <div class="role-params-area" id="paramArea_role_b2" style="display: block;">
+                        <!-- Mock initial content for S01 -->
+                        <div class="param-group">
+                            <div class="param-label">시도 선택</div>
+                            <select class="form-select" style="max-width: 180px;">
+                                <option>선택</option>
+                                <option selected>서울특별시</option>
+                                <option>인천광역시</option>
+                                <option>부산광역시</option>
+                            </select>
+                            <div class="param-label" style="width: auto; margin-left: 8px;">시군구 선택</div>
+                            <select class="form-select" style="max-width: 180px;">
+                                <option>전체</option>
+                                <option>강남구</option>
+                                <option selected>종로구</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Button to Add a New Role Block -->
+            <button class="add-role-btn" onclick="addNewRoleBlock()">
+                ＋ 새로운 권한 추가하기
+            </button>
+
+            <div style="margin-top: 32px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size:13px; color:#A2191F;">* 각 권한이 하나의 역할로 매핑됩니다. 지자체, 제조사를 여러개 추가할 수 있습니다.</span>
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn btn-ghost" onclick="closeAssignModal()">취소</button>
+                    <button class="btn btn-primary" onclick="alert('멀티 권한 설정 정보가 성공적으로 반영되었습니다.'); closeAssignModal();">저장하기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. Header Role Switch Modal
+        function openSwitchModal() { document.getElementById('roleSwitchModal').style.display = 'flex'; }
+        function closeSwitchModal() { document.getElementById('roleSwitchModal').style.display = 'none'; }
+        function executeSwitch(roleName) {
+            document.getElementById('currentRoleBadge').innerText = roleName;
+            document.querySelectorAll('.switch-role-item').forEach(el => {
+                el.classList.remove('active-role');
+                const badge = el.querySelector('.current-badge');
+                if (badge) badge.remove();
+            });
+            const clickedEl = event.currentTarget;
+            clickedEl.classList.add('active-role');
+            clickedEl.innerHTML += '<div class="current-badge">현재 접속중</div>';
+            alert(`[세션 전환 완료]\n'${roleName}'(으)로 권한이 변경되어 화면이 새로고침됩니다.`);
+            closeSwitchModal();
+        }
+
+        // 2. Assign Multi-Role Modal Logic
+        let roleIdx = 3;
+
+        function openAssignModal(name, id) {
+            document.getElementById('roleAssignModal').style.display = 'flex';
+        }
+        function closeAssignModal() {
+            document.getElementById('roleAssignModal').style.display = 'none';
+        }
+
+        function addNewRoleBlock() {
+            const container = document.getElementById('rolesContainer');
+            const blockId = 'role_b' + roleIdx++;
+
+            const html = `
+                <div class="role-block" id="${blockId}">
+                    <button class="btn-remove" onclick="removeRoleBlock('${blockId}')">삭제</button>
+                    <div class="role-head">
+                        <span style="font-size: 14px; font-weight: 600;">권한 유형</span>
+                        <select class="form-select" style="max-width:300px;" onchange="renderRoleParams('${blockId}', this.value)">
+                            <option value="none" selected>권한을 선택하세요</option>
+                            <option value="C05">보조금 관리자</option>
+                            <option value="B01">기후부</option>
+                            <option value="S01">지자체 담당자 (보조금 승인)</option>
+                            <option value="M01">제조수입사 (보조금 신청)</option>
+                        </select>
+                    </div>
+                    <div class="role-params-area" id="paramArea_${blockId}" style="display: none;"></div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function removeRoleBlock(blockId) {
+            document.getElementById(blockId).remove();
+        }
+
+        function renderRoleParams(blockId, roleValue) {
+            const paramArea = document.getElementById('paramArea_' + blockId);
+            paramArea.innerHTML = ''; // clear
+
+            if (roleValue === 'S01') {
+                // 지자체 담당자 상세 조건
+                paramArea.style.display = 'block';
+                paramArea.innerHTML = `
+                    <div class="param-group">
+                        <div class="param-label">시도 선택</div>
+                        <select class="form-select" style="max-width: 180px;">
+                            <option value="">선택</option>
+                            <option value="서울특별시">서울특별시</option>
+                            <option value="인천광역시">인천광역시</option>
+                            <option value="부산광역시">부산광역시</option>
+                            <option value="경기도">경기도</option>
+                        </select>
+                        <div class="param-label" style="width: auto; margin-left: 8px;">시군구 선택</div>
+                        <select class="form-select" style="max-width: 180px;">
+                            <option value="전체">전체 (시도 총괄)</option>
+                            <option value="강남구">강남구</option>
+                            <option value="종로구">종로구</option>
+                            <option value="연수구">연수구</option>
+                        </select>
+                    </div>
+                `;
+            } else if (roleValue === 'M01') {
+                // 제조수입사 파라미터
+                paramArea.style.display = 'block';
+                paramArea.innerHTML = `
+                    <div class="param-group">
+                        <div class="param-label">대상 제조사</div>
+                        <select class="form-select" style="max-width: 300px;">
+                            <option value="">선택</option>
+                            <option>현대자동차</option>
+                            <option>기아</option>
+                            <option>KGM</option>
+                            <option>테슬라코리아</option>
+                        </select>
+                    </div>
+                `;
+            } else {
+                // 파라미터 불필요 시 영역 숨김
+                paramArea.style.display = 'none';
+            }
+        }
+
+        // Global Modal Close on Outside Click
+        window.onclick = function (event) {
+            const m1 = document.getElementById('roleSwitchModal');
+            const m2 = document.getElementById('roleAssignModal');
+            if (event.target == m1) closeSwitchModal();
+            if (event.target == m2) closeAssignModal();
+        }
+    </script>
+</body>
+
+</html>
