@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 연계 환경설정 (SFR030) - 무공해차 통합누리집</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #0F62FE; --bg-body: #F4F7FB; --bg-card: #FFFFFF; --text-main: #161616; --border-color: #E0E0E0; --radius: 12px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); line-height: 1.5; padding-bottom: 60px; }
+        .top-header { background-color: #161616; color: #fff; padding: 0 40px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        .page-header { margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); }
+        .tab { padding: 12px 24px; font-size: 15px; font-weight: 600; color: #525252; text-decoration: none; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+        .tab:hover, .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border-color); padding: 32px; margin-bottom: 24px; }
+        .card-title { font-size: 18px; font-weight: 700; margin-bottom: 24px; border-left: 4px solid var(--primary); padding-left: 12px; }
+        
+        .form-row { display: flex; align-items: flex-start; justify-content: space-between; padding: 20px 0; border-bottom: 1px solid #eee; }
+        .form-row:last-child { border-bottom: none; }
+        .form-info strong { display: block; font-size: 15px; margin-bottom: 4px; }
+        .form-info p { font-size: 13px; color: #6F6F6F; }
+        
+        .form-control { padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; width: 350px; font-family: monospace; }
+        .btn { padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+        .btn-primary { background: var(--primary); color: #fff; }
+
+        /* Toggle */
+        .switch { position: relative; display: inline-block; width: 48px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #24A148; }
+        input:checked + .slider:before { transform: translateX(24px); }
+    </style>
+</head>
+<body>
+    <header class="top-header">
+         <div class="header-logo" style="font-weight:700;">시스템 관리자 <span style="font-weight:400; font-size:15px; margin-left:8px;">| 통합 알림 서비스 (API)</span></div>
+        <div class="header-tools"><span style="font-size:13px;">관리자님</span></div>
+    </header>
+
+    <div class="container">
+        <header class="page-header">
+            <h1 style="font-size: 24px; margin-bottom: 8px; font-weight: 700;">외부 연계 API 활용 안내</h1>
+            <p style="color: #6F6F6F; font-size:14px;">무공해차 통합누리집에 연계된 외부 알림 발송 서비스(카카오톡, 문자)의 통신 전략 및 발송 규칙을 안내합니다.</p>
+        </header>
+
+        <div class="tabs">
+            <a href="SFR-030_noti_dashboard.html" class="tab">현황 및 통계</a>
+            <a href="SFR-030_noti_template.html" class="tab">알림 템플릿 관리/테스트</a>
+            <a href="SFR-030_noti_history.html" class="tab">상세 발송 내역 조회</a>
+            <a href="SFR-030_noti_config.html" class="tab active">API 연계 안내</a>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">통신비 절감을 위한 스마트 라우팅 (Smart Routing)</h2>
+            <div style="font-size: 14px; line-height:1.7; color:#333; padding: 12px 0;">
+                <p style="margin-bottom:12px;">
+                    무공해차 통합누리집은 사용자 편의성 향상과 <strong>통신 비용 최소화</strong>를 위해 
+                    단순 대량 문자 발송 대신 외부 전문 API(비즈뿌리오 알림톡 등)와 연동되어 있습니다. 
+                </p>
+                <ul style="list-style-type:disc; padding-left: 24px; margin-bottom: 24px;">
+                    <li><strong>1차 발송 (우선 순위):</strong> 카카오 알림톡 전송 (건당 발송 비용이 문자 대비 저렴함)</li>
+                    <li><strong>2차 발송 (우회/Fallback):</strong> 수신자가 카카오톡을 미사용하거나 알림톡을 차단하여 전송이 실패한 경우, 즉각 외부 API 서버에서 자동으로 SMS/LMS 로 전환하여 재발송합니다.</li>
+                </ul>
+                <div style="padding:16px; background:#F8F9FA; border-radius:8px; border:1px solid #E0E0E0; font-family:monospace; font-size:13px; color:#525252;">
+                    * 자동 전환 로직은 플랫폼 내부가 아닌 외부 API Gateway 단에서 일괄 처리되므로 서버 부하를 유발하지 않습니다.
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">외부 알림 API 통신 규격 및 연동 정보</h2>
+            
+            <div class="form-row" style="flex-direction:column; gap:8px;">
+                <div class="form-info" style="width:100%;">
+                    <strong>연동 API 공급자 (Service Provider)</strong>
+                    <div style="margin-top:8px; font-size:14px; color:#161616;">비즈뿌리오 통합 메시징 API (버전 3.0)</div>
+                </div>
+            </div>
+
+            <div class="form-row" style="border-bottom:none;">
+                <div class="form-info">
+                    <strong>API 엔드포인트 URL</strong>
+                    <div style="margin-top:8px; font-size:13px; font-family:monospace; color:#0F62FE;">https://api.bizppurio.com/v3/message</div>
+                </div>
+                <div class="form-info">
+                    <strong>발신자 번호 (대표 콜센터 번호)</strong>
+                    <div style="margin-top:8px; font-size:14px; font-family:monospace; color:#333;">1661-0970</div>
+                </div>
+            </div>
+            
+            <div style="margin-top:24px; padding-top:24px; border-top:1px solid #eee; font-size:13px; color:#888;">
+                ※ 연결 인증키(API Key) 및 토큰 발행 등 실제 정보는 소스코드 내부 보안 프로퍼티(System Properties)에서 관리되오니 시스템 개발자 가이드를 참고하시기 바랍니다. 담당 외 관리자 화면에서는 정보가 마스킹되어 공개되지 않습니다.
+            </div>
+        </div>
+    </div>
+</body>
+</html>
