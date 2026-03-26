@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>차량제원 관리 (목록) - 승인 절차 포함</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0F62FE;
+            --primary-hover: #0353E9;
+            --bg-body: #F4F7FB;
+            --bg-card: #FFFFFF;
+            --text-main: #161616;
+            --text-secondary: #525252;
+            --border-color: #E0E0E0;
+            --radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+            --status-draft-bg: #F4F4F4;
+            --status-draft-txt: #525252;
+            --status-req-bg: #FFF1D6;
+            --status-req-txt: #F1C21B;
+            --status-appr-bg: #DEFBE6;
+            --status-appr-txt: #198038;
+            --status-rej-bg: #FFE5E5;
+            --status-rej-txt: #FA4D56;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 32px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 24px;
+        }
+
+        .page-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Role Toggle Switch */
+        .role-switch {
+            background: #E0E0E0;
+            padding: 4px;
+            border-radius: 8px;
+            display: flex;
+            gap: 4px;
+        }
+
+        .role-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            background: transparent;
+            color: var(--text-secondary);
+            transition: 0.2s;
+        }
+
+        .role-btn.active {
+            background: #fff;
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .card {
+            background: #fff;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .search-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: flex-end;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #525252;
+            margin-bottom: 8px;
+        }
+
+        .form-control,
+        .form-select {
+            width: 100%;
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .table-top-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        th {
+            background: #F4F7FB;
+            border-y: 1px solid var(--border-color);
+            padding: 12px 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #525252;
+        }
+
+        td {
+            border-bottom: 1px solid #eee;
+            padding: 12px 10px;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background-color: #FAFCFF;
+        }
+
+        /* Status Badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge.draft {
+            background: var(--status-draft-bg);
+            color: var(--status-draft-txt);
+        }
+
+        .badge.req {
+            background: var(--status-req-bg);
+            color: #B48A14;
+        }
+
+        .badge.appr {
+            background: var(--status-appr-bg);
+            color: var(--status-appr-txt);
+        }
+
+        .badge.rej {
+            background: var(--status-rej-bg);
+            color: var(--status-rej-txt);
+        }
+
+        .link-title {
+            color: var(--primary);
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .link-title:hover {
+            text-decoration: underline;
+        }
+
+        .info-box {
+            background: #E0EFFF;
+            border-left: 4px solid var(--primary);
+            padding: 12px 16px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-bottom: 24px;
+            color: #0043CE;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <nav class="breadcrumb">
+            <span>누리집 관리</span> > <span>차량정보 관리</span> > <span>차량제원 관리 (권한 뷰어)</span>
+        </nav>
+
+        <header class="page-header">
+            <div>
+                <h1>차량현황 관리 목록</h1>
+                <p>제조수입사가 등록하고 담당자가 검토/승인하는 절차를 확인합니다.</p>
+            </div>
+            <div class="role-switch">
+                <button class="role-btn active" onclick="switchRole('maker')">🏢 제조/수입사 화면</button>
+                <button class="role-btn" onclick="switchRole('admin')">🛡️ 공단 담당자 화면</button>
+            </div>
+        </header>
+
+        <div class="info-box" id="roleInfo">
+            ℹ️ 현재 접속 권한: <strong>현대자동차 (제조수입사)</strong> / 담당 차량의 스펙을 작성하고 공단에 승인 요청할 수 있습니다.
+        </div>
+
+        <div class="card">
+            <div class="search-area">
+                <div class="form-group">
+                    <label class="form-label">승인 상태</label>
+                    <select class="form-select">
+                        <option value="">====전체====</option>
+                        <option>작성중</option>
+                        <option>승인요청</option>
+                        <option>승인완료</option>
+                        <option>반려</option>
+                    </select>
+                </div>
+                <div class="form-group" id="searchMakerGroup" style="display: none;">
+                    <label class="form-label">제조사</label>
+                    <select class="form-select">
+                        <option>전체</option>
+                        <option>현대</option>
+                        <option>기아</option>
+                        <option>KGM</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 2;">
+                    <label class="form-label">검색어 (모델 등)</label>
+                    <input type="text" class="form-control" placeholder="검색어를 입력하세요.">
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn btn-outline" onclick="location.reload()">초기화</button>
+                    <button class="btn btn-primary">조회</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-top-actions">
+            <div>[총 <em>15</em>건 조회]</div>
+            <div id="actionMaker">
+                <button class="btn btn-primary" onclick="location.href='SFR-023_car_info_edit.html?role=maker'">신규 제원 등록</button>
+            </div>
+        </div>
+
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <table>
+                <thead>
+                    <tr>
+                        <th width="5%">번호</th>
+                        <th width="10%">승인 상태</th>
+                        <th width="20%">모델명</th>
+                        <th width="10%">제조사</th>
+                        <th width="8%">대분류</th>
+                        <th width="8%">공개여부</th>
+                        <th width="8%">등록/요청일</th>
+                        <th width="10%">승인일자</th>
+                        <th width="10%">관리</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>15</td>
+                        <td><span class="badge req">승인요청</span></td>
+                        <td align="left"><a href="SFR-023_car_info_edit.html?id=15" class="link-title">아이오닉 6 Long Range</a></td>
+                        <td>현대자동차</td>
+                        <td>승용차</td>
+                        <td>-</td>
+                        <td>2024.03.20</td>
+                        <td>-</td>
+                        <td><button class="btn btn-ghost" style="padding: 6px 12px; font-size: 12px;">상세보기</button></td>
+                    </tr>
+                    <tr>
+                        <td>14</td>
+                        <td><span class="badge appr">승인완료</span></td>
+                        <td align="left"><a href="SFR-023_car_info_edit.html?id=14" class="link-title">아이오닉 5 N</a></td>
+                        <td>현대자동차</td>
+                        <td>승용차</td>
+                        <td>공개</td>
+                        <td>2024.03.18</td>
+                        <td>2024.03.19</td>
+                        <td><button class="btn btn-ghost" style="padding: 6px 12px; font-size: 12px;">상세보기</button></td>
+                    </tr>
+                    <tr>
+                        <td>13</td>
+                        <td><span class="badge rej">반려</span></td>
+                        <td align="left"><a href="SFR-023_car_info_edit.html?id=13" class="link-title">포터 II 일렉트릭</a></td>
+                        <td>현대자동차</td>
+                        <td>화물차</td>
+                        <td>-</td>
+                        <td>2024.03.15</td>
+                        <td>(반려됨)</td>
+                        <td><button class="btn btn-outline" style="padding: 6px 12px; font-size: 12px;">수정</button></td>
+                    </tr>
+                    <tr>
+                        <td>12</td>
+                        <td><span class="badge draft">작성중</span></td>
+                        <td align="left"><a href="SFR-023_car_info_edit.html?id=12" class="link-title">캐스퍼 일렉트릭</a></td>
+                        <td>현대자동차</td>
+                        <td>승용차</td>
+                        <td>-</td>
+                        <td>2024.03.26</td>
+                        <td>-</td>
+                        <td><button class="btn btn-outline" style="padding: 6px 12px; font-size: 12px;">계속 작성</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function switchRole(role) {
+            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (role === 'admin') {
+                document.getElementById('roleInfo').innerHTML = 'ℹ️ 현재 접속 권한: <strong>한국환경공단 (담당자)</strong> / 제조사가 요청한 제원을 검토하고 승인/반려 또는 보완 요청을 진행합니다.';
+                document.getElementById('roleInfo').style.backgroundColor = '#FFF1F1';
+                document.getElementById('roleInfo').style.borderLeftColor = '#FA4D56';
+                document.getElementById('roleInfo').style.color = '#A2191F';
+                document.getElementById('searchMakerGroup').style.display = 'block';
+            } else {
+                document.getElementById('roleInfo').innerHTML = 'ℹ️ 현재 접속 권한: <strong>현대자동차 (제조수입사)</strong> / 담당 차량의 스펙을 작성하고 공단에 승인 요청할 수 있습니다.';
+                document.getElementById('roleInfo').style.backgroundColor = '#E0EFFF';
+                document.getElementById('roleInfo').style.borderLeftColor = '#0F62FE';
+                document.getElementById('roleInfo').style.color = '#0043CE';
+                document.getElementById('searchMakerGroup').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+
+</html>

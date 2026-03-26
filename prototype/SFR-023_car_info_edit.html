@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>차량 제원 관리</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0F62FE;
+            --primary-hover: #0353E9;
+            --bg-body: #F4F7FB;
+            --bg-card: #FFFFFF;
+            --text-main: #161616;
+            --text-secondary: #525252;
+            --border-color: #E0E0E0;
+            --radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --danger: #DA1E28;
+            --success: #0E7F3D;
+            --warning: #F1C21B;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding-bottom: 60px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 24px;
+        }
+
+        .page-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .status-badge {
+            font-size: 14px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .status-badge.req {
+            background: #FFF1D6;
+            color: #B48A14;
+            border: 1px solid #F1C21B;
+        }
+
+        .status-badge.appr {
+            background: #DEFBE6;
+            color: #198038;
+            border: 1px solid #24A148;
+        }
+
+        .status-badge.draft {
+            background: #F4F4F4;
+            color: #525252;
+            border: 1px solid #CCC;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: 0.2s;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+
+        /* Simulator Tools */
+        .simulator-panel {
+            background: #E0E0E0;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .simulator-panel h4 {
+            font-size: 14px;
+            color: #525252;
+            margin-bottom: 0;
+            font-weight: 700;
+        }
+
+        .role-switch {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            justify-content: center;
+            background: #c6c6c6;
+            padding: 4px;
+            border-radius: 8px;
+        }
+
+        .role-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            background: transparent;
+            color: #525252;
+        }
+
+        .role-btn.active {
+            background: #fff;
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Workflow Stepper */
+        .workflow-stepper {
+            background: #fff;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .step::after {
+            content: '';
+            position: absolute;
+            top: 16px;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background: #E0E0E0;
+            z-index: 1;
+        }
+
+        .step:last-child::after {
+            display: none;
+        }
+
+        .step-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #E0E0E0;
+            color: #fff;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+            border: 4px solid #fff;
+        }
+
+        .step.done .step-circle {
+            background: var(--success);
+        }
+
+        .step.active .step-circle {
+            background: var(--primary);
+            box-shadow: 0 0 0 4px rgba(15, 98, 254, 0.2);
+            border: 2px solid #fff;
+        }
+
+        .step.done::after {
+            background: var(--success);
+        }
+
+        .step-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 8px;
+            color: var(--text-secondary);
+            transition: 0.2s;
+        }
+
+        .step.active .step-label {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .feedback-panel {
+            background: #FFF1F1;
+            border: 1px solid #FA4D56;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+            display: none;
+        }
+
+        .feedback-panel h4 {
+            color: #A2191F;
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+
+        .info-panel {
+            background: #E0EFFF;
+            border: 1px solid #0F62FE;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            color: #0043CE;
+        }
+
+        /* Forms Layout */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 32px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .form-grid.full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #525252;
+            margin-bottom: 8px;
+        }
+
+        .form-label .required {
+            color: var(--danger);
+        }
+
+        .form-control,
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            outline: none;
+            font-size: 14px;
+            background: #fff;
+            transition: 0.2s;
+        }
+
+        .form-control:disabled,
+        .form-select:disabled {
+            background: #F4F7FB;
+            color: #8D8D8D;
+            cursor: not-allowed;
+            border-color: #E0E0E0;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary);
+        }
+
+        textarea.form-control {
+            height: 120px;
+            resize: vertical;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 16px;
+        }
+
+        .flex-row>* {
+            flex: 1;
+        }
+
+        .status-toggle {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .file-upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 32px;
+            text-align: center;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: 0.2s;
+            background: #F8FAFF;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: var(--primary);
+            margin-top: 6px;
+            display: inline-block;
+            background: #e0efff;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        /* Modified Field Status */
+        .modified-field {
+            border: 2px solid var(--warning) !important;
+            background: #FFFCF2 !important;
+        }
+
+        .modified-label {
+            color: #B48A14 !important;
+            font-weight: 700;
+        }
+
+        .modified-badge {
+            font-size: 11px;
+            background: var(--warning);
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 6px;
+            vertical-align: top;
+        }
+
+        /* Type specific sections */
+        .sec-eq,
+        .sec-ce {
+            display: none;
+        }
+
+        /* Default hidden fields (construction, hydrogen) */
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- Simulator Panel -->
+        <div class="simulator-panel">
+            <h4>[UI/권한 시뮬레이터] 시나리오 및 기능 테스트</h4>
+            <div class="role-switch">
+                <button class="role-btn active" id="btnSce1" onclick="switchScenario('new_maker')">1. 신규 등록(제조사)</button>
+                <button class="role-btn" id="btnSce2" onclick="switchScenario('new_admin_direct')">2. 신규 등록(담당자 직권)</button>
+                <button class="role-btn" id="btnSce3" onclick="switchScenario('wait_admin')">3. 승인 대기(담당자 검토)</button>
+                <button class="role-btn" id="btnSce4" onclick="switchScenario('change_maker')">4. 변경/비공개 요청(제조사)</button>
+                <button class="role-btn" id="btnSce5" onclick="switchScenario('change_admin')">5. 변경/비공개 승인(담당자)</button>
+            </div>
+            <div style="font-size: 12px; color: #525252; margin-top: 4px;">아래의 <strong>'차량종류(대분류)'</strong>를 변경해보면 차종별 필수 입력 항목(승용/수소차/건설기계 등)이 유동적으로 바뀝니다.</div>
+        </div>
+
+        <nav class="breadcrumb">
+            <span>누리집 관리</span> > <span>차량 제원 관리</span> > <span>차량 제원 관리 (상세)</span>
+        </nav>
+
+        <header class="page-header">
+            <div>
+                <h1 id="pageTitle">차량 제원 관리</h1>
+                <p id="pageDesc">데이터를 입력하거나 검토를 진행합니다.</p>
+            </div>
+
+            <div class="header-actions" id="actionGroup">
+                <!-- Dynamically populated buttons -->
+            </div>
+        </header>
+
+        <!-- Information / Feedback Panels -->
+        <div class="info-panel" id="infoPanelChange"></div>
+        <div class="feedback-panel" id="feedbackPanel">
+            <h4>⚠️ 반려 / 보완 요청 사유 입력</h4>
+            <div class="form-group" style="margin-top: 12px; margin-bottom: 12px;">
+                <textarea class="form-control" style="height: 80px;" placeholder="사유를 명확히 적어주세요."></textarea>
+            </div>
+            <div style="text-align: right;">
+                <button class="btn btn-ghost" onclick="document.getElementById('feedbackPanel').style.display='none'">취소</button>
+                <button class="btn btn-danger" onclick="alert('반려 처리되었습니다.')">반려 처리 강행</button>
+            </div>
+        </div>
+
+        <!-- Workflow Stepper -->
+        <div class="workflow-stepper">
+            <div class="step" id="step1">
+                <div class="step-circle">1</div>
+                <span class="step-label" id="step1Lbl">작성</span>
+            </div>
+            <div class="step" id="step2">
+                <div class="step-circle">2</div>
+                <span class="step-label" id="step2Lbl">제출/대기</span>
+            </div>
+            <div class="step" id="step3">
+                <div class="step-circle">3</div>
+                <span class="step-label" id="step3Lbl">승인/표출</span>
+            </div>
+        </div>
+
+        <div class="grid-layout">
+            <main>
+                <div class="card">
+                    <h3 class="card-title">기본 정보 <span style="font-size: 13px; font-weight:normal; color:#DA1E28;">* 표시는 필수 항목입니다.</span></h3>
+                    <div class="form-grid full">
+                        <div class="form-group">
+                            <label class="form-label">모델명 <span class="required">*</span></label>
+                            <input type="text" class="form-control field-std" value="아이오닉 6 Long Range 2024" id="inputModel">
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="margin-top: 24px;">
+                        <div class="form-group">
+                            <label class="form-label">차량종류 대분류 (스펙 동적 변경) <span class="required">*</span></label>
+                            <select class="form-select field-std" id="inputKindBig" onchange="chgCarKindBig()">
+                                <option value="EV" selected>전기 승용/화물/승합차 (EV/M/T/B)</option>
+                                <option value="10E">수소차 (10E)</option>
+                                <option value="6E">건설기계 (6E)</option>
+                            </select>
+                            <span class="form-hint" id="hintKindBig">선택 시 하단의 '제원 상세 정보' 입력 항목이 맞춤 변경됩니다.</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">제조사명 <span class="required">*</span></label>
+                            <div class="flex-row">
+                                <select class="form-select field-std">
+                                    <option selected>현대자동차</option>
+                                    <option>기아</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="margin-top: 24px;">
+                        <div class="form-group">
+                            <label class="form-label">표시순서</label>
+                            <input type="number" class="form-control field-std" value="10" id="inputOrder">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" id="labelDisplay">공개 여부</label>
+                            <div class="status-toggle">
+                                <label class="radio-label"><input type="radio" name="displayYn" id="dispY" checked class="field-radio"> 공개 (Y)</label>
+                                <label class="radio-label"><input type="radio" name="displayYn" id="dispN" class="field-radio"> 비공개 (N)</label>
+                            </div>
+                            <span class="form-hint" style="background:#FFF1D6; color:#B48A14; display:none;" id="hintDisplayReq">제조사 요청: 비공개 전환</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">제원 상세 정보 (차종별 맞춤)</h3>
+                    <div class="form-grid" id="specsContainer">
+
+                        <!-- Common or EV Specific (trNe) -->
+                        <div class="form-group sec-ne">
+                            <label class="form-label">승차인원</label>
+                            <input type="text" class="form-control field-std" value="5인승">
+                            <span class="form-hint">예시 : 5인승 / (소형) 3인승</span>
+                        </div>
+
+                        <!-- Common (but title changes) -->
+                        <div class="form-group">
+                            <label class="form-label" id="lblMaxSpeed">최고속도출력</label>
+                            <input type="text" class="form-control field-std" value="185km/h">
+                            <span class="form-hint" id="hintMaxSpeed">예시 : 165km/h</span>
+                        </div>
+
+                        <!-- EV Specific -->
+                        <div class="form-group sec-ne">
+                            <label class="form-label">1회 충전 주행거리 <span style="font-weight:normal; color:#DA1E28;">*핵심 검토</span></label>
+                            <input type="text" class="form-control field-std" value="(상온) 524km (저온) 428km">
+                        </div>
+
+                        <!-- EV, Construction Specific -->
+                        <div class="form-group sec-battery">
+                            <label class="form-label" id="lblBattery">배터리</label>
+                            <input type="text" class="form-control field-std" value="리튬이온폴리머(77.4kWh)">
+                            <span class="form-hint" id="hintBattery">예시 : 리튬이온폴리머(28.08kWh)</span>
+                        </div>
+
+                        <!-- Hydrogen Specific (trCe) -->
+                        <div class="form-group sec-ce">
+                            <label class="form-label">적재하중</label>
+                            <input type="text" class="form-control field-std" placeholder="예: 3ton">
+                        </div>
+                        <div class="form-group sec-ce">
+                            <label class="form-label">정격출력 (수소)</label>
+                            <input type="text" class="form-control field-std" placeholder="예: 20kw">
+                        </div>
+                        <div class="form-group sec-ce">
+                            <label class="form-label">수소저장탱크 용량</label>
+                            <input type="text" class="form-control field-std" placeholder="예: 2.1kg">
+                        </div>
+                        <div class="form-group sec-ce">
+                            <label class="form-label">충전압력</label>
+                            <input type="text" class="form-control field-std" placeholder="예: 700bar">
+                        </div>
+
+                        <!-- Construction Specific (trEq) -->
+                        <div class="form-group sec-eq">
+                            <label class="form-label">총 중량</label>
+                            <input type="text" class="form-control field-std" placeholder="예: 3,950kg">
+                        </div>
+                        <div class="form-group sec-eq">
+                            <label class="form-label">버켓용량(산적)</label>
+                            <input type="text" class="form-control field-std" placeholder="예: 0.012㎥">
+                        </div>
+                        <div class="form-group sec-eq">
+                            <label class="form-label">최대굴삭력(버켓/암)</label>
+                            <input type="text" class="form-control field-std" placeholder="예: 808 / 842 kg">
+                        </div>
+                        <div class="form-group sec-eq">
+                            <label class="form-label">리모트 컨트롤러</label>
+                            <input type="text" class="form-control field-std" placeholder="예: Max 200m(Option)">
+                        </div>
+
+                        <!-- Price parameter (Common) -->
+                        <div class="form-group">
+                            <label class="form-label" id="labelPrice">국고보조금 / 구매보조금</label>
+                            <input type="text" class="form-control field-std" value="680만원" id="inputPrice">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">부가 정보 및 다운로드 문서</h3>
+                    <div class="form-grid full">
+                        <div class="form-group" style="margin-top: 16px;">
+                            <label class="form-label">이미지 및 관련 스펙 서류 업로드</label>
+                            <div class="file-upload-area" id="uploadArea">
+                                <div style="font-size: 24px; margin-bottom: 8px;">📁</div>
+                                <div style="font-weight: 500; font-size: 15px; color: var(--primary);">파일 등록</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // 1. Dynamic Spec Display based on Car Type (carInfoMngHandle.jsp logic mapping)
+        function chgCarKindBig() {
+            var kind = document.getElementById('inputKindBig').value;
+            // Get sections
+            var secNe = document.querySelectorAll('.sec-ne'); // EV
+            var secCe = document.querySelectorAll('.sec-ce'); // Hydrogen
+            var secEq = document.querySelectorAll('.sec-eq'); // Construction
+            var secBattery = document.querySelectorAll('.sec-battery'); // EV+Const
+
+            if (kind === '6E') { // 건설기계
+                // maxSpeed labels
+                document.getElementById('lblMaxSpeed').innerText = '최고속도/선회속도';
+                document.getElementById('hintMaxSpeed').innerText = '예시: 4.2km/h, 7rpm';
+                document.getElementById('hintBattery').innerText = '예시: 리튬이온(13kWh)';
+                document.getElementById('labelPrice').innerHTML = '구매보조금';
+                secNe.forEach(e => e.style.display = 'none');
+                secCe.forEach(e => e.style.display = 'none');
+                secEq.forEach(e => e.style.display = 'block');
+                secBattery.forEach(e => e.style.display = 'block');
+            } else if (kind === '10E') { // 수소차
+                document.getElementById('lblMaxSpeed').innerText = '최고속도/선회속도';
+                document.getElementById('labelPrice').innerHTML = '구매보조금';
+                secNe.forEach(e => e.style.display = 'none');
+                secCe.forEach(e => e.style.display = 'block');
+                secEq.forEach(e => e.style.display = 'none');
+                secBattery.forEach(e => e.style.display = 'none'); // No battery for H2
+            } else { // 기본 EV/M/T/B 등 전기승용/화물/승합
+                document.getElementById('lblMaxSpeed').innerText = '최고속도출력';
+                document.getElementById('hintMaxSpeed').innerText = '예시: 165km/h';
+                document.getElementById('hintBattery').innerText = '예시: 리튬이온폴리머(28.08kWh)';
+                document.getElementById('labelPrice').innerHTML = '국고/구매보조금';
+                secNe.forEach(e => e.style.display = 'block');
+                secCe.forEach(e => e.style.display = 'none');
+                secEq.forEach(e => e.style.display = 'none');
+                secBattery.forEach(e => e.style.display = 'block');
+            }
+        }
+
+        // 2. Simulator Logic
+        function setStepper(stateIndex, lbl1, lbl2, lbl3) {
+            var step1 = document.getElementById('step1');
+            var step2 = document.getElementById('step2');
+            var step3 = document.getElementById('step3');
+            document.getElementById('step1Lbl').innerText = lbl1;
+            document.getElementById('step2Lbl').innerText = lbl2;
+            document.getElementById('step3Lbl').innerText = lbl3;
+
+            // clear states
+            step1.className = 'step'; step2.className = 'step'; step3.className = 'step';
+
+            if (stateIndex === 1) { step1.classList.add('active'); }
+            else if (stateIndex === 2) {
+                step1.classList.add('done'); step2.classList.add('active');
+            } else if (stateIndex === 3) {
+                step1.classList.add('done'); step2.classList.add('done'); step3.classList.add('active');
+            }
+        }
+
+        function switchScenario(scenario) {
+            // Reset Buttons & Form States
+            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+            const fields = document.querySelectorAll('.field-std');
+            const radios = document.querySelectorAll('.field-radio');
+            fields.forEach(f => { f.disabled = false; f.classList.remove('modified-field'); });
+            radios.forEach(r => { r.disabled = false; });
+
+            const title = document.getElementById('pageTitle');
+            const desc = document.getElementById('pageDesc');
+            const btnContainer = document.getElementById('actionGroup');
+            const infoChange = document.getElementById('infoPanelChange');
+            const feedbackPanel = document.getElementById('feedbackPanel');
+            const hintDisplayReq = document.getElementById('hintDisplayReq');
+            const labelPrice = document.getElementById('labelPrice');
+            const priceInput = document.getElementById('inputPrice');
+            const labelDisplay = document.getElementById('labelDisplay');
+            const dispN = document.getElementById('dispN');
+            const inputKindBig = document.getElementById('inputKindBig');
+
+            feedbackPanel.style.display = 'none';
+            infoChange.style.display = 'none';
+            hintDisplayReq.style.display = 'none';
+            labelPrice.classList.remove('modified-label');
+            labelDisplay.classList.remove('modified-label');
+            priceInput.value = '680만원';
+            document.getElementById('dispY').checked = true;
+            inputKindBig.disabled = false;
+
+            // Scenario 1: New Registration by Maker
+            if (scenario === 'new_maker') {
+                document.getElementById('btnSce1').classList.add('active');
+                title.innerHTML = '차량 제원 작성 (제조사) <span class="status-badge draft">작성중</span>';
+                desc.textContent = "제조사가 직접 새로운 스펙을 작성하여 저장/제출합니다.";
+                setStepper(1, '차량 제원 작성', '승인 대기', '누리집 표출');
+                btnContainer.innerHTML = `<button class="btn btn-ghost" onclick="location.href='SFR-023_car_info_list.html'">목록</button>
+                                          <button class="btn btn-outline">임시저장</button>
+                                          <button class="btn btn-primary" onclick="alert('담당자에게 승인 요청되었습니다.')">승인 요청/제출</button>`;
+            }
+            // Scenario 2: New Registration directly by Admin
+            else if (scenario === 'new_admin_direct') {
+                document.getElementById('btnSce2').classList.add('active');
+                title.innerHTML = '차량 제원 등록 (담당자) <span class="status-badge draft">작성중</span>';
+                desc.textContent = "공단 담당자 직권으로 제원 정보를 직접 생성하여 누리집에 등재합니다.";
+                setStepper(1, '차량 제원 등록', '저장/승인 완료', '누리집 표출');
+                btnContainer.innerHTML = `<button class="btn btn-ghost" onclick="location.href='SFR-023_car_info_list.html'">목록</button>
+                                          <button class="btn btn-success" onclick="alert('직접 등록 후 표출 완료되었습니다.')">저장 및 즉시 표출</button>`;
+            }
+            // Scenario 3: Wait Admin (Maker submitted)
+            else if (scenario === 'wait_admin') {
+                document.getElementById('btnSce3').classList.add('active');
+                title.innerHTML = '차량 제원 승인 검토 (담당자) <span class="status-badge req">승인요청(신규)</span>';
+                desc.textContent = "제조사가 등록 요청한 데이터를 검토하고 승인 여부를 결정합니다.";
+                setStepper(2, '차량 제원 작성 완료', '담당자 검토/승인', '누리집 표출');
+                fields.forEach(f => f.disabled = true);
+                radios.forEach(r => r.disabled = true);
+                btnContainer.innerHTML = `<button class="btn btn-ghost" onclick="location.href='SFR-023_car_info_list.html'">목록</button>
+                                          <button class="btn btn-danger" onclick="document.getElementById('feedbackPanel').style.display='block'">반려/보완</button>
+                                          <button class="btn btn-success" onclick="alert('승인되어 공개됩니다.')">제원 승인</button>`;
+            }
+            // Scenario 4: Maker requests modification or hiding
+            else if (scenario === 'change_maker') {
+                document.getElementById('btnSce4').classList.add('active');
+                title.innerHTML = '기존 차량 제원 수정 및 비공개 조치 (제조사) <span class="status-badge appr">공개/표출중</span>';
+                desc.textContent = "표출 중인 데이터를 임의 수정하거나 비공개 전환 시, 공단의 재승인을 거쳐야 합니다.";
+                setStepper(2, '표출 중', '변경/비공개 작성', '재승인 대기');
+                infoChange.style.display = 'flex';
+                infoChange.innerHTML = 'ℹ️ 비공개 전환 및 보조금 수정 시 공단 승인을 득한 후 결과가 반영됩니다.';
+
+                dispN.checked = true;
+                priceInput.value = '680만원 -> 650만원 (보조금 하향)';
+                priceInput.classList.add('modified-field');
+                labelPrice.innerHTML = '국고/구매보조금 <span class="modified-badge">수정됨</span>';
+                labelPrice.classList.add('modified-label');
+                labelDisplay.innerHTML = '공개 여부 <span class="modified-badge">비공개로 변경</span>';
+                labelDisplay.classList.add('modified-label');
+
+                btnContainer.innerHTML = `<button class="btn btn-ghost" onclick="location.href='SFR-023_car_info_list.html'">목록</button>
+                                          <button class="btn btn-outline" onclick="alert('수정 전 내용으로 복구됩니다.')">원상 복구</button>
+                                          <button class="btn btn-primary" onclick="alert('변경 승인을 요청했습니다.')">정보 변경 승인 요청</button>`;
+            }
+            // Scenario 5: Admin reviews Maker's modification request
+            else if (scenario === 'change_admin') {
+                document.getElementById('btnSce5').classList.add('active');
+                title.innerHTML = '차량 제원 변경 및 비공개 심사 (담당자) <span class="status-badge req">변경/비공개 요청</span>';
+                desc.textContent = "제조사가 요청한 변경 사안(차량 비공개 처리 등)을 점검합니다.";
+                setStepper(2, '차량 제원 작성 완료', '변경 승인 검토', '변경사항 반영/표출');
+                infoChange.style.display = 'flex';
+                infoChange.innerHTML = '⚠️ 제조사가 차량 정보를 비공개로 전환하고 보조금을 수정하고자 하는 안건입니다.';
+                infoChange.style.borderColor = '#F1C21B';
+                infoChange.style.backgroundColor = '#FFFCF2';
+                infoChange.style.color = '#B48A14';
+
+                fields.forEach(f => f.disabled = true);
+                radios.forEach(r => r.disabled = true);
+
+                dispN.checked = true;
+                priceInput.value = '650만원';
+                priceInput.classList.add('modified-field');
+                labelPrice.innerHTML = '국고/구매보조금 <span class="modified-badge">기존: 680만원</span>';
+                labelPrice.classList.add('modified-label');
+                labelDisplay.innerHTML = '공개 여부 <span class="modified-badge">기존: 공개</span>';
+                labelDisplay.classList.add('modified-label');
+                hintDisplayReq.style.display = 'inline-block';
+
+                btnContainer.innerHTML = `<button class="btn btn-ghost" onclick="location.href='SFR-023_car_info_list.html'">목록</button>
+                                          <button class="btn btn-danger" onclick="document.getElementById('feedbackPanel').style.display='block'">요청 반려</button>
+                                          <button class="btn btn-success" onclick="alert('승인 완료 (비공개 및 보조금 변경이 즉시 처리)')">변경 승인 및 적용</button>`;
+            }
+
+            chgCarKindBig(); // ensure layout matches selection
+        }
+
+        // Initialize display
+        chgCarKindBig();
+        switchScenario('new_maker');
+    </script>
+</body>
+
+</html>
