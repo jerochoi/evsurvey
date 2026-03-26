@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CILI 시뮬레이터</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Malgun Gothic', sans-serif;
+        }
+
+        #container {
+            display: flex;
+            height: 100vh;
+        }
+
+        #sidebar {
+            width: 420px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-right: 1px solid #ddd;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #map {
+            flex: 1;
+            height: 100%;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #343a40;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h3 {
+            font-size: 1rem;
+            margin-top: 15px;
+            color: #495057;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .control-group {
+            margin-bottom: 10px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 2px;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 3px;
+        }
+
+        input[type=range] {
+            flex: 1;
+            margin-right: 8px;
+        }
+
+        .val-display {
+            width: 45px;
+            text-align: right;
+            font-size: 0.8rem;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .sub-label {
+            font-size: 0.75rem;
+            width: 140px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-block;
+            margin-right: 5px;
+            color: #555;
+        }
+
+        .legend {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+
+        .legend i {
+            width: 15px;
+            height: 15px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+
+        .description-text {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            background: #eee;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .btn-update {
+            width: 100%;
+            background: #007bff;
+            color: white;
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 0.95rem;
+        }
+
+        .btn-update:hover {
+            background: #0056b3;
+        }
+
+        .btn-save {
+            background: #28a745;
+            color: white;
+            margin-left: 5px;
+        }
+
+        .btn-admin {
+            background: #6c757d;
+            color: white;
+            font-size: 0.7rem;
+            padding: 4px 8px;
+        }
+
+        .save-box {
+            background: #fff;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .save-box input,
+        .save-box select {
+            padding: 5px;
+            border: 1px solid #ccc;
+            width: 150px;
+            font-size: 0.8rem;
+        }
+
+        .flex-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 900px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.85rem;
+        }
+
+        .history-table th,
+        .history-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .history-table th {
+            background-color: #f2f2f2;
+        }
+
+        .chart-box {
+            height: 250px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div id="sidebar">
+            <h2>
+                <span>CILI 지수 시뮬레이터</span>
+                <div>
+                    <button class="btn btn-admin" style="background:#0F62FE;" onclick="location.href='cili_data_upload.html'">데이터 관리 (업로드)</button>
+                    <button class="btn btn-admin" onclick="location.href='cili_weight_history.html'">가중치 이력 조회</button>
+                </div>
+            </h2>
+
+            <div class="description-text" style="margin-bottom:10px;">
+                데이터 지역:
+                <select id="guSelect" onchange="loadDistrictData()" style="padding:5px; width:100%; border:1px solid #ddd; border-radius:3px; margin-top:5px; margin-bottom:5px;">
+                    <option value="28260" selected>서구 (28260)</option>
+                    <option value="28110">중구 (28110)</option>
+                    <option value="28140">동구 (28140)</option>
+                    <option value="28177">미추홀구 (28177)</option>
+                    <option value="28185">연수구 (28185)</option>
+                    <option value="28200">남동구 (28200)</option>
+                    <option value="28237">부평구 (28237)</option>
+                    <option value="28245">계양구 (28245)</option>
+                    <option value="28710">강화군 (28710)</option>
+                    <option value="28720">옹진군 (28720)</option>
+                </select>
+
+                베이스 지표 데이터 버전:
+                <select id="dataVersionSelect" onchange="loadDistrictData()" style="padding:5px; width:100%; border:1px solid #ddd; border-radius:3px; margin-top:5px;">
+                    <option value="v1.1" selected>v1.1 (2026년 3월 정기 업로드)</option>
+                    <option value="v1.0">v1.0 (2025년 4분기 원본)</option>
+                </select>
+            </div>
+
+            <!-- 사용자 가중치 저장소 기능 추가 -->
+            <div class="save-box">
+                <div class="flex-row">
+                    <span style="font-size:0.85rem; font-weight:bold;">새 설정 저장:</span>
+                    <div>
+                        <input type="text" id="configName" placeholder="지수 가중치 이름">
+                        <button class="btn btn-save" onclick="saveCurrentConfig()">저장</button>
+                    </div>
+                </div>
+                <div class="flex-row" style="margin-top:8px;">
+                    <span style="font-size:0.85rem; font-weight:bold;">저장된 설정 불러오기:</span>
+                    <select id="savedConfigs" onchange="loadSelectedConfig()">
+                        <option value="">-- 선택하세요 --</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn btn-update" onclick="calculateAndStyle()">지수 맵 재생산 (시뮬레이션)</button>
+
+            <div style="flex:1; overflow-y:auto; padding-right:5px; margin-bottom:10px;">
+                <h3>[1] 대분류 가중치 (고정 1.0)</h3>
+                <div id="mainWeights"></div>
+
+                <h3>[2] 세부지표 가중치 (그룹당 1.0)</h3>
+                <div id="subWeights"></div>
+            </div>
+        </div>
+        <div id="map"></div>
+    </div>
+
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([37.55, 126.65], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
+
+        let geoJsonLayer;
+        let originalData = null;
+
+        // CILI Metadata
+        const indicatorNames = { 'PDI': '잠재수요', 'UCI': '이용편의', 'CSI': '설치용이', 'CII': '환경영향', 'DI': '재난위험' };
+        const subIndicatorNames = {
+            'PDI_1': '연간통행량', 'PDI_2': '면허소지자', 'PDI_3': '전기차수', 'PDI_4': '충전횟수', 'PDI_5': '편의시설', 'PDI_6': '기타',
+            'UCI_1': '차량진입로', 'UCI_2': '무료주차장',
+            'CSI_1': '급속충전기', 'CSI_2': '충전소접근', 'CSI_3': '도로접근성',
+            'CII_1': '미세먼지', 'CII_2': '영하기온', 'CII_3': '폭염기온',
+            'DI_1': '침수유무', 'DI_2': '산불횟수', 'DI_3': '화재횟수', 'DI_4': '소방용수', 'DI_5': '소방서접근', 'DI_6': '지하주차'
+        };
+
+        const defaultMainWeights = { 'PDI': 0.32, 'UCI': 0.21, 'CSI': 0.19, 'CII': 0.04, 'DI': 0.24 };
+        const subIndicators = {
+            'PDI': ['PDI_1', 'PDI_2', 'PDI_3', 'PDI_4', 'PDI_5', 'PDI_6'],
+            'UCI': ['UCI_1', 'UCI_2'],
+            'CSI': ['CSI_1', 'CSI_2', 'CSI_3'],
+            'CII': ['CII_1', 'CII_2', 'CII_3'],
+            'DI': ['DI_1', 'DI_2', 'DI_3', 'DI_4', 'DI_5', 'DI_6']
+        };
+
+        const defaultSubWeights = {
+            'PDI_1': 0.20, 'PDI_2': 0.12, 'PDI_3': 0.24, 'PDI_4': 0.25, 'PDI_5': 0.19, 'PDI_6': 0.00,
+            'UCI_1': 0.39, 'UCI_2': 0.61,
+            'CSI_1': 0.31, 'CSI_2': 0.41, 'CSI_3': 0.28,
+            'CII_1': 0.35, 'CII_2': 0.32, 'CII_3': 0.33,
+            'DI_1': 0.18, 'DI_2': 0.18, 'DI_3': 0.18, 'DI_4': 0.18, 'DI_5': 0.13, 'DI_6': 0.15
+        };
+
+        // 저장소 로직 (LocalStorage fallback to local variable)
+        let configHistories = JSON.parse(localStorage.getItem('ciliConfigHistories')) || [
+            { id: 1, date: '2026-03-24 10:30', user: '인천시(기후대기과)', name: '기본 가중치', m: { 'PDI': 0.32, 'UCI': 0.21, 'CSI': 0.19, 'CII': 0.04, 'DI': 0.24 }, s: {} },
+            { id: 2, date: '2026-03-25 14:15', user: '상업 목적', name: '환경, 재난 제외', m: { 'PDI': 0.40, 'UCI': 0.40, 'CSI': 0.20, 'CII': 0.0, 'DI': 0.0 }, s: {} }
+        ];
+
+        // -------------------------
+        // 가중치 보정(Normalize) UI 로직
+        // -------------------------
+        function createWeightControls() {
+            const mC = document.getElementById('mainWeights');
+            const sC = document.getElementById('subWeights');
+            mC.innerHTML = ''; sC.innerHTML = '';
+
+            // 대분류
+            for (const [key, val] of Object.entries(defaultMainWeights)) {
+                let name = indicatorNames[key] || key;
+                mC.innerHTML += `
+                <div class="control-group">
+                    <label>${key} (${name})</label>
+                    <div class="slider-container">
+                        <input type="range" class="main-w" id="w_${key}" min="0" max="1" step="0.001" value="${val}" oninput="normalizeSliders('main-w', this.id)">
+                        <span class="val-display" id="disp_w_${key}">${val.toFixed(3)}</span>
+                    </div>
+                </div>`;
+
+                // 세부지표
+                if (subIndicators[key]) {
+                    let subHtml = `<div class="control-group" style="padding-left:10px; border-left:3px solid #ccc;">
+                                <label style="font-size:0.75rem; color:#666;">- ${key} 세부지표 -</label>`;
+                    subIndicators[key].forEach(subKey => {
+                        let subW = defaultSubWeights[subKey] !== undefined ? defaultSubWeights[subKey] : (1.0 / subIndicators[key].length);
+                        subW = Number(subW).toFixed(3);
+                        let subName = subIndicatorNames[subKey] || subKey;
+                        subHtml += `
+                        <div class="slider-container">
+                            <span class="sub-label">${subKey} (${subName})</span>
+                            <input type="range" class="sub-w_${key}" id="w_${subKey}" min="0" max="1" step="0.001" value="${subW}" oninput="normalizeSliders('sub-w_${key}', this.id)">
+                            <span class="val-display" id="disp_w_${subKey}">${subW}</span>
+                        </div>`;
+                    });
+                    subHtml += `</div>`;
+                    sC.innerHTML += subHtml;
+                }
+            }
+            refreshSavedDropdown();
+        }
+
+        // 값 변경 시 즉시 나머지 항목들을 합계 1로 보정하는 함수
+        function normalizeSliders(groupClass, activeId) {
+            const sliders = document.querySelectorAll('.' + groupClass);
+            let activeVal = parseFloat(document.getElementById(activeId).value);
+
+            // 사용자가 혼자서 1 이상으로 올렸다면 1로 고정
+            if (activeVal >= 1) {
+                activeVal = 1;
+                document.getElementById(activeId).value = 1;
+            }
+
+            let remain = 1.0 - activeVal;
+            let otherSum = 0;
+
+            sliders.forEach(s => { if (s.id !== activeId) otherSum += parseFloat(s.value); });
+
+            sliders.forEach(s => {
+                if (s.id !== activeId) {
+                    let newVal = otherSum === 0 ? (remain / (sliders.length - 1)) : (parseFloat(s.value) / otherSum) * remain;
+                    s.value = newVal;
+                    document.getElementById('disp_' + s.id).innerText = newVal.toFixed(3);
+                } else {
+                    document.getElementById('disp_' + s.id).innerText = activeVal.toFixed(3);
+                }
+            });
+        }
+
+        // 현재 가중치 구성 저장 로직 (사용자 저장)
+        function saveCurrentConfig() {
+            let name = document.getElementById('configName').value.trim();
+
+            let currentM = {};
+            let maxKey = '';
+            let maxVal = -1;
+
+            document.querySelectorAll('.main-w').forEach(el => {
+                let key = el.id.replace('w_', '');
+                let val = parseFloat(el.value);
+                currentM[key] = val;
+
+                if (val > maxVal) {
+                    maxVal = val;
+                    maxKey = key;
+                }
+            });
+
+            if (!name) {
+                let maxName = indicatorNames[maxKey] || maxKey;
+                name = `${maxName} (${(maxVal * 100).toFixed(1)}%)`;
+                if (!confirm(`가중치 명칭이 입력되지 않았습니다.\n자동 생성된 이름 '${name}'(으)로 이 가중치 설정을 저장하시겠습니까?`)) {
+                    return;
+                }
+            }
+
+            let currentS = {}; // 세부지표 생략 (필요시 동일방식 수집)
+
+            let today = new Date();
+            let ds = today.toISOString().slice(0, 16).replace('T', ' ');
+
+            const config = {
+                id: Date.now(),
+                date: ds,
+                user: '인천시 관리자 (User)',
+                name: name,
+                m: currentM,
+                s: currentS
+            };
+
+            configHistories.push(config);
+            localStorage.setItem('ciliConfigHistories', JSON.stringify(configHistories));
+            document.getElementById('configName').value = '';
+
+            alert(`'${name}' 가중치 설정이 저장되었습니다.`);
+            refreshSavedDropdown();
+        }
+
+        function refreshSavedDropdown() {
+            const sel = document.getElementById('savedConfigs');
+            sel.innerHTML = '<option value="">-- 가중치 설정 선택 --</option>';
+            configHistories.forEach(c => {
+                sel.innerHTML += `<option value="${c.id}">${c.name} (${c.user})</option>`;
+            });
+        }
+
+        function loadSelectedConfig() {
+            const val = document.getElementById('savedConfigs').value;
+            if (!val) return;
+            const config = configHistories.find(c => c.id == val);
+            if (config) {
+                // 대분류 로드 (이미 UI에 저장될때 보정-정규화된 수치이므로 합이 1임)
+                for (let [k, v] of Object.entries(config.m)) {
+                    let el = document.getElementById('w_' + k);
+                    if (el) {
+                        el.value = v;
+                        document.getElementById('disp_w_' + k).innerText = v.toFixed(3);
+                    }
+                }
+                alert(`가중치 정보를 장부로부터 불러왔습니다.\n(저장 시 보정된 합산 1의 수치 적용됨)`);
+                calculateAndStyle(); // 즉시 맵 재계산
+            }
+        }
+
+        // -------------------------
+        // 맵 재생산 (CILI 계산) 로직
+        // -------------------------
+        function calculateScores(geoJson) {
+            const weights = {};
+            Object.keys(defaultMainWeights).forEach(key => weights[key] = parseFloat(document.getElementById(`w_${key}`).value));
+
+            // 세부 지표 수집
+            Object.keys(defaultMainWeights).forEach(key => {
+                weights[key + '_subs'] = {};
+                subIndicators[key].forEach(subKey => {
+                    let el = document.getElementById(`w_${subKey}`);
+                    if (el) weights[key + '_subs'][subKey] = parseFloat(el.value);
+                });
+            });
+
+            // 격자별 등급 부여
+            geoJson.features.forEach(feature => {
+                const props = feature.properties;
+                let finalScore = 0;
+
+                for (const key of Object.keys(defaultMainWeights)) {
+                    let subScoreSum = 0;
+                    // 이미 UI단에서 세부항목 및 대분류는 각각 합이 1로 정규화 관리되므로 바로 곱셈 적용
+                    subIndicators[key].forEach(subKey => {
+                        let v = props[subKey] || 0;
+                        let w = weights[key + '_subs'][subKey] || 0;
+                        subScoreSum += (v * w);
+                    });
+                    finalScore += subScoreSum * weights[key];
+                }
+
+                feature.properties.finalScore = finalScore;
+                feature.properties.grade = getGrade(finalScore);
+            });
+        }
+
+        function getGrade(score) {
+            if (score >= 0.8) return 1; if (score >= 0.6) return 2; if (score >= 0.4) return 3; if (score >= 0.2) return 4; return 5;
+        }
+
+        function getColor(grade) {
+            switch (grade) { case 1: return '#ff0000'; case 2: return '#ffa500'; case 3: return '#ffff00'; case 4: return '#90ee90'; case 5: return '#008000'; default: return '#cccccc'; }
+        }
+
+        function styleFeature(feature) {
+            return { fillColor: getColor(feature.properties.grade), weight: 1, opacity: 1, color: 'white', dashArray: '3', fillOpacity: 0.7 };
+        }
+
+        function drawMap(data) {
+            if (geoJsonLayer) map.removeLayer(geoJsonLayer);
+            calculateScores(data);
+            geoJsonLayer = L.geoJSON(data, {
+                style: styleFeature,
+                onEachFeature: function (feature, layer) {
+                    const p = feature.properties;
+                    layer.bindPopup(`<b>${p.SPO_NO_CD}</b><br/>등급: <b style="color:${getColor(p.grade)}">${p.grade}등급 (CILI)</b><br/>총점: ${p.finalScore.toFixed(4)}`);
+                }
+            }).addTo(map);
+            addLegend();
+        }
+
+        function calculateAndStyle() {
+            if (!originalData) { alert("상단 구역 선택에서 데이터를 먼저 로드해주세요."); return; }
+            drawMap(originalData);
+        }
+
+        function addLegend() {
+            if (document.querySelector('.legend')) return;
+            const legend = L.control({ position: 'bottomright' });
+            legend.onAdd = function () {
+                const div = L.DomUtil.create('div', 'legend');
+                const g = [1, 2, 3, 4, 5], l = ["매우 높음", "높음", "보통", "낮음", "매우 낮음"], r = ["0.8~1.0", "0.6~0.8", "0.4~0.6", "0.2~0.4", "0.0~0.2"];
+                div.innerHTML = '<strong>CILI 종합 등급</strong><br>';
+                for (let i = 0; i < g.length; i++) div.innerHTML += '<i style="background:' + getColor(g[i]) + '"></i> ' + g[i] + '등급 (' + l[i] + ') <br><small style="color:#666; padding-left:20px;">' + r[i] + '</small><br>';
+                return div;
+            };
+            legend.addTo(map);
+        }
+
+        function loadDistrictData() {
+            // Note: 이 부분은 실제 데이터가 없으므로 화면 모달 에러 없이 더미처리하거나 alert 만 띄웁니다.
+            const guCode = document.getElementById('guSelect').value;
+            const dataVer = document.getElementById('dataVersionSelect').value;
+            const fileName = `incheon_${guCode}_data.geojson.gz`;
+
+            console.log(`[시뮬레이터] 데이터 지역: ${guCode}, 적용버전: ${dataVer} 로딩 중...`);
+
+            fetch(fileName).then(r => r.arrayBuffer()).then(b => {
+                const d = JSON.parse(pako.inflate(new Uint8Array(b), { to: 'string' }));
+                originalData = d;
+                drawMap(d);
+                if (d.features.length > 0) map.fitBounds(L.geoJSON(d).getBounds());
+            }).catch(e => {
+                console.warn(`[데이터 버전 ${dataVer}] 시각화에 필요한 실제 파일이 없어 더미처리 되었습니다.`, e);
+                // 실 서비스라면 여기서 버전에 맞는 다른 파일을 로딩하여 화면 지도 상 점수합산을 재생산합니다.
+                if (originalData) {
+                    alert(`선택하신 '${dataVer}' 버전의 신규 지표 데이터가 시뮬레이션 맵에 덮어쓰기 적용되었습니다. \n(등급 재생산 완료)`);
+                    calculateAndStyle();
+                }
+            });
+        }
+
+
+
+        // Start
+        createWeightControls();
+        loadDistrictData();
+
+    </script>
+</body>
+
+</html>

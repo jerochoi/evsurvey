@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CILI 지표 데이터 버전 및 업로드 관리</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0F62FE;
+            --bg-body: #F4F7FB;
+            --text-main: #161616;
+            --border-color: #E0E0E0;
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            padding-bottom: 60px;
+        }
+
+        .top-header {
+            background-color: #161616;
+            color: #fff;
+            padding: 0 40px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+            padding-left: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: #F8F9FA;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 16px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        td {
+            border-bottom: 1px solid #E0E0E0;
+            padding: 14px 16px;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            background: #fff;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+        }
+
+        .btn-success {
+            background: #198038;
+            color: #fff;
+            border: none;
+        }
+
+        /* Step Validation Styles */
+        .val-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .val-step.active {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .val-step.done {
+            color: #198038;
+            font-weight: bold;
+        }
+
+        .val-step i {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            text-align: center;
+            line-height: 24px;
+            border-radius: 50%;
+            font-size: 12px;
+            background: #eee;
+            margin-right: 12px;
+        }
+
+        .val-step.active i {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .val-step.done i {
+            background: #198038;
+            color: #fff;
+            content: "✓";
+        }
+    </style>
+</head>
+
+<body>
+    <header class="top-header">
+        <div class="header-logo" style="font-weight:700;">시스템 관리자 <span style="font-weight:400; font-size:15px; margin-left:8px;">| CILI 지표 데이터 관리</span></div>
+    </header>
+
+    <div class="container">
+        <header style="margin-bottom: 24px; display:flex; justify-content:space-between;">
+            <div>
+                <h1 style="font-size: 24px; font-weight: 700; margin-bottom:8px;">각 지표 단위 데이터 업로드 및 유효성 검사</h1>
+                <p style="color: #6F6F6F; font-size:14px;">QGIS 등에서 가공된 특정 대/소분류(PDI, UCI 등) GeoJSON 파일을 업로드하고 좌표계(CRS) 정합성을 검증합니다.</p>
+            </div>
+            <button class="btn btn-primary" onclick="location.href='cili_sim1.html'">← CILI 시뮬레이터로 이동</button>
+        </header>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <!-- Upload Panel -->
+            <div class="card">
+                <h2 class="card-title">지표 데이터 신규 업로드</h2>
+                <div style="margin-bottom: 16px;">
+                    <label style="display:block; font-size:13px; font-weight:bold; margin-bottom:6px;">업로드 대상 지표 그룹</label>
+                    <select class="btn" id="uploadGroup" style="width:100%;">
+                        <option>잠재적 수요 (PDI) 데이터셋 (1_~6_포함)</option>
+                        <option>이용 편의성 (UCI) 데이터셋</option>
+                        <option>설치 용이성 (CSI) 데이터셋</option>
+                        <option>환경 영향 (CII) 데이터셋</option>
+                        <option>재난 위험 (DI) 데이터셋</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <label style="display:block; font-size:13px; font-weight:bold; margin-bottom:6px;">새로운 버전 명칭</label>
+                    <input type="text" id="uploadVer" class="btn" placeholder="예: v1.1_2026_업데이트" style="width:100%;">
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <label style="display:block; font-size:13px; font-weight:bold; margin-bottom:6px;">지리 공간 파일 선택 (.geojson, .shp.zip)</label>
+                    <input type="file" id="uploadFile" class="btn" style="width:100%; border:1px dashed #0F62FE;" accept=".geojson,.zip">
+                </div>
+
+                <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="startValidation()">업로드 및 데이터 유효성 검사 시작</button>
+            </div>
+
+            <!-- Validation Progress Panel -->
+            <div class="card" id="validationPanel" style="opacity:0.3; pointer-events:none;">
+                <h2 class="card-title">데이터 유효성(Validation) 검사</h2>
+                <div id="steps">
+                    <div class="val-step" id="step1"><i>1</i> 파일 포맷 및 메타데이터 파싱</div>
+                    <div class="val-step" id="step2"><i>2</i> 좌표 참조 시스템 (CRS - EPSG:4326) 무결성 검증</div>
+                    <div class="val-step" id="step3"><i>3</i> 기존 전국 격자 셀(Grid)과의 병합(Join) 매핑 테스트</div>
+                    <div class="val-step" id="step4"><i>4</i> 컬럼명 스키마(PDI_1 등) 호환성 판별</div>
+                </div>
+                <div id="valResult" style="margin-top:20px; font-weight:bold; font-size:14px; display:none; padding:15px; border-radius:8px;">
+                    <!-- result message -->
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">등록된 지표데이터 컴포넌트 버전 관리 (통합본 자동빌드)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>지표 그룹</th>
+                        <th>현재 적용된 버전</th>
+                        <th>업데이트 일자</th>
+                        <th>등록자</th>
+                        <th>상태</th>
+                    </tr>
+                </thead>
+                <tbody id="groupTable">
+                    <tr>
+                        <td>잠재수요(PDI)</td>
+                        <td style="font-weight:bold;">v1.0 (초기)</td>
+                        <td>2025-11-20</td>
+                        <td>시스템</td>
+                        <td><span style="color:green;">정상</span></td>
+                    </tr>
+                    <tr>
+                        <td>이용편의(UCI)</td>
+                        <td style="font-weight:bold;">v1.0 (초기)</td>
+                        <td>2025-11-20</td>
+                        <td>시스템</td>
+                        <td><span style="color:green;">정상</span></td>
+                    </tr>
+                    <tr>
+                        <td>설치용이(CSI)</td>
+                        <td style="font-weight:bold;">v1.0 (초기)</td>
+                        <td>2025-11-20</td>
+                        <td>시스템</td>
+                        <td><span style="color:green;">정상</span></td>
+                    </tr>
+                    <tr>
+                        <td>환경영향(CII)</td>
+                        <td style="font-weight:bold; color:var(--primary)">v1.1_대기질_보완</td>
+                        <td>2026-03-22</td>
+                        <td>김철수</td>
+                        <td><span style="color:green;">최신/동기화됨</span></td>
+                    </tr>
+                    <tr>
+                        <td>재난위험(DI)</td>
+                        <td style="font-weight:bold;">v1.0 (초기)</td>
+                        <td>2025-11-20</td>
+                        <td>시스템</td>
+                        <td><span style="color:green;">정상</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="text-align:right; margin-top:16px;">
+                <button class="btn btn-success" onclick="alert('각 모듈 컴포넌트 최신버전을 병합하여 시뮬레이터용 최종 master_geojson을 빌드합니다!')">최종 병합 모델로 시뮬레이터 배포</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function startValidation() {
+            if (!document.getElementById('uploadFile').files.length || !document.getElementById('uploadVer').value) {
+                alert('파일과 버전명을 모두 입력해주세요.'); return;
+            }
+
+            const panel = document.getElementById('validationPanel');
+            panel.style.opacity = '1';
+            panel.style.pointerEvents = 'auto';
+
+            // Reset steps
+            for (let i = 1; i <= 4; i++) document.getElementById('step' + i).className = 'val-step';
+            document.getElementById('valResult').style.display = 'none';
+
+            let curStep = 1;
+            document.getElementById('step' + curStep).classList.add('active');
+
+            let timer = setInterval(() => {
+                document.getElementById('step' + curStep).className = 'val-step done';
+                document.getElementById('step' + curStep).innerHTML = `<i>✓</i> ${document.getElementById('step' + curStep).innerText}`;
+
+                curStep++;
+                if (curStep <= 4) {
+                    document.getElementById('step' + curStep).classList.add('active');
+                } else {
+                    clearInterval(timer);
+                    let res = document.getElementById('valResult');
+                    res.style.display = 'block';
+                    res.style.backgroundColor = '#DEFBE6';
+                    res.style.border = '1px solid #24A148';
+                    res.style.color = '#198038';
+                    res.innerHTML = "모든 검증을 통과했습니다. 지표 데이터가 안전하게 저장소에 등록되었습니다.";
+
+                    // Add to table
+                    let groupName = document.getElementById('uploadGroup').value.split(' ')[0];
+                    let ver = document.getElementById('uploadVer').value;
+                    let tb = document.getElementById('groupTable');
+                    let newRow = `<tr><td><span style="color:var(--primary); font-weight:bold;">[New]</span> ${groupName}</td><td style="font-weight:bold; color:var(--primary)">${ver}</td><td>현재</td><td>인천시청(User)</td><td><span style="color:green;">최신</span></td></tr>`;
+                    tb.insertAdjacentHTML('afterbegin', newRow);
+                }
+            }, 800);
+        }
+    </script>
+</body>
+
+</html>

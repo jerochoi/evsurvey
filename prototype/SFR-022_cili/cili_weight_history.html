@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CILI 사용자 가중치 이력 관리</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #0F62FE;
+            --bg-body: #F4F7FB;
+            --text-main: #161616;
+            --border-color: #E0E0E0;
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            padding-bottom: 60px;
+        }
+
+        .top-header {
+            background-color: #161616;
+            color: #fff;
+            padding: 0 40px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+            padding-left: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: #F8F9FA;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #525252;
+        }
+
+        td {
+            border-bottom: 1px solid #E0E0E0;
+            padding: 14px 16px;
+            font-size: 14px;
+        }
+
+        tr:hover td {
+            background-color: #FAFCFF;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            background: #fff;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="top-header">
+        <div class="header-logo" style="font-weight:700;">시스템 관리자 <span style="font-weight:400; font-size:15px; margin-left:8px;">| CILI 지표 가중치 이력 관리</span></div>
+    </header>
+
+    <div class="container">
+        <header class="page-header">
+            <div>
+                <h1 style="font-size: 24px; margin-bottom: 8px; font-weight: 700;">사용자 구성 가중치 조회 및 이력 관리</h1>
+                <p style="color: #6F6F6F; font-size:14px;">플랫폼 내 각 기관 및 담당자가 저장한 CILI 지수 대분류·소분류 시뮬레이션 가중치 이력과 사용자 정보를 추적 관리합니다.</p>
+            </div>
+            <button class="btn btn-primary" onclick="location.href='cili_sim1.html'">← CILI 시뮬레이터로 이동</button>
+        </header>
+
+        <div class="card">
+            <h2 class="card-title">목록 (전체 이력)</h2>
+            <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
+                <div style="display:flex; gap:8px;">
+                    <select class="btn">
+                        <option>소속 기관 전체</option>
+                        <option>환경부</option>
+                        <option>인천광역시</option>
+                    </select>
+                    <input type="text" class="btn" placeholder="이름/명칭 검색" style="width:200px;">
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>저장 일시</th>
+                        <th>설정 명칭</th>
+                        <th>사용자 성명</th>
+                        <th>소속 기관 및 부서</th>
+                        <th>PDI(잠재)</th>
+                        <th>UCI(편의)</th>
+                        <th>CSI(설치)</th>
+                        <th>CII(환경)</th>
+                        <th>DI(위험)</th>
+                        <th>기준 모델 설정</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>2026-03-26 15:20</td>
+                        <td><span style="font-weight:bold; color:var(--primary);">환경영향 (17.5%) 중심안</span></td>
+                        <td>김철수 <span style="font-size:11px; color:#888;">(아이디: kcs12)</span></td>
+                        <td>환경부 대기미래기획과</td>
+                        <td>0.200</td>
+                        <td>0.200</td>
+                        <td>0.200</td>
+                        <td style="font-weight:bold; color:red;">0.175</td>
+                        <td>0.225</td>
+                        <td><button class="btn" onclick="alert('이 설정으로 전체 사이트 기본값을 복원합니다.')">기본값 적용</button></td>
+                    </tr>
+                    <tr style="background:#F2F7FF;">
+                        <td>2026-03-25 11:10</td>
+                        <td><span style="font-weight:bold; color:var(--primary);">인천시 충전기반 확충안</span></td>
+                        <td>박지훈 <span style="font-size:11px; color:#888;">(아이디: i_park)</span></td>
+                        <td>인천시청 에너지정책과</td>
+                        <td style="font-weight:bold; color:red;">0.318</td>
+                        <td>0.211</td>
+                        <td>0.189</td>
+                        <td>0.044</td>
+                        <td>0.238</td>
+                        <td><span style="font-weight:bold; font-size:12px; color:var(--primary)">현재 기본 지정됨</span></td>
+                    </tr>
+                    <tr>
+                        <td>2026-03-24 09:30</td>
+                        <td><span style="font-weight:bold; color:var(--primary);">이용편의 (70%) 극대화안</span></td>
+                        <td>최유진 <span style="font-size:11px; color:#888;">(아이디: yj_choi)</span></td>
+                        <td>서울연구원 교통시스템연구실</td>
+                        <td>0.100</td>
+                        <td style="font-weight:bold; color:red;">0.700</td>
+                        <td>0.100</td>
+                        <td>0.050</td>
+                        <td>0.050</td>
+                        <td><button class="btn" onclick="alert('이 설정으로 전체 사이트 기본값을 복원합니다.')">기본값 적용</button></td>
+                    </tr>
+                    <tr>
+                        <td>2026-03-21 14:05</td>
+                        <td><span style="font-weight:bold; color:var(--primary);">잠재수요 (70%) 중심 설정안</span></td>
+                        <td>이민호 <span style="font-size:11px; color:#888;">(아이디: lmh_00)</span></td>
+                        <td>카카오모빌리티 데이터분석팀</td>
+                        <td style="font-weight:bold; color:red;">0.700</td>
+                        <td>0.100</td>
+                        <td>0.100</td>
+                        <td>0.050</td>
+                        <td>0.050</td>
+                        <td><button class="btn" onclick="alert('이 설정으로 전체 사이트 기본값을 복원합니다.')">기본값 적용</button></td>
+                    </tr>
+                    <tr>
+                        <td>2026-03-18 16:45</td>
+                        <td><span style="font-weight:bold; color:var(--primary);">환경, 재난 배제 가중치</span></td>
+                        <td>정수아 <span style="font-size:11px; color:#888;">(아이디: sua_j)</span></td>
+                        <td>한국전력공사 인프라기획본부</td>
+                        <td>0.500</td>
+                        <td>0.300</td>
+                        <td>0.200</td>
+                        <td style="font-weight:bold; color:blue;">0.000</td>
+                        <td style="font-weight:bold; color:blue;">0.000</td>
+                        <td><button class="btn" onclick="alert('이 설정으로 전체 사이트 기본값을 복원합니다.')">기본값 적용</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">가중치 변동 추이 요약 (최근 5건)</h2>
+            <div style="height: 300px;">
+                <canvas id="historyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('historyChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [
+                    '인천시 충전기반 확충안', 
+                    '환경영향 (17.5%) 중심안', 
+                    '이용편의 (70%) 극대화안', 
+                    '잠재수요 (70%) 중심 설정안', 
+                    '환경, 재난 배제 가중치'
+                ],
+                datasets: [
+                    { label: 'PDI (잠재수요)', data: [0.318, 0.200, 0.100, 0.700, 0.500], backgroundColor: '#007bff' },
+                    { label: 'UCI (이용편의)', data: [0.211, 0.200, 0.700, 0.100, 0.300], backgroundColor: '#28a745' },
+                    { label: 'CSI (설치용이)', data: [0.189, 0.200, 0.100, 0.100, 0.200], backgroundColor: '#ffc107' },
+                    { label: 'CII (환경영향)', data: [0.044, 0.175, 0.050, 0.050, 0.000], backgroundColor: '#dc3545' },
+                    { label: 'DI (재난위험)', data: [0.238, 0.225, 0.050, 0.050, 0.000], backgroundColor: '#6f42c1' }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true, max: 1 } } }
+        });
+    </script>
+</body>
+
+</html>
