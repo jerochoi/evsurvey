@@ -11,16 +11,88 @@
     <script type="text/javascript" src="jquery.min.js"></script>
     <script type="text/javascript" src="common.js"></script>
     <style>
-        .container { margin-top: 25px; }
-        .inner { display: flex; justify-content: center; }
-        .con-right { width: 100%; max-width: 1000px; }
-        .required::after { content: ' *'; color: red; }
-        .section-box { border: 1px solid #ddd; padding: 20px; border-radius: 5px; background: #fff; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .section-title { font-size: 18px; font-weight: bold; padding-bottom: 10px; border-bottom: 2px solid #1976d2; margin-bottom: 15px; color: #1976d2; }
+        .container {
+            margin-top: 25px;
+        }
+
+        .inner {
+            display: flex;
+            justify-content: center;
+        }
+
+        .con-right {
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .required::after {
+            content: ' *';
+            color: red;
+        }
+
+        .section-box {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 5px;
+            background: #fff;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #1976d2;
+            margin-bottom: 15px;
+            color: #1976d2;
+        }
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
 
 <body>
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">💡</span> Help Desk 문의
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 통합누리집 방문자가 수소충전소 구축과 관련된 <b>궁금증을 해결하거나, 특정 부지의 적정성을 검토 요청</b>하는 창구입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li><b>일반 문의</b>: 법령 해석이나 단순 절차 안내 등 텍스트 중심의 질의를 수행합니다.</li>
+                        <li><b>부지 검토</b>: 특정 지번에 충전소 구축 가능 여부를 확인하기 위해 사업구분, 면적, 지역지구 등 상세 정보를 입력해야 합니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[주요 항목 및 기능 설명]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">📂 문의대상 선택</td>
+                        <td class="help-col-desc">'부지검토' 선택 시 상세 정보 입력창이 동적으로 나타나며, 그 외 항목은 단순 문의형태로 진행됩니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">📍 부지 위치 및 주소</td>
+                        <td class="help-col-desc">부지발굴 지원을 위해 검토 대상지의 정확한 지번 주소와 면적(㎡)을 필수로 입력해야 합니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">⚖️ 지역지구 지정현황</td>
+                        <td class="help-col-desc">개발제한구역, 문화재보호구역 등 관계 법령에 따른 제한 사항을 입력하면 더욱 정확한 검토 결과를 받을 수 있습니다.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    </div>
+
     <div class="all-container">
         <!-- Header -->
         <div class="container-fluid top-frame">
@@ -54,7 +126,8 @@
                         <div class="section-title">기본 문의 정보</div>
                         <table class="table-left">
                             <colgroup>
-                                <col width="15%"><col width="85%">
+                                <col width="15%">
+                                <col width="85%">
                             </colgroup>
                             <tbody>
                                 <tr>
@@ -82,7 +155,10 @@
                             <div class="section-title">부지검토 요청 상세 정보</div>
                             <table class="table-left">
                                 <colgroup>
-                                    <col width="15%"><col width="35%"><col width="15%"><col width="35%">
+                                    <col width="15%">
+                                    <col width="35%">
+                                    <col width="15%">
+                                    <col width="35%">
                                 </colgroup>
                                 <tbody>
                                     <tr>
@@ -153,9 +229,9 @@
     </div>
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             // 문의대상 변경 이벤트 감지
-            $('#inquiryTarget').on('change', function() {
+            $('#inquiryTarget').on('change', function () {
                 var selectedValue = $(this).val();
                 if (selectedValue === '부지검토') {
                     $('#siteReviewForm').stop().slideDown(300);
@@ -170,5 +246,17 @@
             }
         });
     </script>
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
 </body>
+
 </html>

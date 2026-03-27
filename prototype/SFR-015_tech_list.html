@@ -49,9 +49,51 @@
 
         /* 검토완료 */
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
 
 <body>
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">💡</span> 기술검토 요청 및 접수 현황
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 수소충전소 설치계획에 대한 <b>기술검토 진행 현황</b>을 파악하고 관리합니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>사업자가 제출한 설치계획서의 접수 상태부터 공단 검토 완료까지 전 과정을 보여줍니다.</li>
+                        <li>사용자 권한(환경청/공단)에 따라 '검토요청', '접수', '검토작성' 등 각 단계별 필요한 조치를 할 수 있습니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[주요 항목 및 기능 설명]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">🚦 진행 상태 배지</td>
+                        <td class="help-col-desc">제출완료(파랑), 검토요청(주황), 검토중(초록), 검토완료(회색) 등 각 안건의 현재 단계를 색상별 배지로 구분하여 표시합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">⚡ 단계별 액션 버튼</td>
+                        <td class="help-col-desc">현재 상태에 따라 '검토요청'(환경청), '접수'(공단), '검토작성'(공단 담당자) 등 다음 단계로 넘어가기 위한 전용 버튼이 활성화됩니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">📄 설치계획서 확인</td>
+                        <td class="help-col-desc">'다운로드' 버튼을 통해 사업자가 제출한 원본 설치계획서 및 증빙 서류를 확인할 수 있습니다.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    </div>
+
     <div class="all-container">
         <!-- Header -->
         <div class="container-fluid top-frame">
@@ -85,7 +127,6 @@
 
                     <!-- 검색 영역 -->
                     <div class="con m-b-15">
-                        <h2>검색 조건</h2>
                         <div class="page-block search-wrap">
                             <table class="table-left">
                                 <tbody>
@@ -113,20 +154,19 @@
 
                     <!-- 목록 영역 -->
                     <div class="con">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px;">
-                            <h2>검색 결과: <b>3</b>건</h2>
+                        <div class="section-top" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <div class="total-count" style="font-size: 16px; font-weight: bold;">검색 결과: <b style="color: #1976d2;">3</b>건</div>
                         </div>
                         <table class="table-center">
                             <colgroup>
-                                <col width="5%">
-                                <col width="10%">
-                                <col width="15%">
-                                <col width="20%">
-                                <col width="10%">
-                                <col width="10%">
-                                <col width="15%">
-                                <col width="15%">
+                                <col width="60px">
+                                <col width="100px">
+                                <col width="120px">
+                                <col width="*">
+                                <col width="100px">
+                                <col width="120px">
+                                <col width="120px">
+                                <col width="120px">
                             </colgroup>
                             <thead>
                                 <tr>
@@ -145,54 +185,64 @@
                                     <td>3</td>
                                     <td><span class="status-badge status-submit">제출완료</span></td>
                                     <td>한강청</td>
-                                    <td>인천 오류동 충전소</td>
+                                    <td class="t-a-left">인천 오류동 충전소</td>
                                     <td>홍길동</td>
                                     <td>2026-03-16</td>
                                     <td><button class="btn_small02 btn_green_bg">다운로드</button></td>
                                     <td>
-                                        <button class="btn_small02 btn_blue02_bg"
-                                            onclick="alert('공단으로 기술검토를 요청하였습니다.')">검토요청</button>
+                                        <button class="btn_small02 btn_blue02_bg" onclick="alert('공단으로 기술검토를 요청하였습니다.')">검토요청</button>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>2</td>
                                     <td><span class="status-badge status-request">검토요청</span></td>
                                     <td>수도권청</td>
-                                    <td>서울 마곡 삼거리소</td>
+                                    <td class="t-a-left">서울 마곡 삼거리소</td>
                                     <td>김철수</td>
                                     <td>2026-03-15</td>
                                     <td><button class="btn_small02 btn_green_bg">다운로드</button></td>
                                     <td>
-                                        <button class="btn_small02 btn_navy_bg"
-                                            onclick="alert('접수 처리되었습니다.')">접수</button>
+                                        <button class="btn_small02 btn_navy_bg" onclick="alert('접수 처리되었습니다.')">접수</button>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>1</td>
                                     <td><span class="status-badge status-ing">검토중</span></td>
                                     <td>금강청</td>
-                                    <td>세종 어진동 충전소</td>
+                                    <td class="t-a-left">세종 어진동 충전소</td>
                                     <td>이영희</td>
                                     <td>2026-03-14</td>
                                     <td><button class="btn_small02 btn_green_bg">다운로드</button></td>
                                     <td>
-                                        <button class="btn_small02 btn_blue02_bg"
-                                            onclick="location.href='SFR-015_tech_review.html'">검토작성</button>
+                                        <button class="btn_small02 btn_blue02_bg" onclick="location.href='SFR-015_tech_review.html'">검토작성</button>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
 
-                        <!-- 하단 버튼 영역 추가 -->
-                        <div class="btn-wrap t-a-right m-t-20">
-                            <button class="btn_square btn_blue02_bg" style="width: 150px;" 
-                                onclick="location.href='SFR-015_tech_submit.html'">기술검토 요청</button>
+                    <!-- 하단 버튼 영역 -->
+                    <div class="con" style="background: none; border: none; padding: 0;">
+                        <div class="btn-wrap t-a-right">
+                            <button class="btn_square btn_blue02_bg" style="width: 150px;" onclick="location.href='SFR-015_tech_submit.html'">기술검토 요청</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
 </body>
+
 
 </html>

@@ -88,15 +88,15 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        table {
+        .data-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.9em;
             min-width: 1000px;
         }
 
-        th,
-        td {
+        .data-table th,
+        .data-table td {
             padding: 4px 4px;
             /* 더 좁게 표시 */
             font-size: 0.85rem;
@@ -212,9 +212,54 @@
             font-weight: bold;
         }
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
 
 <body>
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">💡</span> 관리대장 - 상업운영(Hying) 비교 안내
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 기후부 내부 관리 데이터와 외부 실시간 운영 API(Hying)를 대조하여 <b>충전소 정보의 일관성 및 실제 운영 상태</b>를 실시간으로 점검하는 화면입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>부처 관리 대장과 민간 제공 상업운영 데이터 간의 불일치를 식별하여 데이터 현행화 및 민원 대응력을 높이기 위해 설계되었습니다.</li>
+                        <li>매칭 알고리즘을 통해 이름/주소/좌표가 상이한 항목을 자동으로 찾아내며, 현재 영업 여부(API 기준)를 즉각 대조합니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[주요 항목 및 기능 설명]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">⚖️ 데이터 교차 매칭</td>
+                        <td class="help-col-desc">내부 대장 데이터와 외부 API 데이터를 연결하여 매칭성공(거리오차 포함)/실패/없음 여부를 시각적으로 구분하여 표시합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🚩 운영 상태 불일치 확인</td>
+                        <td class="help-col-desc">관리대장상 '운영중'이나 API에서 '영업종료'로 나타나는 등 장부와 실재의 차이를 한눈에 식별하여 현행화를 돕습니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">📊 실시간 연동 통계</td>
+                        <td class="help-col-desc">관리대장 총계, API 영업중 개소, 교차점검 매칭 현황 등 종합적인 데이터 정합성 지표를 상단 카드로 보여줍니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🔍 상세 필터 및 검색</td>
+                        <td class="help-col-desc">매칭 결과, 관리대장 상태, API상 영업 상태 등 각 열의 드롭다운 필터를 통해 관리 대상 항목을 신속하게 검색합니다.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
 
     <h1>수소충전소 상업운영(Hying비교)</h1>
 
@@ -228,7 +273,7 @@
     </div>
 
     <div class="table-responsive">
-        <table>
+        <table class="data-table">
             <thead>
                 <tr>
                     <th style="min-width: 40px; width: 40px;">No</th>
@@ -438,11 +483,11 @@
             `;
             document.getElementById('stats-container').innerHTML = statsHtml;
 
-            // 정렬: 매칭실패 -> 매칭성공(운영중) -> API에만 존재 -> 구축중 등등 기타
+            // 정렬: 매칭성공(운영중) -> 매칭실패 -> API에만 존재 -> 구축중 등등 기타
             resultList.sort((a, b) => {
                 const getOrder = (type) => {
-                    if (type === "매칭실패") return 1;
-                    if (type.startsWith("매칭성공")) return 2;
+                    if (type.startsWith("매칭성공")) return 1;
+                    if (type === "매칭실패") return 2;
                     if (type === "관리대장 없음") return 3;
                     return 4;
                 };
@@ -583,6 +628,18 @@
 
         window.onload = init;
     </script>
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
 </body>
+
 
 </html>

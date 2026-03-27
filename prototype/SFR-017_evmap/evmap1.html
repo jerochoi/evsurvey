@@ -6,6 +6,7 @@
     <title>충전소 표시 OpenLayers</title>
     <!-- OpenLayers CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.3.0/ol.css" type="text/css">
+    <link type="text/css" rel="stylesheet" href="../prototype.css">
     <style>
         body,
         html {
@@ -30,10 +31,8 @@
             border-radius: 10px;
             border: 1px solid #cccccc;
             bottom: 12px;
-            /* left: -50px; Remove fixed left to allow positioning */
             min-width: 280px;
             transform: translate(-50%, 0);
-            /* Center horizontally */
         }
 
         .ol-popup:after,
@@ -127,6 +126,60 @@
 
     <!-- EV Map Logic -->
     <script src="evMap1.js"></script>
+
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">⚡</span> 지도 성능 개선 기술 안내
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 전국 수만 개의 충전소 데이터를 <b>성능 저하 없이 매끄럽게 표출</b>하기 위해 최적 기술을 적용한 예시 화면입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>대용량 데이터 연산을 메인 스레드에서 분리하여 가동함으로써 화면 멈춤(Freezing) 현상을 완전히 제거했습니다.</li>
+                        <li>화면 이동 및 확대/축소 시 발생하는 연산을 최적화하여 저사양 기기에서도 부드러운 인터랙션을 제공합니다.</li>
+                    </ul>
+                </div>
+                
+                <h3 class="help-subtitle">[적용된 핵심 성능 개선 기술]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">🧵 Web Workers</td>
+                        <td class="help-col-desc">수만 개의 데이터 로딩 및 클러스터링 계산을 백그라운드 스레드에서 처리하여, UI 응답 속도를 획기적으로 개선했습니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">📉 Supercluster 알고리즘</td>
+                        <td class="help-col-desc">대량의 좌표 데이터를 계층적으로 클러스터링하여, 수만 개의 마커를 동시에 그려도 프레임 저하가 발생하지 않습니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">⏱️ 이벤트 디바운싱</td>
+                        <td class="help-col-desc">지도 이동 및 검색어 입력 시 불필요한 연속 연산을 방지하고, 마지막 동작 후에만 반응하도록 제어하여 CPU 점유율을 낮췄습니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">📦 데이터 압축 표출</td>
+                        <td class="help-col-desc">데이터 전송량을 줄이기 위해 Gzip 압축된 JSON 데이터를 직접 처리하여 초기 로딩 속도를 높였습니다.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
 
     <!-- Initialization Script -->
     <script>

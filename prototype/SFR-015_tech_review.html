@@ -185,9 +185,55 @@
             font-weight: normal;
         }
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
 
 <body>
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">💡</span>기술검토 결과 작성
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 현장 조사 및 서류 검토를 마친 후, <b>각 항목별 세부 검토 의견을 수립</b>하여 기술검토를 최종 완료하는 문서 작성 화면입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>법적 사항, 설치 현황 등 범주별로 여러 건의 검토 의견을 동적으로 추가하여 상세히 기술할 수 있습니다.</li>
+                        <li>작성된 내용은 공식적인 기술검토 의견서 양식으로 자동 구성되며, 최종 완료 시 시스템에 정식 등록됩니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[주요 항목 및 기능 설명]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">➕ 검토항목 동적 추가</td>
+                        <td class="help-col-desc">'설치부지' 및 '용량/공급방식' 등 주요 항목 우측의 [ + ] 버튼을 클릭하여 의견 입력란을 늘려 작성할 수 있습니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">✍️ 스마트 에디터 툴바</td>
+                        <td class="help-col-desc">텍스트 크기(T/T-), 자간 조절, 굵게(B) 등 문서의 가독성을 높이기 위한 편집 기능을 제공합니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">📂 범주별 분류 선택</td>
+                        <td class="help-col-desc">각 의견별로 (법적사항), (증설검토), (기타사항) 등 소분류를 선택하여 의견의 성격을 명확히 규정할 수 있습니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🖼️ 현장 사진 관리</td>
+                        <td class="help-col-desc">하단의 사진대지 영역에 현장 점검 사진을 업로드합니다.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    </div>
+
     <div class="all-container">
         <div class="container" style="margin-top: 25px;">
             <div class="inner">
@@ -561,6 +607,18 @@
             tr.remove();
         }
     </script>
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
 </body>
+
 
 </html>

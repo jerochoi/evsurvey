@@ -11,6 +11,7 @@
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 
     <style>
         body {
@@ -271,9 +272,54 @@
             color: #fff;
         }
     </style>
+
 </head>
 
 <body>
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content" style="max-width: 650px;">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">💡</span> 수소충전소 구축 현황 관리
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div style="background:#f4f7fb; padding:16px 20px; border-radius:8px; margin-bottom:24px; border-left:4px solid #0f62fe;">
+                    <p style="font-size: 14px; line-height: 1.6; color: #333; margin:0;">
+                        본 화면은 <b>기후부에서 기존 엑셀로 수기 관리하던 수소충전소 운영 및 구축 정보 총괄 대장</b>을 전산화하기 위해 설계된 예시 화면입니다.
+                    </p>
+                    <ul style="font-size: 14px; line-height: 1.6; color: #444; margin-top: 10px; padding-left: 20px; margin-bottom:0;">
+                        <li style="margin-bottom:6px;">물리적인 엑셀 파일을 벗어나 <b>웹 시스템 기반으로 통합 관리하고 추적</b>할 수 있게 전환합니다.</li>
+                        <li>다양한 항목 관리를 위해 <b>섹션별(그룹 단위) 테이블 숨김/펼침 기능(데이터 폴딩)과 다중 조건 복합 검색 기능</b>을 적용하여 가시성을 극대화했습니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[주요 항목 및 기능 설명]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-30">▼ 전체 펴기 / 접기</td>
+                        <td class="help-col-desc">엑셀처럼 늘어지는 방대한 열(Column) 데이터들을 <b>년도별현황, 개별허가, 시공 등 카테고리 그룹 단위</b>로 한 번에 펼치거나 숨겨 원하는 항목 위주로 화면을 구성합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🔍 다중 조건 복합 검색</td>
+                        <td class="help-col-desc">운영구분(구축중/운영중), 담당부처, 지역별(초성 검색 지원), 명칭 등 <b>여러 복합적인 조건을 조합하여 방대한 데이터를 원활하게 필터링</b>하는 기능입니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">📊 열 제목 클릭 시 정렬</td>
+                        <td class="help-col-desc">데이터 행의 열 제목(헤더)부분을 클릭하면 <b>지정된 열을 기준으로 오름차순 및 내림차순(▲/▼)으로 정렬</b>되어 엑셀 대비 더욱 빠르고 직관적인 데이터 비교가 가능합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">✨ 신규 등록 및 수정</td>
+                        <td class="help-col-desc">신규 수소충전소 단위 구축 이력을 엑셀이 아닌 시스템에 바로 기입하고, 목록을 클릭 시 상시 업데이트하여 즉각적인 현황을 반영하도록 돕습니다.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    </div>
+
 
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container-fluid">
@@ -950,6 +996,18 @@
                 }
             });
         </script>
+
+        <script>
+            function toggleHelpModal() {
+                var modal = document.getElementById("helpModal");
+                if (modal.style.display === "block") {
+                    modal.style.display = "none";
+                } else {
+                    modal.style.display = "block";
+                }
+            }
+        </script>
 </body>
+
 
 </html>

@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>수소차 등록 현황 (행정구역별)</title>
     <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <style>
         body,
         html {
@@ -168,9 +167,54 @@
             background-color: #95a5a6;
         }
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
 
 <body>
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">💡</span> 전국 수소충전소 및 수소차 현황 안내
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 지리정보(Map)를 기반으로 <b>전국 수소충전소의 구축 단계별 위치</b>와 <b>시군구별 수소차 등록 대수</b>를 통합하여 시각화한 대시보드입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>충전소 인프라 확충 현황과 실제 수소차 보급 현황을 지도로 대조하여 지역별 수요-공급 균형을 분석할 수 있습니다.</li>
+                        <li>사이드바의 통계 영역은 지도에 표기된 데이터를 부처별, 구축사업자별 등으로 자동 집계하여 수치화해 보여줍니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[주요 항목 및 기능 설명]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">📍 충전소 상태별 마커</td>
+                        <td class="help-col-desc">부지선정(초록), 구축중(빨강), 운영중(파랑) 등 충전소의 현재 단계를 색상으로 구분하여 지도에 표기합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🗺️ 수소차 보급 열지도</td>
+                        <td class="help-col-desc">행정구역(시군구) 단위의 수소차 등록 대수를 색상 농도(Choropleth)로 표현하여 지역별 밀집도를 확인합니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">📂 데이터 필터링</td>
+                        <td class="help-col-desc">사이드바 상단의 체크박스를 통해 지도에 보일 충전소 상태나 수소차 등록 대수 레이어를 선택적으로 켜거나 끕니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">📊 다각도 통계 분석</td>
+                        <td class="help-col-desc">부처/사업구분/지방청/설비사업자 등 다양한 기준으로 분류된 통계 정보를 실시간으로 사이드바에서 파악합니다.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
 
     <div id="layout">
         <div id="sidebar">
@@ -186,10 +230,10 @@
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 15px;">
                         <div class="stat-row">
                             <label class="filter-label">
-                                <input type="checkbox" class="filter-checkbox" value="green" checked>
-                                <span class="badge bg-green">용역부지</span>
+                                <input type="checkbox" class="filter-checkbox" value="blue" checked>
+                                <span class="badge bg-blue">운영중</span>
                             </label>
-                            <span class="stat-val" id="count-green">0</span>
+                            <span class="stat-val" id="count-blue">0</span>
                         </div>
                         <div class="stat-row">
                             <label class="filter-label">
@@ -200,14 +244,14 @@
                         </div>
                         <div class="stat-row">
                             <label class="filter-label">
-                                <input type="checkbox" class="filter-checkbox" value="blue" checked>
-                                <span class="badge bg-blue">운영중</span>
+                                <input type="checkbox" class="filter-checkbox" value="green">
+                                <span class="badge bg-green">용역부지</span>
                             </label>
-                            <span class="stat-val" id="count-blue">0</span>
+                            <span class="stat-val" id="count-green">0</span>
                         </div>
                         <div class="stat-row">
                             <label class="filter-label">
-                                <input type="checkbox" class="filter-checkbox" value="gray" checked>
+                                <input type="checkbox" class="filter-checkbox" value="gray">
                                 <span class="badge bg-gray">취소/기타</span>
                             </label>
                             <span class="stat-val" id="count-gray">0</span>
@@ -265,8 +309,7 @@
     </script>
 
     <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <script>
         // 1. Data Setup
@@ -669,6 +712,18 @@
         }
 
     </script>
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
 </body>
+
 
 </html>

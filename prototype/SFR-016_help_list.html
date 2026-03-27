@@ -35,9 +35,51 @@
 
         /* 답변완료 */
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
 
 <body>
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">💡</span> Help Desk 문의 내역 관리 안내
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 사용자들이 신청한 <b>Help Desk 문의와 부지검토 요청 건을 통합 관리</b>하고 답변을 처리하는 관리자용 목록 화면입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>'답변대기' 상태의 안건을 우선적으로 확인하여 신속한 민원 처리가 가능하도록 지원합니다.</li>
+                        <li>부지검토 안건의 경우 전용 검토 보고서 작성 화면으로 연결되어 체계적인 답변 수립이 가능합니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[주요 항목 및 기능 설명]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">🟠 답변 대기/완료</td>
+                        <td class="help-col-desc">처리가 필요한 안건은 주황색 '답변대기'로, 처리가 완료된 안건은 초록색 '답변완료' 배지로 시각화되어 구분됩니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">📝 답변/검토 작성</td>
+                        <td class="help-col-desc">문의 성격에 따라 '상세보기' 또는 '답변작성' 버튼이 제공되며, 클릭 시 해당 안건의 상세 내용 확인 및 답변 입력이 가능합니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">⚖️ 관련법령 관리</td>
+                        <td class="help-col-desc">부지 검토 시 참고해야 할 최신 법령 정보를 등록하고 수정할 수 있는 관리 화면으로 즉시 이동할 수 있습니다.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    </div>
+
     <div class="all-container">
         <!-- Header -->
         <div class="container-fluid top-frame">
@@ -151,6 +193,18 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
 </body>
+
 
 </html>

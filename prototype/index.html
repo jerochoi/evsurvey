@@ -17,7 +17,7 @@
             background-color: #0f172a;
         }
 
-        /* Iframe scrollbar remove or standard style depending on inner page */
+        /* Iframe styling */
         iframe {
             width: 100%;
             height: 100%;
@@ -26,6 +26,12 @@
             border-top-left-radius: 1rem;
             border-bottom-left-radius: 1rem;
             box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            iframe {
+                border-radius: 0;
+            }
         }
 
         .nav-link {
@@ -50,49 +56,75 @@
             color: #ffffff;
             font-weight: bold;
         }
+
+        /* Sidebar Transition */
+        #sidebar {
+            width: 280px;
+            max-width: 280px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        #sidebar.collapsed {
+            width: 0;
+            max-width: 0;
+            opacity: 0;
+            pointer-events: none;
+            border-right: none;
+        }
+
+        /* Mobile Overlay */
+        @media (max-width: 768px) {
+            #sidebar {
+                position: fixed;
+                z-index: 50;
+                background-color: #0f172a;
+                box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+            }
+        }
     </style>
 </head>
 
 <body>
 
     <!-- 좌측 프레임: 메뉴 리스트 -->
-    <aside class="w-[280px] h-full flex flex-col shrink-0">
-        <div class="p-6 pb-2">
+    <aside id="sidebar" class="h-full flex flex-col shrink-0 border-r border-slate-800">
+        <div class="p-6 pb-2 min-w-[280px]">
             <h1 class="text-white text-lg font-black tracking-tight mb-1">화면 설계</h1>
             <p class="text-slate-400 text-xs mb-6">프로토타입</p>
         </div>
 
-        <nav class="flex-1 overflow-y-auto px-4 space-y-1 pb-6">
+        <nav class="flex-1 overflow-y-auto px-4 space-y-1 pb-6 min-w-[280px]">
             <!-- 그룹: 수소충전소 -->
             <div class="pt-3 pb-1 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest">SFR-014 수소충전소 정보관리</div>
-            <a href="SFR-014_hs4.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-014_hs4.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 📝 관리대장
             </a>
-            <a href="SFR-014_hs2.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-014_hs2.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 📊 등록현황 (행정구역)
             </a>
-            <a href="SFR-014_hs3.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-014_hs3.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 🏭 상업운영 (Hying비교)
             </a>
-            <a href="SFR-014_hs_map1.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-014_hs_map1.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 🗺️ 시도별 현황 (지도)
             </a>
             <a target="preview-frame" class="nav-link" onclick="void(0)">
                 📊 (*) 통계 화면 <br>&nbsp; &nbsp; - 공정관리, 운영현황 등
             </a>
-            <a href="SFR-014_hs_map2.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-014_hs_portal_map.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 📍 충전소 찾기 (지도)
             </a>
 
             <!-- 그룹: 기술검토 -->
             <div class="pt-3 pb-1 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest">SFR-015 기술검토</div>
-            <a href="SFR-015_tech_submit.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-015_tech_submit.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 📝 기술검토 신청 (사용자)
             </a>
-            <a href="SFR-015_tech_list.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-015_tech_list.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 📋 기술검토 목록
             </a>
-            <a href="SFR-015_tech_review.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-015_tech_review.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 🔎 기술검토 검토
             </a>
             <a target="preview-frame" class="nav-link" onclick="void(0)">
@@ -101,24 +133,24 @@
 
             <!-- 그룹: HelpDesk -->
             <div class="pt-4 pb-1 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest">SFR-016 HelpDesk</div>
-            <a href="SFR-016_help_submit.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-016_help_submit.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 🛎️ HelpDesk 신청 (사용자)
             </a>
-            <a href="SFR-016_help_list.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-016_help_list.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 📄 HelpDesk 목록
             </a>
-            <a href="SFR-016_help_review.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-016_help_review.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 🛠️ 부지검토 작성
             </a>
-            <a href="SFR-016_help_law.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-016_help_law.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 🏛️ 부지검토 법령 관리
             </a>
 
             <div class="pt-4 pb-1 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest">SFR-017 지도서비스 (속도확인)</div>
-            <a href="SFR-017_evmap/evmap1.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-017_evmap/evmap1.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 🗺️ 지도1 OpenLayers
             </a>
-            <a href="SFR-017_evmap/evmap2.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-017_evmap/evmap2.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 📍 지도2 Leaflet
             </a>
 
@@ -128,45 +160,45 @@
 
             <!-- 그룹 1: 가이드관리 시스템 -->
             <div class="pt-3 pb-1 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest">SFR-020 안내페이지</div>
-            <a href="SFR-020_guide_mgmt_list.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-020_guide_mgmt_list.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 🗂️ 가이드 관리 목록 (관리자)
             </a>
-            <a href="SFR-020_guide_builder.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-020_guide_builder.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 🏗️ 가이드 문서 빌더1 (관리자)
             </a>
-            <a href="SFR-020_guide_mgmt_edit.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-020_guide_mgmt_edit.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 🔨 가이드 문서 빌더2 (관리자)
             </a>
-            <a href="SFR-020_guide_view.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-020_guide_view.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 📖 가이드 표시 뷰어 (사용자)
             </a>
 
             <!-- 그룹 2: 오류신고 및 문의 -->
             <div class="pt-4 pb-1 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest">SFR-021 업무민원</div>
-            <a href="SFR-021_help_popup.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-021_help_popup.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 💬 에러 신고 팝업 (버튼)
             </a>
-            <a href="SFR-021_help_user_history.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-021_help_user_history.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 👤 내 문의 내역 확인 (사용자)
             </a>
-            <a href="SFR-021_help_admin_dashboard.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-021_help_admin_dashboard.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 📊 민원 현황 (관리자)
             </a>
-            <a href="SFR-021_help_admin_assign.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-021_help_admin_assign.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 ⚙️ 담당자 배정 (관리자)
             </a>
-            <a href="SFR-021_help_admin_reply.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-021_help_admin_reply.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 ✍️ 문의 답변 (관리자)
             </a>
 
             <div class="pt-4 pb-1 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest">SFR-022 위치선정</div>
-            <a href="SFR-022_cili/cili_sim1.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-022_cili/cili_sim1.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 🗺️ CILI 시뮬레이터
             </a>
-            <a href="SFR-022_cili/cili_weight_history.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-022_cili/cili_weight_history.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 📊 CILI 가중치 이력 조회
             </a>
-            <a href="SFR-022_cili/cili_data_upload.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-022_cili/cili_data_upload.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 📁 CILI 지표 데이터 버전 관리
             </a>
             <a target="preview-frame" class="nav-link" onclick="void(0)">
@@ -183,10 +215,10 @@
             </a>
 
             <div class="pt-4 pb-1 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest">SFR-023 차량 제원 관리</div>
-            <a href="SFR-023_car_info_list.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-023_car_info_list.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 📄 차량 제원 목록
             </a>
-            <a href="SFR-023_car_info_edit.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-023_car_info_edit.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 🛠️ 차량 제원 작성
             </a>
 
@@ -197,40 +229,40 @@
             <div class="pt-4 pb-1 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest">SFR-026 충전기 이력 관리(고유식별)</div>
 
             <div class="pt-4 pb-1 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest">SFR-027 관리자 기능 개선</div>
-            <a href="SFR-027_role_management.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-027_role_management.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 🔄 멀티 권한 관리
             </a>
-            <a href="SFR-027_security_config.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-027_security_config.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 🛡️ 계정 보안 설정
             </a>
-            <a href="SFR-027_security_menu_log.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-027_security_menu_log.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 📊 메뉴 접근 로그
             </a>
-            <a href="SFR-027_security_access_log.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-027_security_access_log.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 📋 접근 및 차단 이력
             </a>
-            <a href="SFR-027_security_fail_log.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-027_security_fail_log.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 📋 인증 실패 내역
             </a>
 
             <div class="pt-4 pb-1 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest">SFR-028 통합승인</div>
 
             <div class="pt-4 pb-1 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest">SFR-029 대시보드 개인화</div>
-            <a href="SFR-029_dashboard_layout.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-029_dashboard_layout.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 📊 대시보드 개인화
             </a>
 
             <div class="pt-4 pb-1 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest">SFR-030 통합 알림 서비스</div>
-            <a href="SFR-030_noti_dashboard.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-030_noti_dashboard.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 📊 알림 발송 현황/통계
             </a>
-            <a href="SFR-030_noti_template.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-030_noti_template.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 📝 알림 템플릿 관리
             </a>
-            <a href="SFR-030_noti_history.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-030_noti_history.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 📋 상세 발송 내역 조회
             </a>
-            <a href="SFR-030_noti_config.html" target="preview-frame" class="nav-link" onclick="setActive(this)">
+            <a href="SFR-030_noti_config.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
                 📖 API 연계 안내
             </a>
 
@@ -242,14 +274,34 @@
         </nav>
     </aside>
 
+    <!-- Sidebar Toggle Button (Floating) -->
+    <button onclick="toggleSidebar()" class="fixed bottom-6 left-6 z-[60] w-12 h-12 bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-blue-700 transition-all hover:scale-110 active:scale-95 group">
+        <svg id="toggleIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-transform group-hover:rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
     <!-- 우측 프레임: 화면 렌더링 영역 -->
-    <main class="flex-1 h-full py-2 pr-2">
+    <main class="flex-1 h-full py-0 pr-0 md:py-2 md:pr-2">
         <iframe name="preview-frame" src=""></iframe>
     </main>
 
     <script>
-        // 메뉴 클릭 시 활성화 UI 변경 스크립트
-        function setActive(element) {
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+            
+            // Icon transformation
+            const icon = document.getElementById('toggleIcon');
+            if(sidebar.classList.contains('collapsed')) {
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />';
+            } else {
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />';
+            }
+        }
+
+        // 메뉴 클릭 시 활성화 UI 변경 및 모바일 대응
+        function handleMenuClick(element) {
             // 모든 nav-link에서 active 클래스 제거
             const links = document.querySelectorAll('.nav-link');
             links.forEach(link => {
@@ -257,6 +309,11 @@
             });
             // 클릭된 메뉴에 active 클래스 추가
             element.classList.add('active');
+
+            // 모바일일 경우 메뉴 클릭 후 자동으로 사이드바 접기
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
         }
     </script>
 </body>

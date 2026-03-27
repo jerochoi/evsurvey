@@ -163,10 +163,55 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
             pointer-events: none; /* Let hover events pass through to map layer */
         }
-    </style>
+</style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
 
 <body>
+<button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">💡</span> 시도별 수소충전소 현황 대시보드 안내
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 전국 17개 시도별 <b>수소충전소 운영 및 구축 현황</b>을 요약하여 보고용/브리핑용으로 활용하기 적합하도록 설계된 대시보드입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>지도의 행정구역 레이블과 사이드바의 통계 카드를 연계하여, 특정 지역의 인프라 보급 수준을 즉각적으로 파악할 수 있습니다.</li>
+                        <li>단순 위치 표기를 넘어 '개소(Site)'와 '기수(Charger)' 정보를 동시에 제공하여 실질적인 충전 용량을 가늠하도록 돕습니다.</li>
+                    </ul>
+                </div>
+                
+                <h3 class="help-subtitle">[주요 항목 및 기능 설명]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">🗺️ 시도별 요약 레이블</td>
+                        <td class="help-col-desc">지도 상의 각 시도 중심부에 해당 지역의 운영/구축 정보를 요약된 카드 형태로 상시 노출하여 직관성을 높였습니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">📱 사이드바 통계 카드</td>
+                        <td class="help-col-desc">전국 합계 및 17개 시도의 상세 현황(개소/기수 구분)을 리스트 형태로 제공하며, 클릭 시 해당 지역으로 지도가 자동 이동합니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">🔍 인터랙티브 연동</td>
+                        <td class="help-col-desc">지도의 행정구역을 클릭하면 사이드바의 해당 항목이 강조되고, 반대로 사이드바 선택 시 지도 위치가 동기화되어 탐색이 용이합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🖥️ 보고 자료 최적화</td>
+                        <td class="help-col-desc">불필요한 UI 요소를 최소화하고 대시보드 형태의 레이아웃을 채택하여, 화면 캡처만으로도 즉시 보고서용 자료로 활용 가능합니다.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
 
     <div id="layout">
         <div id="sidebar">
@@ -402,5 +447,17 @@
                 `;
             });
     </script>
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
 </body>
+
 </html>

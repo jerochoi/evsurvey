@@ -232,9 +232,55 @@
             background: #d32f2f;
         }
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
 
 <body>
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">💡</span> 부지검토 결과 보고서 작성
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 신청된 부지에 대해 <b>인허가, 수요, 민원 등 다각도의 분석 결과</b>를 종합하여 공식적인 검토 보고서를 작성하는 화면입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>입력된 항목들은 표준 보고서 양식으로 구성되며, 즉시 인쇄하거나 PDF로 저장할 수 있습니다.</li>
+                        <li>부지 적정성 판단의 근거가 되는 실시간 법령 검토 결과와 위성/현장 사진을 포함합니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[주요 항목 및 기능 설명]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">📑 검토항목 자유 구성</td>
+                        <td class="help-col-desc">'항목 추가' 버튼으로 인허가 외에도 새로운 검토 카테고리를 생성하고, 각 항목 내에서 세부 의견란을 늘려 작성할 수 있습니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🖥️ 보고서 미리보기/인쇄</td>
+                        <td class="help-col-desc">상단 및 하단의 '보고서 미리보기' 버튼을 통해 실제 출력될 형태를 확인하고, 불필요한 UI 요소가 제거된 깔끔한 문서를 인쇄합니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">🗺️ 위성/현장 사진 증빙</td>
+                        <td class="help-col-desc">분석 대상지의 위성 사진(확대/축소)과 현장 점검 사진을 첨부하여 시각적인 검토 근거를 보고서에 포함합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">⚖️ 관련법령 검토</td>
+                        <td class="help-col-desc">등록된 관련 법령을 바탕으로 입지 제한 사항을 체크하고, 종합 의견(○/△/×)을 최종 수립합니다.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    </div>
+
     <div class="all-container">
         <div class="container">
             <div class="inner">
@@ -605,6 +651,18 @@
             tr.remove();
         }
     </script>
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
 </body>
+
 
 </html>
