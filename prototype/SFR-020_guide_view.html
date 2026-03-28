@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,7 +19,12 @@
             --radius: 12px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-body);
@@ -27,53 +33,292 @@
         }
 
         /* Nav Header */
-        header { height: 60px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; position: sticky; top: 0; background: #fff; z-index: 100; }
-        .logo { font-weight: 700; color: var(--primary); font-size: 18px; }
-        .user { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 12px; }
+        header {
+            height: 60px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 100;
+        }
+
+        .logo {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 18px;
+        }
+
+        .user {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
         /* Content Layout */
-        .manual-layout { display: flex; max-width: 1400px; margin: 0 auto; min-height: calc(100vh - 60px); }
-        
+        .manual-layout {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            min-height: calc(100vh - 60px);
+        }
+
         /* Sidebar Navigation */
-        .manual-sidebar { width: 340px; border-right: 1px solid var(--border-color); padding: 40px; background: var(--bg-alt); position: sticky; top: 60px; height: calc(100vh - 60px); overflow-y: auto; }
-        .sidebar-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 24px; letter-spacing: 1px; }
-        .nav-tree { list-style: none; }
-        .nav-node { margin-bottom: 12px; }
-        .nav-node-link { display: flex; align-items: flex-start; gap: 12px; text-decoration: none; color: var(--text-secondary); padding: 12px; border-radius: 8px; transition: all 0.2s; font-size: 14px; font-weight: 500; }
-        .nav-node-link:hover { background: #E0EFFF; color: var(--primary); }
-        .nav-node-link.active { background: #fff; color: var(--primary); font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
-        .nav-idx { background: #DDE1E6; color: #161616; min-width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 11px; font-weight: 700; }
-        .active .nav-idx { background: var(--primary); color: #fff; }
+        .manual-sidebar {
+            width: 340px;
+            border-right: 1px solid var(--border-color);
+            padding: 40px;
+            background: var(--bg-alt);
+            position: sticky;
+            top: 60px;
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+        }
+
+        .sidebar-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            letter-spacing: 1px;
+        }
+
+        .nav-tree {
+            list-style: none;
+        }
+
+        .nav-node {
+            margin-bottom: 12px;
+        }
+
+        .nav-node-link {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            padding: 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-node-link:hover {
+            background: #E0EFFF;
+            color: var(--primary);
+        }
+
+        .nav-node-link.active {
+            background: #fff;
+            color: var(--primary);
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .nav-idx {
+            background: #DDE1E6;
+            color: #161616;
+            min-width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .active .nav-idx {
+            background: var(--primary);
+            color: #fff;
+        }
 
         /* Main Viewer */
-        .manual-viewer { flex-grow: 1; padding: 60px 100px; max-width: 900px; }
+        .manual-viewer {
+            flex-grow: 1;
+            padding: 60px 100px;
+            max-width: 900px;
+        }
 
-        .manual-header { margin-bottom: 60px; }
-        .manual-badge { display: inline-block; background: #E0EFFF; color: var(--primary); padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 700; margin-bottom: 16px; }
-        .manual-header h1 { font-size: 40px; font-weight: 700; color: #161616; margin-bottom: 16px; letter-spacing: -1.5px; }
-        .manual-header p { font-size: 18px; color: var(--text-secondary); }
+        .manual-header {
+            margin-bottom: 60px;
+        }
+
+        .manual-badge {
+            display: inline-block;
+            background: #E0EFFF;
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .manual-header h1 {
+            font-size: 40px;
+            font-weight: 700;
+            color: #161616;
+            margin-bottom: 16px;
+            letter-spacing: -1.5px;
+        }
+
+        .manual-header p {
+            font-size: 18px;
+            color: var(--text-secondary);
+        }
 
         /* Step Card */
-        .view-step { margin-bottom: 80px; scroll-margin-top: 100px; }
-        .step-tag { font-size: 13px; font-weight: 800; color: var(--primary); margin-bottom: 12px; display: block; border-bottom: 2px solid #E0EFFF; width: fit-content; padding-bottom: 4px; text-transform: uppercase; }
-        .step-content h2 { font-size: 24px; font-weight: 700; margin-bottom: 20px; color: #161616; }
-        .step-desc { font-size: 16px; color: var(--text-secondary); margin-bottom: 32px; line-height: 1.8; }
-        
-        .step-img-box { background: var(--bg-alt); border: 1px solid var(--border-color); border-radius: 16px; padding: 12px; margin-bottom: 24px; position: relative; overflow: hidden; }
-        .step-img { display: block; width: 100%; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); background: #fff; min-height: 200px; }
-        
-        .tip-box { background: #FFF9E6; border-left: 4px solid #F1C21B; padding: 20px; border-radius: 0 8px 8px 0; font-size: 14px; margin-top: 24px; }
-        .tip-box b { color: #8A6D00; }
+        .view-step {
+            margin-bottom: 80px;
+            scroll-margin-top: 100px;
+        }
 
-        .footer-nav { display: flex; justify-content: space-between; margin-top: 100px; padding-top: 40px; border-top: 1px solid var(--border-color); }
-        .nav-btn { display: flex; flex-direction: column; text-decoration: none; color: var(--text-secondary); }
-        .nav-btn span { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
-        .nav-btn h4 { font-size: 16px; color: var(--text-main); }
-        .nav-btn:hover h4 { color: var(--primary); }
+        .step-tag {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 12px;
+            display: block;
+            border-bottom: 2px solid #E0EFFF;
+            width: fit-content;
+            padding-bottom: 4px;
+            text-transform: uppercase;
+        }
 
+        .step-content h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #161616;
+        }
+
+        .step-desc {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            line-height: 1.8;
+        }
+
+        .step-img-box {
+            background: var(--bg-alt);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-img {
+            display: block;
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            background: #fff;
+            min-height: 200px;
+        }
+
+        .tip-box {
+            background: #FFF9E6;
+            border-left: 4px solid #F1C21B;
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+            font-size: 14px;
+            margin-top: 24px;
+        }
+
+        .tip-box b {
+            color: #8A6D00;
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 100px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            color: var(--text-secondary);
+        }
+
+        .nav-btn span {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .nav-btn h4 {
+            font-size: 16px;
+            color: var(--text-main);
+        }
+
+        .nav-btn:hover h4 {
+            color: var(--primary);
+        }
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
+
 <body>
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">📖</span> 이용안내 가이드 뷰어 안내
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 <b>사용자가 복잡한 업무를 막힘없이 수행</b>할 수 있도록 단계별 가이드와 시각적 자료를 제공하는 전용 뷰어입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>좌측 목차를 통해 원하는 단계로 즉시 이동할 수 있으며, 현재 진행 중인 위치가 시각적으로 강조됩니다.</li>
+                        <li>업무 중 혼동하기 쉬운 부분은 별도의 '꿀팁(Tip)' 상자로 강조하여 처리 효율을 높였습니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[뷰어 주요 활용 방법]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">📑 단계별 내비게이션</td>
+                        <td class="help-col-desc">좌측 사이드바의 번호 메뉴나 하단의 'Next Step' 버튼을 클릭하여 업무 절차를 순차적으로 확인합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🖥️ 실화면 캡처 매칭</td>
+                        <td class="help-col-desc">가이드 내에 포함된 이미지 영역을 참고하여 실제 운영 시스템의 화면 구성과 데이터 입력 위치를 대조합니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">💡 운영 노하우 적용</td>
+                        <td class="help-col-desc">단순 매뉴얼 외에 숙련된 관리자의 노하우가 담긴 팁 박스를 확인하여 업무 지연을 방지합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🔗 업무 연결 유지</td>
+                        <td class="help-col-desc">가이드의 지침에 따라 검토를 마친 후, 상단 'Home'이나 관련 링크를 통해 실제 업무를 완수합니다.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
 
     <header>
         <div class="logo">⚡ EV Infra Smart Portal</div>
@@ -118,33 +363,39 @@
             <section class="view-step" id="step1">
                 <span class="step-tag">Phase 01</span>
                 <div class="step-content">
-                    <h2>통합 승인 현황 확인</h2>
-                    <p class="step-desc">상단 메인 메뉴에서 '통합승인' 탭을 선택한 후, 전체 목록 중 본인의 담당 구역에 해당하는 승인 요청 건을 필터링하여 확인합니다.</p>
-                    
-                    <div class="step-img-box">
-                        <div style="padding: 100px 0; text-align: center; color: #aaa; font-size: 13px; background: #fff; border: 1px dashed #ddd; border-radius: 8px;">
-                            [ 가이드 이미지 영역: 통합 승인 리스트 화면 스크린샷 ]
+                    <div class="help-modal-header">
+                        <h2>통합 승인 현황 확인</h2>
+                    </div>
+                    <div class="help-modal-body">
+                        <p class="step-desc">상단 메인 메뉴에서 '통합승인' 탭을 선택한 후, 전체 목록 중 본인의 담당 구역에 해당하는 승인 요청 건을 필터링하여 확인합니다.</p>
+
+                        <div class="step-img-box">
+                            <div style="padding: 100px 0; text-align: center; color: #aaa; font-size: 13px; background: #fff; border: 1px dashed #ddd; border-radius: 8px;">
+                                [ 가이드 이미지 영역: 통합 승인 리스트 화면 스크린샷 ]
+                            </div>
+                        </div>
+
+                        <div class="tip-box">
+                            <b>💡 운영 꿀팁:</b> 배정된 요청 건이 많을 경우 '접수일자' 기준 오름차순으로 정렬하면 처리 지연 건을 우선적으로 확인할 수 있습니다.
                         </div>
                     </div>
-
-                    <div class="tip-box">
-                        <b>💡 운영 꿀팁:</b> 배정된 요청 건이 많을 경우 '접수일자' 기준 오름차순으로 정렬하면 처리 지연 건을 우선적으로 확인할 수 있습니다.
-                    </div>
-                </div>
             </section>
 
             <section class="view-step" id="step2">
                 <span class="step-tag">Phase 02</span>
                 <div class="step-content">
-                    <h2>검토 의견 상세 대조</h2>
-                    <p class="step-desc">외부 검토위원이 작성한 1차 의견서를 열람하여 설치 기술 기준(전기, 소방, 건축) 적합성 여부를 기재된 서류상의 데이터와 대조합니다.</p>
-                    
-                    <div class="step-img-box">
-                        <div style="padding: 100px 0; text-align: center; color: #aaa; font-size: 13px; background: #fff; border: 1px dashed #ddd; border-radius: 8px;">
-                            [ 가이드 이미지 영역: 상세 검토서 대조 화면 ]
+                    <div class="help-modal-header">
+                        <h2>검토 의견 상세 대조</h2>
+                    </div>
+                    <div class="help-modal-body">
+                        <p class="step-desc">외부 검토위원이 작성한 1차 의견서를 열람하여 설치 기술 기준(전기, 소방, 건축) 적합성 여부를 기재된 서류상의 데이터와 대조합니다.</p>
+
+                        <div class="step-img-box">
+                            <div style="padding: 100px 0; text-align: center; color: #aaa; font-size: 13px; background: #fff; border: 1px dashed #ddd; border-radius: 8px;">
+                                [ 가이드 이미지 영역: 상세 검토서 대조 화면 ]
+                            </div>
                         </div>
                     </div>
-                </div>
             </section>
 
             <div class="footer-nav">
@@ -160,5 +411,17 @@
         </main>
     </div>
 
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
 </body>
+
 </html>

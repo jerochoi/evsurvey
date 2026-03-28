@@ -220,13 +220,14 @@
             border: 1px solid var(--border-color);
         }
 
-        table {
+        /* 본문 데이터 테이블 스타일 - .card 내부로 범위 제한 */
+        .card table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
         }
 
-        th {
+        .card th {
             background: #F4F7FB;
             border-top: 1px solid var(--border-color);
             border-bottom: 1px solid var(--border-color);
@@ -236,15 +237,26 @@
             color: #525252;
         }
 
-        td {
+        .card td {
             border-bottom: 1px solid #E0E0E0;
             padding: 14px;
             font-size: 14px;
             vertical-align: middle;
         }
 
-        tr:hover td {
+        .card tr:hover td {
             background-color: #FAFCFF;
+        }
+
+        /* help-table이 전역 td 스타일 영향 받지 않도록 리셋 */
+        .help-table td {
+            border-bottom: none !important;
+            font-size: inherit !important;
+            vertical-align: middle !important;
+        }
+
+        .help-table tr:hover td {
+            background-color: inherit !important;
         }
 
         .auth-tag {
@@ -282,90 +294,137 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            z-index: 2000;
         }
 
         .modal-body {
             background: #fff;
-            border-radius: 12px;
-            padding: 32px;
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+            border-radius: 16px;
+            padding: 0;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
             max-height: 90vh;
-            overflow-y: auto;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
         }
 
         .modal-body.w-md {
-            width: 500px;
+            width: 480px;
         }
 
         .modal-body.w-lg {
-            width: 750px;
+            width: 800px;
         }
 
         .modal-header {
+            padding: 24px 32px;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
+            background: #fff;
         }
 
         .modal-header h2 {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .modal-close {
-            background: none;
+            background: #f4f6f8;
             border: none;
-            font-size: 24px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
             cursor: pointer;
             color: #525252;
+            transition: 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #e0e0e0;
+            color: #161616;
+        }
+
+        .modal-content-area {
+            padding: 32px;
+            overflow-y: auto;
+        }
+
+        .switch-role-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
         .switch-role-item {
-            padding: 16px;
+            padding: 18px 20px;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            margin-bottom: 12px;
+            border-radius: 12px;
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
+            background: #fff;
         }
 
         .switch-role-item:hover {
             border-color: var(--primary);
-            background: #FAFCFF;
+            background: #f8fbff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(15, 98, 254, 0.1);
         }
 
         .switch-role-item.active-role {
             border-color: var(--primary);
-            background: #E0EFFF;
-            outline: 2px solid var(--primary);
+            background: #edf5ff;
+            border-width: 2px;
+        }
+
+        .switch-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
 
         .switch-info strong {
             display: block;
-            font-size: 15px;
-            margin-bottom: 4px;
+            font-size: 16px;
+            color: #161616;
         }
 
         .switch-info span {
             font-size: 13px;
-            color: #525252;
+            color: #6f6f6f;
         }
 
         .current-badge {
-            background: #0043CE;
+            background: var(--primary);
             color: #fff;
             font-size: 11px;
-            padding: 3px 8px;
-            border-radius: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
         /* Dynamic Role Assignment Blocks */
@@ -468,9 +527,55 @@
             background: #E0EFFF;
         }
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
 
 <body>
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">🔑</span> 멀티 권한 관리 및 세션 전환 안내
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 운영 담당자가 <b>단일 계정으로 다양한 사용자 권한(지자체, 제조사 등)을 보유</b>하고, 실시간으로 역할을 전환하며 업무를 수행할 수 있게 관리하는 화면입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>민원 응대 시 사용자와 동일한 권한으로 전환하여 화면을 확인하거나, 업무 대행 프로세스를 지원합니다.</li>
+                        <li>한 명의 사용자에게 여러 개의 독립된 '역할 블록'을 할당하여 복합적인 권한 체계를 구축합니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[핵심 기능 가이드]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">🔄 세션 권한 전환</td>
+                        <td class="help-col-desc">상단 헤더의 버튼을 통해 로그아웃 없이 현재 세션의 역할을 즉시 변경합니다. 전환된 역할에 따라 메뉴 접근 권한이 실시간 재설정됩니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🧪 멀티 권한 블록 할당</td>
+                        <td class="help-col-desc">사용자별 상세 설정에서 '새로운 권한 추가'를 통해 지자체(지역별), 제조사(업체별) 등 여러 역할을 동시에 부여할 수 있습니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">📍 역할별 파라미터 제어</td>
+                        <td class="help-col-desc">지자체 담당자 권한 부여 시 '시도/시군구', 제조사 권한 부여 시 '특정 업체명' 등 역할에 종속된 세부 조건을 개별 설정합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🛡️ 운영자 대행 대시보드</td>
+                        <td class="help-col-desc">통합 관리자가 각 현장의 민원 상황을 응대하기 위해 특정 권한을 임시 획득하여 서비스의 정상 동작 여부를 직접 확인하는 용도로 활용됩니다.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    </div>
+
 
     <!-- Mockup System Navigation Header -->
     <header class="top-header">
@@ -568,177 +673,180 @@
         </div>
     </div>
 
-
-    <!-- 1. Role Switch Modal (Fake Header Action) -->
+    <!-- 1. Role Switch Modal -->
     <div class="modal-overlay" id="roleSwitchModal">
         <div class="modal-body w-md">
             <div class="modal-header">
                 <h2>🔄 세션 권한 전환</h2>
                 <button class="modal-close" onclick="closeSwitchModal()">×</button>
             </div>
-            <p style="font-size: 14px; color: #525252; margin-bottom: 24px;">
-                현재 사용자에게 부여된 전체 권한 목록입니다.<br />
-                테스트 또는 예외 업무 대행을 위해 접속할 역할을 선택해주세요.
-            </p>
+            <div class="modal-content-area">
+                <p style="font-size: 14px; color: #525252; margin-bottom: 20px; line-height: 1.6;">
+                    현재 계정에 할당된 권한 목록입니다.<br />
+                    전환할 역할을 선택하시면 해당 세션으로 즉시 변경됩니다.
+                </p>
 
-            <div class="switch-role-item active-role" onclick="executeSwitch('공단 담당자(총괄)')">
-                <div class="switch-info">
-                    <strong>관리자(총괄)</strong>
-                    <span>한국환경공단 소속 관리자 기본 뷰</span>
-                </div>
-                <div class="current-badge">현재 접속중</div>
-            </div>
-            <div class="switch-role-item" onclick="executeSwitch('기후부')">
-                <div class="switch-info">
-                    <strong>기후부</strong>
-                    <span>승인 및 통계 현황 조회</span>
-                </div>
-            </div>
-            <div class="switch-role-item" onclick="executeSwitch('지자체 담당자 (서울 강남구)')">
-                <div class="switch-info">
-                    <strong>지자체 담당자 / 서울특별시 강남구</strong>
-                    <span>보조금 지급</span>
-                </div>
-            </div>
-            <div class="switch-role-item" onclick="executeSwitch('제조사 대행 (현대자동차)')">
-                <div class="switch-info">
-                    <strong>제조수입사 / 현대자동차</strong>
-                    <span>보조금 신청</span>
-                </div>
-            </div>
-            <div class="switch-role-item" onclick="executeSwitch('제조사 대행 (현대자동차)')">
-                <div class="switch-info">
-                    <strong>제조수입사 / 테슬라</strong>
-                    <span>보조금 신청</span>
-                </div>
-            </div>
-
-            <div style="margin-top: 24px; text-align: right;">
-                <button class="btn btn-ghost" onclick="closeSwitchModal()">취소</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 2. Dynamic Role Assignment User Modal -->
-    <div class="modal-overlay" id="roleAssignModal">
-        <div class="modal-body w-lg">
-            <div class="modal-header">
-                <h2>사용자 권한 개별 설정</h2>
-                <button class="modal-close" onclick="closeAssignModal()">×</button>
-            </div>
-
-            <div class="user-summary">
-                <div>
-                    <strong id="assignUserName">홍길동 (hong12)</strong>
-                    <span id="assignUserDept">한국환경공단 / 부서</span>
-                </div>
-                <div class="auth-tag primary">★ 관리자(총괄)</div>
-            </div>
-
-            <div style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #525252;">부여된 권한 및 세부 조건 트리</div>
-
-            <!-- Dynamic Role Container -->
-            <div id="rolesContainer">
-
-                <!-- Initial Mock Role 1 -->
-                <div class="role-block" id="role_b1">
-                    <button class="btn-remove" onclick="removeRoleBlock('role_b1')">삭제</button>
-                    <div class="role-head">
-                        <span style="font-size: 14px; font-weight: 600;">권한 유형</span>
-                        <select class="form-select" style="max-width:300px;" onchange="renderRoleParams('role_b1', this.value)">
-                            <option value="none">선택</option>
-                            <option value="C05" selected>보조금 관리자</option>
-                            <option value="B01">기후부</option>
-                            <option value="S01">지자체 담당자 (보조금 승인)</option>
-                            <option value="M01">제조수입사 (보조금 신청)</option>
-                        </select>
+                <div class="switch-role-list">
+                    <div class="switch-role-item active-role" onclick="executeSwitch('공단 담당자(총괄)')">
+                        <div class="switch-info">
+                            <strong>관리자 (총괄)</strong>
+                            <span>한국환경공단 소속 · 시스템 전체 제어</span>
+                        </div>
+                        <div class="current-badge">현재 접속중</div>
                     </div>
-                    <div class="role-params-area" id="paramArea_role_b1" style="display: none;"></div>
-                </div>
-
-                <!-- Initial Mock Role 2 (Local Gov) -->
-                <div class="role-block" id="role_b2">
-                    <button class="btn-remove" onclick="removeRoleBlock('role_b2')">삭제</button>
-                    <div class="role-head">
-                        <span style="font-size: 14px; font-weight: 600;">권한 유형</span>
-                        <select class="form-select" style="max-width:300px;" onchange="renderRoleParams('role_b2', this.value)">
-                            <option value="none">선택</option>
-                            <option value="C05">보조금 관리자</option>
-                            <option value="B01">기후부</option>
-                            <option value="S01" selected>지자체 담당자 (보조금 승인)</option>
-                            <option value="M01">제조수입사 (보조금 신청)</option>
-                        </select>
+                    <div class="switch-role-item" onclick="executeSwitch('기후부')">
+                        <div class="switch-info">
+                            <strong>기후부 담당자</strong>
+                            <span>한국환경공단 기후부 · 통계 및 승인</span>
+                        </div>
                     </div>
-                    <div class="role-params-area" id="paramArea_role_b2" style="display: block;">
-                        <!-- Mock initial content for S01 -->
-                        <div class="param-group">
-                            <div class="param-label">시도 선택</div>
-                            <select class="form-select" style="max-width: 180px;">
-                                <option>선택</option>
-                                <option selected>서울특별시</option>
-                                <option>인천광역시</option>
-                                <option>부산광역시</option>
-                            </select>
-                            <div class="param-label" style="width: auto; margin-left: 8px;">시군구 선택</div>
-                            <select class="form-select" style="max-width: 180px;">
-                                <option>전체</option>
-                                <option>강남구</option>
-                                <option selected>종로구</option>
-                            </select>
+                    <div class="switch-role-item" onclick="executeSwitch('지자체 담당자 (서울 강남구)')">
+                        <div class="switch-info">
+                            <strong>지자체 담당자 / 서울특별시 강남구</strong>
+                            <span>서울특별시 강남구청 · 보조금 지급 업무</span>
+                        </div>
+                    </div>
+                    <div class="switch-role-item" onclick="executeSwitch('제조사 대행 (현대자동차)')">
+                        <div class="switch-info">
+                            <strong>제조수입사 / 현대자동차</strong>
+                            <span>현대자동차(본사) · 보조금 신청 및 결과 확인</span>
+                        </div>
+                    </div>
+                    <div class="switch-role-item" onclick="executeSwitch('제조사 대행 (테슬라)')">
+                        <div class="switch-info">
+                            <strong>제조수입사 / 테슬라 코리아</strong>
+                            <span>테슬라 코리아 · 보조금 신청 업무</span>
                         </div>
                     </div>
                 </div>
 
+                <div style="margin-top: 32px; display: flex; justify-content: flex-end;">
+                    <button class="btn btn-ghost" onclick="closeSwitchModal()" style="width: 100%;">닫기</button>
+                </div>
             </div>
+        </div>
+    </div>
+    <!-- 2. Role Assignment Modal -->
+    <div class="modal-overlay" id="roleAssignModal">
+        <div class="modal-body w-lg">
+            <div class="modal-header">
+                <h2>👤 사용자 권한 개별 설정</h2>
+                <button class="modal-close" onclick="closeAssignModal()">×</button>
+            </div>
+            <div class="modal-content-area">
+                <div class="user-summary">
+                    <div>
+                        <strong id="assignUserName" style="font-size: 18px; margin-bottom: 4px;">홍길동 (hong12)</strong>
+                        <span id="assignUserDept">한국환경공단 / 탄소중립지원부</span>
+                    </div>
+                    <div class="auth-tag primary">★ 기본권한: 관리자(총괄)</div>
+                </div>
 
-            <!-- Button to Add a New Role Block -->
-            <button class="add-role-btn" onclick="addNewRoleBlock()">
-                ＋ 새로운 권한 추가하기
-            </button>
+                <div style="font-size: 14px; font-weight: 700; margin-bottom: 16px; color: #161616; display: flex; align-items: center; gap: 8px;">
+                    <span style="width: 4px; height: 16px; background: var(--primary); border-radius: 2px;"></span>
+                    부여된 권한 및 세부 파라미터 구성
+                </div>
 
-            <div style="margin-top: 32px; display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size:13px; color:#A2191F;">* 각 권한이 하나의 역할로 매핑됩니다. 지자체, 제조사를 여러개 추가할 수 있습니다.</span>
-                <div style="display: flex; gap: 12px;">
-                    <button class="btn btn-ghost" onclick="closeAssignModal()">취소</button>
-                    <button class="btn btn-primary" onclick="alert('멀티 권한 설정 정보가 성공적으로 반영되었습니다.'); closeAssignModal();">저장하기</button>
+                <div id="rolesContainer">
+                    <!-- content -->
+                    <div class="role-block" id="role_b1">
+                        <button class="btn-remove" onclick="removeRoleBlock('role_b1')">삭제</button>
+                        <div class="role-head">
+                            <span style="font-size: 14px; font-weight: 600; color: #525252;">보유 권한 유형</span>
+                            <select class="form-select" style="max-width:300px;" onchange="renderRoleParams('role_b1', this.value)">
+                                <option value="none">권한 선택</option>
+                                <option value="C05" selected>보조금 관리자 (총괄)</option>
+                                <option value="B01">기후부 담당자</option>
+                                <option value="S01">지자체 담당자 (보조금 승인)</option>
+                                <option value="M01">제조수입사 (보조금 신청)</option>
+                            </select>
+                        </div>
+                        <div class="role-params-area" id="paramArea_role_b1" style="display: none;"></div>
+                    </div>
+
+                    <div class="role-block" id="role_b2">
+                        <button class="btn-remove" onclick="removeRoleBlock('role_b2')">삭제</button>
+                        <div class="role-head">
+                            <span style="font-size: 14px; font-weight: 600; color: #525252;">보유 권한 유형</span>
+                            <select class="form-select" style="max-width:300px;" onchange="renderRoleParams('role_b2', this.value)">
+                                <option value="none">권한 선택</option>
+                                <option value="C05">보조금 관리자 (총괄)</option>
+                                <option value="B01">기후부 담당자</option>
+                                <option value="S01" selected>지자체 담당자 (보조금 승인)</option>
+                                <option value="M01">제조수입사 (보조금 신청)</option>
+                            </select>
+                        </div>
+                        <div class="role-params-area" id="paramArea_role_b2" style="display: block;">
+                            <div class="param-group">
+                                <div class="param-label">시도 선택</div>
+                                <select class="form-select" style="max-width: 180px;">
+                                    <option>선택</option>
+                                    <option selected>서울특별시</option>
+                                    <option>인천광역시</option>
+                                    <option>부산광역시</option>
+                                </select>
+                                <div class="param-label" style="width: auto; margin-left: 12px;">시군구 선택</div>
+                                <select class="form-select" style="max-width: 180px;">
+                                    <option>전체</option>
+                                    <option>강남구</option>
+                                    <option selected>종로구</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="add-role-btn" onclick="addNewRoleBlock()" style="margin-top: 8px;">
+                    ＋ 새로운 권한 블록 추가
+                </button>
+
+                <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size:12px; color:#DA1E28; line-height: 1.4;">
+                        * 다중 권한 부여 시 로그아웃 없이 상단 헤더에서 전환 가능합니다.<br />
+                        * 지자체 및 제조사 권한은 복수로 추가할 수 있습니다.
+                    </span>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-ghost" onclick="closeAssignModal()" style="min-width: 100px;">취소</button>
+                        <button class="btn btn-primary" onclick="alert('멀티 권한 설정이 성공적으로 저장되었습니다.'); closeAssignModal();" style="min-width: 120px;">설정 저장</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // 1. Header Role Switch Modal
-        function openSwitchModal() { document.getElementById('roleSwitchModal').style.display = 'flex'; }
-        function closeSwitchModal() { document.getElementById('roleSwitchModal').style.display = 'none'; }
-        function executeSwitch(roleName) {
-            document.getElementById('currentRoleBadge').innerText = roleName;
-            document.querySelectorAll('.switch-role-item').forEach(el => {
-                el.classList.remove('active-role');
-                const badge = el.querySelector('.current-badge');
-                if (badge) badge.remove();
-            });
-            const clickedEl = event.currentTarget;
-            clickedEl.classList.add('active-role');
-            clickedEl.innerHTML += '<div class="current-badge">현재 접속중</div>';
-            alert(`[세션 전환 완료]\n'${roleName}'(으)로 권한이 변경되어 화면이 새로고침됩니다.`);
-            closeSwitchModal();
-        }
+            <script>
+                // 1. Header Role Switch Modal
+                function openSwitchModal() { document.getElementById('roleSwitchModal').style.display = 'flex'; }
+                function closeSwitchModal() { document.getElementById('roleSwitchModal').style.display = 'none'; }
+                function executeSwitch(roleName) {
+                    document.getElementById('currentRoleBadge').innerText = roleName;
+                    document.querySelectorAll('.switch-role-item').forEach(el => {
+                        el.classList.remove('active-role');
+                        const badge = el.querySelector('.current-badge');
+                        if (badge) badge.remove();
+                    });
+                    const clickedEl = event.currentTarget;
+                    clickedEl.classList.add('active-role');
+                    clickedEl.innerHTML += '<div class="current-badge">현재 접속중</div>';
+                    alert(`[세션 전환 완료]\n'${roleName}'(으)로 권한이 변경되어 화면이 새로고침됩니다.`);
+                    closeSwitchModal();
+                }
 
-        // 2. Assign Multi-Role Modal Logic
-        let roleIdx = 3;
+                // 2. Assign Multi-Role Modal Logic
+                let roleIdx = 3;
 
-        function openAssignModal(name, id) {
-            document.getElementById('roleAssignModal').style.display = 'flex';
-        }
-        function closeAssignModal() {
-            document.getElementById('roleAssignModal').style.display = 'none';
-        }
+                function openAssignModal(name, id) {
+                    document.getElementById('roleAssignModal').style.display = 'flex';
+                }
+                function closeAssignModal() {
+                    document.getElementById('roleAssignModal').style.display = 'none';
+                }
 
-        function addNewRoleBlock() {
-            const container = document.getElementById('rolesContainer');
-            const blockId = 'role_b' + roleIdx++;
+                function addNewRoleBlock() {
+                    const container = document.getElementById('rolesContainer');
+                    const blockId = 'role_b' + roleIdx++;
 
-            const html = `
+                    const html = `
                 <div class="role-block" id="${blockId}">
                     <button class="btn-remove" onclick="removeRoleBlock('${blockId}')">삭제</button>
                     <div class="role-head">
@@ -754,21 +862,21 @@
                     <div class="role-params-area" id="paramArea_${blockId}" style="display: none;"></div>
                 </div>
             `;
-            container.insertAdjacentHTML('beforeend', html);
-        }
+                    container.insertAdjacentHTML('beforeend', html);
+                }
 
-        function removeRoleBlock(blockId) {
-            document.getElementById(blockId).remove();
-        }
+                function removeRoleBlock(blockId) {
+                    document.getElementById(blockId).remove();
+                }
 
-        function renderRoleParams(blockId, roleValue) {
-            const paramArea = document.getElementById('paramArea_' + blockId);
-            paramArea.innerHTML = ''; // clear
+                function renderRoleParams(blockId, roleValue) {
+                    const paramArea = document.getElementById('paramArea_' + blockId);
+                    paramArea.innerHTML = ''; // clear
 
-            if (roleValue === 'S01') {
-                // 지자체 담당자 상세 조건
-                paramArea.style.display = 'block';
-                paramArea.innerHTML = `
+                    if (roleValue === 'S01') {
+                        // 지자체 담당자 상세 조건
+                        paramArea.style.display = 'block';
+                        paramArea.innerHTML = `
                     <div class="param-group">
                         <div class="param-label">시도 선택</div>
                         <select class="form-select" style="max-width: 180px;">
@@ -787,10 +895,10 @@
                         </select>
                     </div>
                 `;
-            } else if (roleValue === 'M01') {
-                // 제조수입사 파라미터
-                paramArea.style.display = 'block';
-                paramArea.innerHTML = `
+                    } else if (roleValue === 'M01') {
+                        // 제조수입사 파라미터
+                        paramArea.style.display = 'block';
+                        paramArea.innerHTML = `
                     <div class="param-group">
                         <div class="param-label">대상 제조사</div>
                         <select class="form-select" style="max-width: 300px;">
@@ -802,20 +910,32 @@
                         </select>
                     </div>
                 `;
-            } else {
-                // 파라미터 불필요 시 영역 숨김
-                paramArea.style.display = 'none';
-            }
-        }
+                    } else {
+                        // 파라미터 불필요 시 영역 숨김
+                        paramArea.style.display = 'none';
+                    }
+                }
 
-        // Global Modal Close on Outside Click
-        window.onclick = function (event) {
-            const m1 = document.getElementById('roleSwitchModal');
-            const m2 = document.getElementById('roleAssignModal');
-            if (event.target == m1) closeSwitchModal();
-            if (event.target == m2) closeAssignModal();
-        }
-    </script>
+                // Global Modal Close on Outside Click
+                window.onclick = function (event) {
+                    const m1 = document.getElementById('roleSwitchModal');
+                    const m2 = document.getElementById('roleAssignModal');
+                    if (event.target == m1) closeSwitchModal();
+                    if (event.target == m2) closeAssignModal();
+                }
+            </script>
+
+            <script>
+                function toggleHelpModal() {
+                    var modal = document.getElementById("helpModal");
+                    if (modal.style.display === "block") {
+                        modal.style.display = "none";
+                    } else {
+                        modal.style.display = "block";
+                    }
+                }
+            </script>
 </body>
+
 
 </html>

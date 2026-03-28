@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>담당자 지정 및 알림 설정</title>
+    <title>담당자 지정 및 알림 설정 (SFR-021)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -24,17 +24,74 @@
         .toggle-checkbox:checked+.toggle-label {
             background-color: #3b82f6;
         }
+
+        /* help-table: prototype.css 전역 td 스타일 차단 */
+        .help-table td {
+            border-bottom: none !important;
+            font-size: inherit !important;
+            vertical-align: middle !important;
+        }
+
+        .help-table tr:hover td {
+            background-color: inherit !important;
+        }
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
 
 <body class="text-slate-800 h-screen flex flex-col">
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">🔔</span> 담당자 배정 및 알림 관리 안내
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 시스템에 접수된 <b>문의 유형별 담당자 배정 규칙을 설정</b>하고, 실시간 알림 채널을 관리하는 화면입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>문의 유형(버그, 권한, 기타)에 따라 자동 배정할 담당자를 지정하여 처리 공백을 없앱니다.</li>
+                        <li>푸시 알림 및 이메일 연동 채널을 설정하여 미답변 문의 발생 시 즉각 대응 체계를 구축합니다.</li>
+                    </ul>
+                </div>
+                <h3 class="help-subtitle">[주요 기능]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">👤 자동 담당자 배정</td>
+                        <td class="help-col-desc">특정 유형의 문의가 접수되면 지정된 기본 담당자에게 자동으로 티켓이 배정되어 처리 효율을 높입니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🔔 실시간 알림 설정</td>
+                        <td class="help-col-desc">문의가 접수되거나 지연될 경우 알림을 발송할 내부 채널(메신저/이메일) 및 수신자를 관리합니다.</td>
+                    </tr>
+                    <!--
+                    <tr class="alt-row">
+                        <td class="help-col-title">📋 담당자 부하 균형</td>
+                        <td class="help-col-desc">각 담당자의 처리 티켓 수를 확인하여 특정 담당자에게 업무가 편중되지 않도록 관리합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">⚠️ 에스컬레이션 설정</td>
+                        <td class="help-col-desc">미답변 상태가 일정 시간 이상 지속되면 상위 책임자에게도 알림이 전달되도록 설정합니다.</td>
+                    </tr>
+                    -->
+                </table>
+            </div>
+        </div>
+    </div>
+
 
     <!-- 상단 네비게이션바 (관리자) -->
     <header class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center shrink-0 shadow-md z-20">
         <div class="flex items-center gap-6">
             <h1 class="text-xl font-bold tracking-tight">통합관리시스템 <span class="text-blue-400">Admin</span></h1>
             <nav class="hidden md:flex gap-4 text-sm font-medium text-slate-300">
-                <a href="#" class="hover:text-white transition">대시보드</a>
+                <a href="SFR-021_help_admin_dashboard.html" class="hover:text-white transition">대시보드</a>
                 <a href="SFR-021_help_admin_reply.html" class="hover:text-white transition">문의/답변 처리</a>
                 <a href="#" class="text-white border-b-2 border-blue-500 pb-1">담당자/알림 관리</a>
             </nav>
@@ -94,7 +151,7 @@
                     <h2 class="text-2xl font-bold text-slate-800 mb-2">담당자 지정 및 알림 설정</h2>
                     <p class="text-slate-500 text-sm">시스템, 메뉴, 접속 권한별로 헬프데스크 문의를 처리할 담당자를 매핑하고 알림(팝업/메일) 수신 여부를 관리합니다.</p>
                 </div>
-                <button class="px-5 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-lg shadow-sm hover:bg-blue-700 transition flex items-center gap-2">
+                <button onclick="openAssignModal()" class="px-5 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-lg shadow-sm hover:bg-blue-700 transition flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
@@ -142,7 +199,7 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-bold tracking-wider">
-                            <th class="p-4 w-12 text-center">우선순위</th>
+                            <th class="p-4 w-20 text-center">우선순위</th>
                             <th class="p-4">시스템</th>
                             <th class="p-4">메뉴 범위</th>
                             <th class="p-4">권한 그룹</th>
@@ -239,6 +296,246 @@
 
         </div>
     </main>
+
+    <!-- ========== 담당자 지정 추가 모달 ========== -->
+    <div id="assignModal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background:rgba(15,23,42,0.45); backdrop-filter:blur(5px);">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col max-h-[92vh] overflow-hidden" onclick="event.stopPropagation()">
+
+            <!-- 모달 헤더 -->
+            <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-white shrink-0">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">담당자 지정 추가</h2>
+                    <p class="text-slate-400 text-sm mt-1">문의 조건(시스템/메뉴/권한)에 따라 자동 배정될 담당자 규칙을 등록합니다.</p>
+                </div>
+                <button onclick="closeAssignModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- 모달 본문 -->
+            <div class="px-8 py-6 overflow-y-auto flex-1 space-y-6">
+
+                <!-- 조건 설정 섹션 -->
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-1 h-5 bg-blue-600 rounded-full"></div>
+                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">조건 설정</h3>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1.5">대상 시스템 <span class="text-red-500">*</span></label>
+                            <select id="modal_system" class="w-full border border-slate-300 rounded-lg text-sm py-2.5 px-3 text-slate-700 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 bg-slate-50">
+                                <option value="">시스템을 선택하세요</option>
+                                <option>무공해차 통합누리집</option>
+                                <option>구매보조금 시스템</option>
+                                <option>충전기 보급관리 시스템</option>
+                                <option>공통 시스템 (전체)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1.5">해당 메뉴 범위</label>
+                            <select id="modal_menu" class="w-full border border-slate-300 rounded-lg text-sm py-2.5 px-3 text-slate-700 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 bg-slate-50">
+                                <option value="">메뉴 전체 (무관)</option>
+                                <option>차량 제원 관리 하위 모두</option>
+                                <option>보조금 신청 관련 전체</option>
+                                <option>지원 현황 조회</option>
+                                <option>권한/계정 관리</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1.5">문의자 권한 그룹</label>
+                            <select id="modal_role" class="w-full border border-slate-300 rounded-lg text-sm py-2.5 px-3 text-slate-700 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 bg-slate-50">
+                                <option value="">전체 권한 (무관)</option>
+                                <option>지자체 담당자</option>
+                                <option>제조수입사 (제작사)</option>
+                                <option>공단 직원</option>
+                                <option>포털 일반회원</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1.5">문의 유형</label>
+                            <select id="modal_type" class="w-full border border-slate-300 rounded-lg text-sm py-2.5 px-3 text-slate-700 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 bg-slate-50">
+                                <option value="">전체 유형 (무관)</option>
+                                <option>오류 / 버그 신고</option>
+                                <option>권한 요청</option>
+                                <option>기능 제안</option>
+                                <option>기타 문의</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 우선순위 -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1.5">우선순위 <span class="text-red-500">*</span></label>
+                    <div class="flex items-center gap-3">
+                        <input type="number" id="modal_priority" value="2" min="1" max="99" class="w-24 border border-slate-300 rounded-lg text-sm py-2.5 px-3 text-slate-700 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 text-center font-bold">
+                        <span class="text-xs text-slate-400">숫자가 낮을수록 우선 적용됩니다. (현재 최고 우선순위: 1)</span>
+                    </div>
+                </div>
+
+                <!-- 담당자 설정 섹션 -->
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-1 h-5 bg-blue-600 rounded-full"></div>
+                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">담당자 지정</h3>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">배정 담당자 검색 <span class="text-red-500">*</span></label>
+                        <div class="flex gap-2">
+                            <input type="text" id="modal_search" placeholder="이름, 사번, 부서명 입력" class="flex-1 border border-slate-300 rounded-lg text-sm py-2.5 px-3 text-slate-700 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200">
+                            <button onclick="searchAssignee()" class="px-4 py-2 bg-slate-800 text-white text-sm font-bold rounded-lg hover:bg-slate-700 transition">검색</button>
+                        </div>
+
+                        <!-- 검색 결과 -->
+                        <div id="searchResults" class="mt-3 border border-slate-200 rounded-xl overflow-hidden hidden">
+                            <div class="bg-slate-50 px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">검색 결과</div>
+                            <div class="divide-y divide-slate-100">
+                                <label class="flex items-center gap-3 px-4 py-3 hover:bg-blue-50/40 cursor-pointer transition">
+                                    <input type="radio" name="assignee" value="hong" class="text-blue-600 accent-blue-600">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-sm">홍</div>
+                                    <div>
+                                        <div class="text-sm font-bold text-slate-800">홍길동 <span class="text-xs font-normal text-slate-400 ml-1">EMP-0012</span></div>
+                                        <div class="text-xs text-slate-500">디지털서비스팀 · 선임연구원 <span class="ml-2 bg-green-50 text-green-700 border border-green-100 px-1.5 py-0.5 rounded text-[10px] font-bold">현재 배정: 3건</span></div>
+                                    </div>
+                                </label>
+                                <label class="flex items-center gap-3 px-4 py-3 hover:bg-blue-50/40 cursor-pointer transition">
+                                    <input type="radio" name="assignee" value="kim" class="text-blue-600 accent-blue-600">
+                                    <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-700 font-bold flex items-center justify-center text-sm">김</div>
+                                    <div>
+                                        <div class="text-sm font-bold text-slate-800">김지원 <span class="text-xs font-normal text-slate-400 ml-1">EMP-0034</span></div>
+                                        <div class="text-xs text-slate-500">운영지원팀 · 주임 <span class="ml-2 bg-amber-50 text-amber-700 border border-amber-100 px-1.5 py-0.5 rounded text-[10px] font-bold">현재 배정: 8건</span></div>
+                                    </div>
+                                </label>
+                                <label class="flex items-center gap-3 px-4 py-3 hover:bg-blue-50/40 cursor-pointer transition">
+                                    <input type="radio" name="assignee" value="park" class="text-blue-600 accent-blue-600">
+                                    <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-sm">박</div>
+                                    <div>
+                                        <div class="text-sm font-bold text-slate-800">박운영 <span class="text-xs font-normal text-slate-400 ml-1">EMP-0056</span></div>
+                                        <div class="text-xs text-slate-500">시스템운영팀 · 책임 <span class="ml-2 bg-green-50 text-green-700 border border-green-100 px-1.5 py-0.5 rounded text-[10px] font-bold">현재 배정: 1건</span></div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 알림 설정 섹션 -->
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-1 h-5 bg-blue-600 rounded-full"></div>
+                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">알림 설정</h3>
+                    </div>
+                    <div class="bg-slate-50 rounded-xl border border-slate-200 divide-y divide-slate-200">
+                        <div class="flex items-center justify-between px-5 py-3.5">
+                            <div>
+                                <div class="text-sm font-semibold text-slate-700">팝업/시스템 알림</div>
+                                <div class="text-xs text-slate-400 mt-0.5">문의 접수 시 해당 담당자에게 시스템 알림 발송</div>
+                            </div>
+                            <div class="relative inline-block w-10 align-middle select-none">
+                                <input type="checkbox" id="notif_popup" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" checked>
+                                <label for="notif_popup" class="toggle-label block overflow-hidden h-5 rounded-full bg-slate-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between px-5 py-3.5">
+                            <div>
+                                <div class="text-sm font-semibold text-slate-700">이메일 알림</div>
+                                <div class="text-xs text-slate-400 mt-0.5">접수 즉시 담당자 등록 이메일로 발송</div>
+                            </div>
+                            <div class="relative inline-block w-10 align-middle select-none">
+                                <input type="checkbox" id="notif_email" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" checked>
+                                <label for="notif_email" class="toggle-label block overflow-hidden h-5 rounded-full bg-slate-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+                        <!--
+                        <div class="flex items-center justify-between px-5 py-3.5">
+                            <div>
+                                <div class="text-sm font-semibold text-slate-700">에스컬레이션 (24시간 미처리 시)</div>
+                                <div class="text-xs text-slate-400 mt-0.5">상위 팀장에게 자동 에스컬레이션 알림</div>
+                            </div>
+                            <div class="relative inline-block w-10 align-middle select-none">
+                                <input type="checkbox" id="notif_escalate" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer">
+                                <label for="notif_escalate" class="toggle-label block overflow-hidden h-5 rounded-full bg-slate-300 cursor-pointer"></label>
+                            </div>
+                        </div>
+                        -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 모달 푸터 -->
+            <div class="px-8 py-5 border-t border-slate-100 bg-slate-50 flex justify-between items-center shrink-0 rounded-b-2xl">
+                <p class="text-xs text-slate-400">
+                    <span class="text-red-400 font-bold">*</span> 표시 항목은 필수 입력입니다.
+                </p>
+                <div class="flex gap-3">
+                    <button onclick="closeAssignModal()" class="px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition">취소</button>
+                    <button onclick="saveAssignRule()" class="px-6 py-2.5 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition shadow-sm shadow-blue-600/20 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        규칙 저장
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById('helpModal');
+            if (modal.style.display === 'block') {
+                modal.style.display = 'none';
+            } else {
+                modal.style.display = 'block';
+            }
+        }
+
+        function openAssignModal() {
+            var modal = document.getElementById('assignModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAssignModal() {
+            var modal = document.getElementById('assignModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+
+        function searchAssignee() {
+            var keyword = document.getElementById('modal_search').value.trim();
+            var results = document.getElementById('searchResults');
+            if (keyword.length === 0) {
+                alert('검색어를 입력하세요.');
+                return;
+            }
+            results.classList.remove('hidden');
+        }
+
+        function saveAssignRule() {
+            var system = document.getElementById('modal_system').value;
+            var priority = document.getElementById('modal_priority').value;
+            var selected = document.querySelector('input[name="assignee"]:checked');
+
+            if (!system) { alert('대상 시스템을 선택하세요.'); return; }
+            if (!selected) { alert('배정할 담당자를 검색하여 선택하세요.'); return; }
+
+            alert('담당자 배정 규칙이 성공적으로 저장되었습니다.');
+            closeAssignModal();
+        }
+
+        // 모달 외부 클릭 시 닫기
+        document.getElementById('assignModal').addEventListener('click', function (e) {
+            if (e.target === this) closeAssignModal();
+        });
+    </script>
 
 </body>
 

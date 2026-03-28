@@ -1,48 +1,255 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>알림 템플릿 관리 (SFR030) - 무공해차 통합누리집</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #0F62FE; --bg-body: #F4F7FB; --bg-card: #FFFFFF; --text-main: #161616; --border-color: #E0E0E0; --radius: 12px; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); line-height: 1.5; padding-bottom: 60px; }
-        .top-header { background-color: #161616; color: #fff; padding: 0 40px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
-        .container { max-width: 1400px; margin: 40px auto; padding: 0 20px; }
-        .page-header { margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; }
-        .tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); }
-        .tab { padding: 12px 24px; font-size: 15px; font-weight: 600; color: #525252; text-decoration: none; border-bottom: 3px solid transparent; margin-bottom: -1px; }
-        .tab:hover, .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-        .card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border-color); padding: 24px; margin-bottom: 24px; }
-        .card-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; border-left: 4px solid var(--primary); padding-left: 12px; display:flex; justify-content:space-between; align-items:center;}
-        
-        .layout-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
-        
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { background: #F8F9FA; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 12px 16px; font-size: 13px; font-weight: 600; }
-        td { border-bottom: 1px solid #E0E0E0; padding: 14px 16px; font-size: 14px; }
-        tr:hover td { background-color: #FAFCFF; cursor: pointer; }
-        
-        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-        .bg-kakao { background: #FEE500; color: #3A2929; border: 1px solid #E5CE00; }
-        .bg-sms { background: #E5F0FF; color: #0043CE; border: 1px solid #A6C8FF; }
+        :root {
+            --primary: #0F62FE;
+            --bg-body: #F4F7FB;
+            --bg-card: #FFFFFF;
+            --text-main: #161616;
+            --border-color: #E0E0E0;
+            --radius: 12px;
+        }
 
-        .btn { padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #ccc; background:#fff;}
-        .btn-primary { background: var(--primary); color: #fff; border:none; }
-        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding-bottom: 60px;
+        }
+
+        .top-header {
+            background-color: #161616;
+            color: #fff;
+            padding: 0 40px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 16px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab {
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #525252;
+            text-decoration: none;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -1px;
+        }
+
+        .tab:hover,
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .card {
+            background: #fff;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            border-left: 4px solid var(--primary);
+            padding-left: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: #F8F9FA;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 16px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        td {
+            border-bottom: 1px solid #E0E0E0;
+            padding: 14px 16px;
+            font-size: 14px;
+        }
+
+        tr:hover td {
+            background-color: #FAFCFF;
+            cursor: pointer;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .bg-kakao {
+            background: #FEE500;
+            color: #3A2929;
+            border: 1px solid #E5CE00;
+        }
+
+        .bg-sms {
+            background: #E5F0FF;
+            color: #0043CE;
+            border: 1px solid #A6C8FF;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            background: #fff;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+        }
+
         /* Test Panel */
-        .test-panel { background: #F8F9FA; padding: 20px; border-radius: 8px; border: 1px solid #E0E0E0; }
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
-        .form-control { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 13px; }
-        .msg-preview { background: #fff; padding: 16px; border-radius: 8px; border: 1px solid #ccc; min-height: 150px; font-size: 14px; line-height: 1.6; white-space: pre-wrap; font-family: monospace; }
+        .test-panel {
+            background: #F8F9FA;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #E0E0E0;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 13px;
+        }
+
+        .msg-preview {
+            background: #fff;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            min-height: 150px;
+            font-size: 14px;
+            line-height: 1.6;
+            font-family: monospace;
+        }
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
+
 <body>
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">📝</span> 알림 템플릿 관리 및 테스트 안내
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 무공해차 통합누리집에서 발송되는 모든 메시지의 <b>표준 문안(템플릿)을 관리</b>하고, 실제 발송 가능 여부를 검증하는 관리 화면입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>알림톡(카카오)의 경우 외부 공급자의 검토/승인이 완료된 문구만 실제 발송이 가능합니다.</li>
+                        <li>메시지 본문 내 개인화 변수(예: #{이름}, #{접수번호})의 올바른 치환 여부를 미리 확인할 수 있습니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[템플릿 운영 프로세스]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title">🧪 발송 테스트 패널</td>
+                        <td class="help-col-desc">관리자 연락처로 직접 테스트 메시지를 발송하여 폰트 가독성, 링크 연결성, 변수 치환 결과 등을 최종 점검합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">📑 템플릿 복사/편집</td>
+                        <td class="help-col-desc">기존 승인된 템플릿을 복사하여 유사한 업무(예: 보조금 배정 안내 -> 지급 안내)에 빠르게 적용할 수 있습니다.</td>
+                    </tr>
+                </table>
+
+                <h3 class="help-subtitle" style="margin-top:24px;">[변수 사용 및 주의사항]</h3>
+                <div class="help-desc-box" style="background:#fffbe6;">
+                    <ul class="help-list">
+                        <li><strong>치환 변수 규칙:</strong> 템플릿 내 <code>#{variable}</code> 형식은 시스템 내부 데이터와 자동 연동되므로 임의 삭제에 유의하십시오.</li>
+                        <li><strong>실제 과금 주의:</strong> '테스트 발송' 버튼 클릭 시 실제 API 호출이 발생하며, 공급자 정책에 따라 과금될 수 있습니다.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <header class="top-header">
-         <div class="header-logo" style="font-weight:700;">시스템 관리자 <span style="font-weight:400; font-size:15px; margin-left:8px;">| 통합 알림 서비스 (API)</span></div>
+        <div class="header-logo" style="font-weight:700;">시스템 관리자 <span style="font-weight:400; font-size:15px; margin-left:8px;">| 통합 알림 서비스 (API)</span></div>
         <div class="header-tools"><span style="font-size:13px;">관리자님</span></div>
     </header>
 
@@ -62,75 +269,95 @@
         <div class="layout-grid">
             <!-- Left: Table -->
             <div class="card" style="margin-bottom:0;">
-                <h2 class="card-title">등록된 알림 템플릿 목록 <button class="btn btn-primary">신규 템플릿 등록</button></h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>템플릿 코드</th>
-                            <th>수단</th>
-                            <th>업무 시스템 명</th>
-                            <th>알림명 (Title)</th>
-                            <th>API 승인상태</th>
-                            <th>수정/복사</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr onclick="loadTest('TPL-AUTH-01')">
-                            <td style="font-family:monospace; font-size:12px;">TPL-AUTH-01</td>
-                            <td><span class="badge bg-sms">SMS</span></td>
-                            <td>계정 보안</td>
-                            <td>2차 로그인 본인인증 번호 발송</td>
-                            <td><span style="color:green; font-weight:600;">승인완료</span></td>
-                            <td><button class="btn">편집</button></td>
-                        </tr>
-                        <tr onclick="loadTest('TPL-SUB-01')">
-                            <td style="font-family:monospace; font-size:12px;">TPL-SUB-01</td>
-                            <td><span class="badge bg-kakao">카카오</span></td>
-                            <td>보조금 관리</td>
-                            <td>보조금 지급 우선순위 대상 선정</td>
-                            <td><span style="color:green; font-weight:600;">승인완료</span></td>
-                            <td><button class="btn">편집</button></td>
-                        </tr>
-                        <tr>
-                            <td style="font-family:monospace; font-size:12px;">TPL-HELP-02</td>
-                            <td><span class="badge bg-kakao">카카오</span></td>
-                            <td>HelpDesk</td>
-                            <td>질의응답 답변 등록 안내</td>
-                            <td><span style="color:#D12771; font-weight:600;">반려 (내용오류)</span></td>
-                            <td><button class="btn">편집</button></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="help-modal-header">
+                    <h2 class="card-title">등록된 알림 템플릿 목록 <button class="btn btn-primary">신규 템플릿 등록</button></h2>
+                </div>
+                <div class="help-modal-body">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>템플릿 코드</th>
+                                <th>수단</th>
+                                <th>업무 시스템 명</th>
+                                <th>알림명 (Title)</th>
+                                <th>API 승인상태</th>
+                                <th>수정/복사</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr onclick="loadTest('TPL-AUTH-01')">
+                                <td style="font-family:monospace; font-size:12px;">TPL-AUTH-01</td>
+                                <td><span class="badge bg-sms">SMS</span></td>
+                                <td>계정 보안</td>
+                                <td>2차 로그인 본인인증 번호 발송</td>
+                                <td><span style="color:green; font-weight:600;">승인완료</span></td>
+                                <td><button class="btn">편집</button></td>
+                            </tr>
+                            <tr onclick="loadTest('TPL-SUB-01')">
+                                <td style="font-family:monospace; font-size:12px;">TPL-SUB-01</td>
+                                <td><span class="badge bg-kakao">카카오</span></td>
+                                <td>보조금 관리</td>
+                                <td>보조금 지급 우선순위 대상 선정</td>
+                                <td><span style="color:green; font-weight:600;">승인완료</span></td>
+                                <td><button class="btn">편집</button></td>
+                            </tr>
+                            <tr>
+                                <td style="font-family:monospace; font-size:12px;">TPL-HELP-02</td>
+                                <td><span class="badge bg-kakao">카카오</span></td>
+                                <td>HelpDesk</td>
+                                <td>질의응답 답변 등록 안내</td>
+                                <td><span style="color:#D12771; font-weight:600;">반려 (내용오류)</span></td>
+                                <td><button class="btn">편집</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Right: Test Panel -->
             <div class="card" style="margin-bottom:0;">
-                <h2 class="card-title">알림 발송 테스트 (직접 발송)</h2>
-                <div class="test-panel">
-                    <div class="form-group">
-                        <label>테스트 발송 템플릿</label>
-                        <input type="text" class="form-control" value="[TPL-SUB-01] 보조금 대상 선정" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label>수신자 연락처</label>
-                        <input type="text" class="form-control" placeholder="010-XXXX-XXXX (숫자만 입력)">
-                    </div>
-                    <div class="form-group">
-                        <label>메시지 본문 미리보기 (변수 대체됨)</label>
-                        <div class="msg-preview">[무공해차 통합누리집]
-#{userName}님, 신청하신 보조금(접수번호: #{reqNumber}) 지급 우선순위 대상자로 선정되었습니다. 
+                <div class="help-modal-header">
+                    <h2 class="card-title">알림 발송 테스트 (직접 발송)</h2>
+                </div>
+                <div class="help-modal-body">
+                    <div class="test-panel">
+                        <div class="form-group">
+                            <label>테스트 발송 템플릿</label>
+                            <input type="text" class="form-control" value="[TPL-SUB-01] 보조금 대상 선정" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>수신자 연락처</label>
+                            <input type="text" class="form-control" placeholder="010-XXXX-XXXX (숫자만 입력)">
+                        </div>
+                        <div class="form-group">
+                            <label>메시지 본문 미리보기 (변수 대체됨)</label>
+                            <div class="msg-preview">[무공해차 통합누리집]<br>
+                                #{userName}님, 신청하신 보조금(접수번호: #{reqNumber}) 지급 우선순위 대상자로 선정되었습니다.<br><br>
 
-시스템에 접속하여 지급 관련 증빙 서류를 7일 내에 등록하여 주시기 바랍니다.
+                                시스템에 접속하여 지급 관련 증빙 서류를 7일 내에 등록하여 주시기 바랍니다.<br><br>
 
-- 대상자명: #{userName}
-- 지원차종: #{carName}
-- 문의: 1661-XXXX</div>
+                                - 대상자명: #{userName}<br>
+                                - 지원차종: #{carName}<br>
+                                - 문의: 1661-XXXX</div>
+                        </div>
+                        <button class="btn btn-primary" style="width:100%; padding:12px; font-size:14px;" onclick="alert('API 호출을 통해 카카오 알림톡 발송을 시도했습니다.')">▶ 수신자에게 테스트 발송</button>
+                        <p style="text-align:center; font-size:11px; color:#c00; margin-top:8px;">* 실제 과금(API 호출료)이 발생하므로 주의하시기 바랍니다.</p>
                     </div>
-                    <button class="btn btn-primary" style="width:100%; padding:12px; font-size:14px;" onclick="alert('API 호출을 통해 카카오 알림톡 발송을 시도했습니다.')">▶ 수신자에게 테스트 발송</button>
-                    <p style="text-align:center; font-size:11px; color:#c00; margin-top:8px;">* 실제 과금(API 호출료)이 발생하므로 주의하시기 바랍니다.</p>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
 </body>
+
 </html>

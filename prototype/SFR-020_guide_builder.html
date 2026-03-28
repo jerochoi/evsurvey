@@ -125,9 +125,54 @@
             background-color: #e2e8f0;
         }
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
 
 <body class="text-slate-800">
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">🏗️</span> 가이드 문서 작성기(빌더) 안내
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 <b>블록 조립 방식</b>을 통해 복잡한 업무 매뉴얼을 누구나 쉽게 제작할 수 있도록 지원하는 작성기입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>좌측 에디터에서 입력한 내용이 우측 사용자 화면(Live Preview)에 즉시 반영되어 실시간으로 디자인을 확인할 수 있습니다.</li>
+                        <li>단순 텍스트뿐만 아니라 스크린샷, 강조 상자, 바로가기 버튼 등을 조합하여 가독성 높은 문서를 생성합니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[에디터 주요 기능 설명]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">🧱 콘텐츠 블록 추가</td>
+                        <td class="help-col-desc">메인 제목, 일반 설명, 주의/안내문, 단계별 스텝 중 필요한 요소를 선택하여 문장을 구성합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">📸 이미지 및 강조 효과</td>
+                        <td class="help-col-desc">단계별 스텝에 업무 화면 스크린샷을 등록할 수 있으며, 텍스트 드래그 후 '굵게(B)' 버튼으로 중요 정보를 강조할 수 있습니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">🔗 연관 메뉴 바로가기</td>
+                        <td class="help-col-desc">가이드 하단에 관련 업무 화면으로 즉시 이동할 수 있는 버튼을 생성하여 사용자의 업무 연결성을 높입니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">📡 라이브 프리뷰</td>
+                        <td class="help-col-desc">'미리보기 갱신하기' 버튼을 통해 실제 정렬 상태와 이미지 배치, 시스템별 권한 설정 결과 등을 최종 검증합니다.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
 
     <div class="editor-container">
 
@@ -138,7 +183,7 @@
                     <span class="text-blue-600">📝</span> 가이드 문서 작성기
                 </h1>
                 <p class="text-sm text-slate-500 mt-1 mb-4">블록을 추가하고 내용을 길게 입력하셔도 모두 렌더링 됩니다.</p>
-                
+
                 <!-- 문서 설정(공개여부, 시스템명, 대상권한) 영역 -->
                 <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 grid grid-cols-2 gap-3 text-sm">
                     <div class="col-span-2">
@@ -175,7 +220,7 @@
                             </label>
                         </div>
                     </div>
-                    
+
                     <div class="col-span-2 pt-2 border-t border-slate-200 mt-1">
                         <label class="block font-bold text-slate-700 mb-2">공개 여부</label>
                         <div class="flex items-center gap-5">
@@ -336,15 +381,15 @@
 
         function updateDocSettings() {
             docSettings.system = document.getElementById('doc-system').value;
-            
+
             // 다중 체크박스(대상 권한) 값 배열 추출
             const authChecked = document.querySelectorAll('input[name="doc-auth"]:checked');
             docSettings.auth = Array.from(authChecked).map(cb => cb.value);
-            
+
             // 라디오(공개여부) 값 추출
             const statusChecked = document.querySelector('input[name="doc-status"]:checked');
-            if(statusChecked) docSettings.status = statusChecked.value;
-            
+            if (statusChecked) docSettings.status = statusChecked.value;
+
             saveAndPreview();
         }
 
@@ -475,15 +520,15 @@
 
                 if (block.type === 'title') {
                     // 권한 텍스트 가공
-                    const authText = docSettings.auth.length > 0 
-                                   ?  docSettings.auth.join(', ') + ' 전용' 
-                                   : '<span class="text-red-500 font-bold">권한 미지정</span>';
+                    const authText = docSettings.auth.length > 0
+                        ? docSettings.auth.join(', ') + ' 전용'
+                        : '<span class="text-red-500 font-bold">권한 미지정</span>';
 
                     // 상단 설정값 기반으로 라벨 색상 지정
-                    const statusBadge = docSettings.status === '공개' 
-                                      ? '<span class="bg-blue-100 text-blue-700 border border-blue-200 px-2 py-0.5 rounded text-xs ml-2 align-middle font-bold tracking-wide">오픈(공개)</span>'
-                                      : '<span class="bg-slate-200 text-slate-600 border border-slate-300 px-2 py-0.5 rounded text-xs ml-2 align-middle font-bold tracking-wide">비공개</span>';
-                                      
+                    const statusBadge = docSettings.status === '공개'
+                        ? '<span class="bg-blue-100 text-blue-700 border border-blue-200 px-2 py-0.5 rounded text-xs ml-2 align-middle font-bold tracking-wide">오픈(공개)</span>'
+                        : '<span class="bg-slate-200 text-slate-600 border border-slate-300 px-2 py-0.5 rounded text-xs ml-2 align-middle font-bold tracking-wide">비공개</span>';
+
                     previewHTML += `
                         <div class="border-b border-slate-200 pb-6 mb-6">
                             <div class="text-[13px] font-bold text-slate-500 mb-3 flex items-center gap-2">
@@ -649,26 +694,26 @@
         function applyBold(elementId, blockId, key) {
             const el = document.getElementById(elementId);
             if (!el) return;
-            
+
             const start = el.selectionStart;
             const end = el.selectionEnd;
-            
+
             if (start === end) {
                 alert("글씨를 굵게 변경하려면 먼저 변경할 텍스트 영역을 마우스로 드래그해서 지정해주세요.");
                 return;
             }
-            
+
             const txt = el.value;
             const selected = txt.substring(start, end);
             const replaced = txt.substring(0, start) + '<strong>' + selected + '</strong>' + txt.substring(end);
-            
+
             el.value = replaced;
             updateData(blockId, key, replaced);
-            
+
             // 입력 포커스 및 선택 영역 유지
             el.focus();
             el.setSelectionRange(start, start + selected.length + 17); // 17은 <strong></strong> 길이 합
-            
+
             saveAndPreview();
         }
 
@@ -676,32 +721,32 @@
         function removeBold(elementId, blockId, key) {
             const el = document.getElementById(elementId);
             if (!el) return;
-            
+
             const start = el.selectionStart;
             const end = el.selectionEnd;
-            
+
             if (start === end) {
                 alert("굵게 표시를 해제하려면 태그(<strong>...</strong>)가 포함된 텍스트 영역을 마우스로 드래그해서 지정해주세요.");
                 return;
             }
-            
+
             const txt = el.value;
             let selected = txt.substring(start, end);
-            
+
             // 선택된 영역 안의 <strong>, </strong> 태그를 모두 제거
             const oldLength = selected.length;
             selected = selected.replace(/<\/?strong>/gi, '');
             const lengthDiff = oldLength - selected.length;
-            
+
             const replaced = txt.substring(0, start) + selected + txt.substring(end);
-            
+
             el.value = replaced;
             updateData(blockId, key, replaced);
-            
+
             // 입력 포커스 및 선택 영역 유지
             el.focus();
             el.setSelectionRange(start, end - lengthDiff);
-            
+
             saveAndPreview();
         }
 
@@ -709,6 +754,18 @@
         renderEditor();
         saveAndPreview();
     </script>
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
 </body>
+
 
 </html>

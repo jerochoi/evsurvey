@@ -128,14 +128,14 @@
 /* Help Modal Table */
 .help-table {
     width: 100%;
-    table-layout: fixed; /* 테이블 너비 고정 */
+    margin-top: 10px;
     border-collapse: collapse;
     font-size: 14px;
     color: #333;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
     overflow: hidden;
-    word-break: break-all; /* 긴 단어 강제 줄바꿈 */
+    overflow-wrap: break-word; /* 넘치는 텍스트 줄바꿈 */
 }
 
 .help-table tr.alt-row {
@@ -151,10 +151,10 @@
 }
 
 .help-table td {
-    padding: 12px 16px;
-    line-height: 1.5;
+    padding: 14px 18px;
+    line-height: 1.6;
     vertical-align: middle; /* 중앙 정렬 유지 */
-    overflow-wrap: break-word; /* 넘치는 텍스트 줄바꿈 */
+    border-bottom: 1px solid #eee;
 }
 
 .help-table td.help-col-title {

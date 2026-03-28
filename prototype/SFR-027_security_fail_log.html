@@ -166,9 +166,59 @@
             border: 1px solid #FA4D56;
         }
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
 
 <body>
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">🔑</span> 인증 실패 및 DI 로그 추적 안내
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 <b>비밀번호 오류</b> 또는 <b>본인인증 실패</b> 이력을 추적하여 무단 접근 시도를 탐지하고 동일인의 반복 공격을 식별하는 보안 화면입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>계정 ID를 바꿔가며 시도하더라도, 본인인증(휴대폰, 인증서 등) 시 발생하는 고유값인 <b>DI(중복가입확인정보)</b>를 기록하여 동일인 여부를 판별합니다.</li>
+                        <li>로그인 실패 횟수 초과로 잠긴 계정의 해제 요청 시, 과거 이력과 대조하여 정당한 사용자인지 판단하는 근거로 활용됩니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[로그 상세 가이드]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">📂 실패 유형 (Type)</td>
+                        <td class="help-col-desc">단순 비밀번호 오입력, 5회 연속 오류에 의한 계정 잠금, 또는 본인인증 단계에서의 인증 실패 여부를 구분합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🆔 DI (Duplication Info)</td>
+                        <td class="help-col-desc">인증기관(NICE 등)으로부터 수신한 암호화된 개인식별값입니다. 아이디를 다르게 입력해도 실소유자가 같으면 동일한 DI값이 기록됩니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">🛡️ 보안 추적 (IP/시간)</td>
+                        <td class="help-col-desc">특정 IP 대역에서 동시 다발적으로 발생하는 인증 실패를 감지하여 '브루트 포스(Brute Force)' 공격 여부를 분석합니다.</td>
+                    </tr>
+                </table>
+
+                <h3 class="help-subtitle" style="margin-top:24px;">[운영 주의사항]</h3>
+                <div class="help-desc-box" style="background:#f8fafc;">
+                    <ul class="help-list">
+                        <li><strong>개인정보 보호:</strong> DI값은 시스템 내부적으로만 활용되며 외부 유출되지 않도록 엄격히 관리됩니다.</li>
+                        <li><strong>잠금 해제 지원:</strong> 사용자가 본인인증 후 계정 잠금 해제를 요청할 때, 이 화면의 DI 매칭 이력을 확인하여 도용 여부를 최종 점검할 수 있습니다.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
     <header class="top-header">
         <div class="header-logo">시스템 관리자 <span>| 계정 보안 통제</span></div>
     </header>
@@ -187,53 +237,68 @@
         </div>
 
         <div class="card">
-            <h2 class="card-title">로그인 및 본인인증 실패 추적 로그</h2>
-            <div style="margin-bottom: 16px; font-size: 13px; color: #525252;">
-                비밀번호 연속 불일치 또는 휴대폰/공동인증서 본인인증 실패 시, 동일인의 반복적인 공격을 추적하기 위해 DI(중복가입확인정보) 값을 로깅합니다.
+            <div class="help-modal-header">
+                <h2 class="card-title">로그인 및 본인인증 실패 추적 로그</h2>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th width="15%">발생 일시</th>
-                        <th width="15%">계정 ID (입력값)</th>
-                        <th width="15%">실패 유형</th>
-                        <th width="40%">DI (Duplication Information) 기록</th>
-                        <th width="15%">접속 IP</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>2026-03-26 15:40:11</td>
-                        <td>park55</td>
-                        <td><span class="badge bg-red">본인인증 실패</span></td>
-                        <td><span class="di-code">MC0GCCqGSIb3DQIJAyEAabc123...xyz987=</span></td>
-                        <td>112.45.67.89</td>
-                    </tr>
-                    <tr>
-                        <td>2026-03-26 15:39:55</td>
-                        <td>park55</td>
-                        <td><span class="badge bg-red">본인인증 실패</span></td>
-                        <td><span class="di-code">MC0GCCqGSIb3DQIJAyEAabc123...xyz987=</span></td>
-                        <td>112.45.67.89</td>
-                    </tr>
-                    <tr>
-                        <td>2026-03-26 15:35:10</td>
-                        <td>unknown_user</td>
-                        <td><span class="badge bg-red">비밀번호 5회 오류</span></td>
-                        <td><span class="di-code">MC0GCCqGSIb3DQIJAyEAz8fje3...l1jA8k=</span></td>
-                        <td>45.12.11.9</td>
-                    </tr>
-                    <tr>
-                        <td>2026-03-25 09:12:33</td>
-                        <td>hong12</td>
-                        <td><span class="badge bg-red">비밀번호 오류</span></td>
-                        <td><span style="color:#8D8D8D; font-size:12px;">(DI 획득 전 단계)</span></td>
-                        <td>211.33.22.11</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="help-modal-body">
+                <div style="margin-bottom: 16px; font-size: 13px; color: #525252;">
+                    비밀번호 연속 불일치 또는 휴대폰/공동인증서 본인인증 실패 시, 동일인의 반복적인 공격을 추적하기 위해 DI(중복가입확인정보) 값을 로깅합니다.
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="15%">발생 일시</th>
+                            <th width="15%">계정 ID (입력값)</th>
+                            <th width="15%">실패 유형</th>
+                            <th width="40%">DI (Duplication Information) 기록</th>
+                            <th width="15%">접속 IP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2026-03-26 15:40:11</td>
+                            <td>park55</td>
+                            <td><span class="badge bg-red">본인인증 실패</span></td>
+                            <td><span class="di-code">MC0GCCqGSIb3DQIJAyEAabc123...xyz987=</span></td>
+                            <td>112.45.67.89</td>
+                        </tr>
+                        <tr>
+                            <td>2026-03-26 15:39:55</td>
+                            <td>park55</td>
+                            <td><span class="badge bg-red">본인인증 실패</span></td>
+                            <td><span class="di-code">MC0GCCqGSIb3DQIJAyEAabc123...xyz987=</span></td>
+                            <td>112.45.67.89</td>
+                        </tr>
+                        <tr>
+                            <td>2026-03-26 15:35:10</td>
+                            <td>unknown_user</td>
+                            <td><span class="badge bg-red">비밀번호 5회 오류</span></td>
+                            <td><span class="di-code">MC0GCCqGSIb3DQIJAyEAz8fje3...l1jA8k=</span></td>
+                            <td>45.12.11.9</td>
+                        </tr>
+                        <tr>
+                            <td>2026-03-25 09:12:33</td>
+                            <td>hong12</td>
+                            <td><span class="badge bg-red">비밀번호 오류</span></td>
+                            <td><span style="color:#8D8D8D; font-size:12px;">(DI 획득 전 단계)</span></td>
+                            <td>211.33.22.11</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
+
+        <script>
+            function toggleHelpModal() {
+                var modal = document.getElementById("helpModal");
+                if (modal.style.display === "block") {
+                    modal.style.display = "none";
+                } else {
+                    modal.style.display = "block";
+                }
+            }
+        </script>
 </body>
+
 
 </html>

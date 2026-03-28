@@ -79,7 +79,7 @@
                 position: fixed;
                 z-index: 50;
                 background-color: #0f172a;
-                box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+                box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
             }
         }
     </style>
@@ -185,10 +185,13 @@
                 📊 민원 현황 (관리자)
             </a>
             <a href="SFR-021_help_admin_assign.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
-                ⚙️ 담당자 배정 (관리자)
+                ⚙️ 담당자 배정
             </a>
             <a href="SFR-021_help_admin_reply.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
-                ✍️ 문의 답변 (관리자)
+                ✍️ 문의 답변
+            </a>
+            <a href="SFR-021_help_template_mgmt.html" target="preview-frame" class="nav-link" onclick="handleMenuClick(this)">
+                📝 답변 템플릿 관리
             </a>
 
             <div class="pt-4 pb-1 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest">SFR-022 위치선정</div>
@@ -290,10 +293,10 @@
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('collapsed');
-            
+
             // Icon transformation
             const icon = document.getElementById('toggleIcon');
-            if(sidebar.classList.contains('collapsed')) {
+            if (sidebar.classList.contains('collapsed')) {
                 icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />';
             } else {
                 icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />';

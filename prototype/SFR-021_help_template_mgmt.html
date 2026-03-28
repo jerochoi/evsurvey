@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>답변 템플릿 관리</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link type="text/css" rel="stylesheet" href="prototype.css">
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+    </style>
+</head>
+<body class="p-8">
+    <div class="max-w-5xl mx-auto">
+        <header class="flex justify-between items-center mb-8">
+            <div class="flex items-center gap-4">
+                <button onclick="history.back()" class="p-2 hover:bg-slate-200 rounded-full transition text-slate-500" title="뒤로 가기">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                </button>
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">답변 템플릿 관리</h1>
+                    <p class="text-slate-500 mt-1">자주 사용하는 답변 양식을 등록하고 관리합니다.</p>
+                </div>
+            </div>
+            <button onclick="openTemplateModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                새 템플릿 추가
+            </button>
+        </header>
+
+        <!-- 필터 영역 -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex gap-4">
+            <div class="flex-1 relative">
+                <input type="text" placeholder="템플릿 제목 또는 내용 검색" class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <svg class="w-5 h-5 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+            <select class="border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option>모든 카테고리</option>
+                <option>시스템 오류</option>
+                <option>계정/권한</option>
+                <option>정기 점검</option>
+                <option>단순 안내</option>
+            </select>
+        </div>
+
+        <!-- 템플릿 리스트 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- 템플릿 카드 1 -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-blue-400 transition-all group">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span class="px-2 py-1 bg-blue-100 text-blue-700 text-[10px] font-bold rounded uppercase mb-2 inline-block">시스템 오류</span>
+                        <h3 class="font-bold text-slate-800 text-lg">브라우저 캐시 삭제 안내</h3>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg></button>
+                        <button class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                    </div>
+                </div>
+                <p class="text-slate-600 text-sm leading-relaxed line-clamp-3 mb-4">
+                    안녕하세요. 고객님. 이용에 불편을 드려 죄송합니다. 
+                    현재 겪고 계신 증상은 브라우저 캐시 문제일 가능성이 높습니다. 
+                    [설정 > 개인정보 보호 및 보안 > 인터넷 사용 기록 삭제] 기능을 통해 캐시를 삭제하신 후 재접속 부탁드립니다.
+                </p>
+                <div class="text-xs text-slate-400 flex items-center gap-2">
+                    <span>최종 수정: 2026-03-25</span>
+                    <span>•</span>
+                    <span>사용 횟수: 124회</span>
+                </div>
+            </div>
+
+            <!-- 템플릿 카드 2 -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-blue-400 transition-all group">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span class="px-2 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold rounded uppercase mb-2 inline-block">계정/권한</span>
+                        <h3 class="font-bold text-slate-800 text-lg">권한 승인 처리 완료 알림</h3>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg></button>
+                        <button class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                    </div>
+                </div>
+                <p class="text-slate-600 text-sm leading-relaxed line-clamp-3 mb-4">
+                    요청하신 시스템 접근 권한 승인이 완료되었습니다. 
+                    이제 해당 메뉴를 이용하실 수 있습니다. 
+                    혹시 로그아웃 후 다시 로그인 하셨음에도 접근이 안 되신다면 고객센터로 연락 부탁드립니다.
+                </p>
+                <div class="text-xs text-slate-400 flex items-center gap-2">
+                    <span>최종 수정: 2026-03-20</span>
+                    <span>•</span>
+                    <span>사용 횟수: 45회</span>
+                </div>
+            </div>
+
+            <!-- 템플릿 카드 3 -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-blue-400 transition-all group">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span class="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded uppercase mb-2 inline-block">단순 안내</span>
+                        <h3 class="font-bold text-slate-800 text-lg">점검 예정 안내</h3>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg></button>
+                        <button class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                    </div>
+                </div>
+                <p class="text-slate-600 text-sm leading-relaxed line-clamp-3 mb-4">
+                    금일 오후 6시부터 서비스 정기 점검이 예정되어 있습니다. 
+                    점검 시간에는 시스템 접속이 원활하지 않을 수 있으니 참고 부탁드립니다. 
+                    불편을 드려 대단히 죄송합니다.
+                </p>
+                <div class="text-xs text-slate-400 flex items-center gap-2">
+                    <span>최종 수정: 2026-03-27</span>
+                    <span>•</span>
+                    <span>사용 횟수: 12회</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 템플릿 등록/수정 모달 -->
+    <div id="templateModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h2 class="font-bold text-lg text-slate-800">템플릿 등록 / 수정</h2>
+                <button onclick="closeTemplateModal()" class="text-slate-400 hover:text-slate-600">&times;</button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">카테고리</label>
+                    <select class="w-full border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option>시스템 오류</option>
+                        <option>계정/권한</option>
+                        <option>단순 안내</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">템플릿 제목</label>
+                    <input type="text" class="w-full border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="제목을 입력하세요">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">답변 내용</label>
+                    <textarea rows="8" class="w-full border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="답변 내용을 작성하세요"></textarea>
+                </div>
+            </div>
+            <div class="p-6 border-t border-slate-100 flex justify-end gap-3 bg-slate-50">
+                <button onclick="closeTemplateModal()" class="px-4 py-2 text-slate-600 font-bold hover:bg-slate-200 rounded-lg transition">취소</button>
+                <button onclick="alert('저장되었습니다.'); closeTemplateModal();" class="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 shadow-md transition">저장하기</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openTemplateModal() {
+            document.getElementById('templateModal').classList.remove('hidden');
+            document.getElementById('templateModal').classList.add('flex');
+        }
+        function closeTemplateModal() {
+            document.getElementById('templateModal').classList.add('hidden');
+            document.getElementById('templateModal').classList.remove('flex');
+        }
+    </script>
+</body>
+</html>

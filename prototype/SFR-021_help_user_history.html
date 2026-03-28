@@ -33,9 +33,54 @@
             transform: rotate(180deg);
         }
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
 
 <body class="text-slate-800 min-h-screen">
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">📂</span> 나의 문의 내역 확인 안내
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 사용자가 접수한 <b>시스템 오류 및 기능 문의 현황</b>을 한눈에 파악하고, 관리자의 답변을 확인할 수 있는 개인용 헬프데스크 포털입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>아코디언 형태의 목록을 통해 방대한 문의 내용과 답변을 간결하게 열람할 수 있습니다.</li>
+                        <li>단순 답변 외에도 문제 해결에 도움이 되는 <b>맞춤형 가이드 링크</b>가 함께 제공됩니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[목록 주요 기능 설명]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">🚥 처리 상태 트래킹</td>
+                        <td class="help-col-desc">'답변 대기'와 '답변 완료' 배지를 통해 현재 민원 처리 상황을 즉시 인지할 수 있습니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🔍 스마트 컨텍스트 확인</td>
+                        <td class="help-col-desc">질문 상단에 자동 수집된 화면 정보(메뉴명, 브라우저 등)가 표시되어 본인이 어떤 환경에서 문의했는지 복기할 수 있습니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">🔗 지식 베이스 연동</td>
+                        <td class="help-col-desc">관리자 답변 하단에 첨부된 '퀵링크'를 클릭하면 해당 이슈와 연관된 전문 이용 안내 가이드로 즉시 연결됩니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">➕ 신규 문의 연계</td>
+                        <td class="help-col-desc">목록 상단의 '새 문의 작성' 버튼을 통해 현재 페이지를 벗어나지 않고도 추가적인 시스템 민원을 접수할 수 있습니다.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
 
     <!-- 최상단 글로벌 네비게이션 가상표시 -->
     <header class="bg-blue-600 shadow text-white px-6 py-4 flex justify-between items-center">
@@ -51,150 +96,153 @@
     <main class="max-w-4xl mx-auto py-10 px-4">
 
         <div class="mb-8">
-            <h2 class="text-2xl font-bold mb-2">나의 문의 내역</h2>
-            <p class="text-slate-500 text-sm">최근 3개월 간 접수하신 문의와 처리 현황을 확인하실 수 있습니다.</p>
-        </div>
+            <div class="help-modal-header">
+                <h2 class="text-2xl font-bold mb-2">나의 문의 내역</h2>
+            </div>
+            <div class="help-modal-body">
+                <p class="text-slate-500 text-sm">최근 3개월 간 접수하신 문의와 처리 현황을 확인하실 수 있습니다.</p>
+            </div>
 
-        <div class="flex items-center gap-4 mb-6 relative">
-            <select class="border border-slate-300 rounded-lg text-sm font-semibold py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-700 shadow-sm">
-                <option>전체 보기</option>
-                <option>처리 중</option>
-                <option>답변 완료</option>
-            </select>
-            <span class="flex-1"></span>
-            <button onclick="alert('신규 문의 팝업을 엽니다.')" class="px-5 py-2.5 bg-slate-800 text-white rounded-lg text-sm font-bold shadow-sm hover:bg-slate-700 transition flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                새 문의 작성
-            </button>
-        </div>
-
-        <!-- 문의 목록 영역 -->
-        <div class="space-y-4">
-
-            <!-- 항목 1: 답변 완료 (펼쳐짐 데모용) -->
-            <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-                <!-- 아코디언 헤더 -->
-                <button onclick="toggleAccordion('item-1', this)" class="w-full text-left px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition outline-none">
-                    <div class="flex items-center gap-4">
-                        <span class="bg-blue-100 text-blue-700 font-bold px-2.5 py-1 rounded text-xs tracking-wide shrink-0">답변 완료</span>
-                        <div>
-                            <h3 class="font-bold text-slate-800 text-[15px] group-hover:text-blue-600 transition truncate">[오류/버그] 지원금 신청 화면에서 버튼이 안눌려요</h3>
-                            <div class="flex gap-2 text-xs text-slate-400 mt-1 font-medium">
-                                <span>접수일: 2026-03-26 10:15</span>
-                                <span>|</span>
-                                <span>ticket #932</span>
-                            </div>
-                        </div>
-                    </div>
-                    <svg class="w-5 h-5 text-slate-400 transition-transform duration-300 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            <div class="flex items-center gap-4 mb-6 relative">
+                <select class="border border-slate-300 rounded-lg text-sm font-semibold py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-700 shadow-sm">
+                    <option>전체 보기</option>
+                    <option>처리 중</option>
+                    <option>답변 완료</option>
+                </select>
+                <span class="flex-1"></span>
+                <button onclick="alert('신규 문의 팝업을 엽니다.')" class="px-5 py-2.5 bg-slate-800 text-white rounded-lg text-sm font-bold shadow-sm hover:bg-slate-700 transition flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
+                    새 문의 작성
                 </button>
+            </div>
 
-                <!-- 아코디언 본문 (초기 상태 expanded) -->
-                <div id="item-1" class="accordion-content expanded bg-slate-50/50">
-                    <div class="p-6">
+            <!-- 문의 목록 영역 -->
+            <div class="space-y-4">
 
-                        <!-- 사용자가 남긴 문의 -->
-                        <div class="mb-6 flex gap-4">
-                            <div class="w-8 h-8 rounded-full bg-slate-200 shrink-0 flex items-center justify-center font-bold text-slate-500 shadow-sm border border-slate-300">Q</div>
-                            <div class="flex-1 bg-white p-5 rounded-2xl rounded-tl-none shadow-sm border border-slate-200">
-                                <div class="text-xs font-bold text-slate-400 mb-2 flex items-center gap-2">
-                                    <span class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">통합관리시스템</span>
-                                    <span>차량 제원 관리 > 지원금 신청</span>
-                                    <span>Chrome 122</span>
-                                </div>
-                                <p class="text-[14px] text-slate-800 leading-relaxed whitespace-pre-line">안녕하세요. 지자체 차량 등록 담당자입니다.
-                                    오늘 아침 시스템 접속해서 '지원금 신청' 메뉴 들어가서 서류 업로드 다 하고 마지막에 파란색 [저장 후 다음단계] 버튼을 눌렀는데 아무런 에러창도 안 뜨고 조용히 먹통이 됩니다. 어제까지는 잘 됐거든요.
-                                    확인차 다른 컴퓨터에서 해봤는데도 똑같네요. 빠른 조치 부탁드립니다! 민원인 대기중이에요. ㅠㅠ</p>
-                                <!-- 첨부 파일 -->
-                                <div class="mt-4 flex gap-2">
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 bg-slate-100 border border-slate-200 rounded cursor-pointer hover:bg-slate-200">
-                                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                        </svg>
-                                        error_screen_capture.png
-                                    </span>
+                <!-- 항목 1: 답변 완료 (펼쳐짐 데모용) -->
+                <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+                    <!-- 아코디언 헤더 -->
+                    <button onclick="toggleAccordion('item-1', this)" class="w-full text-left px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition outline-none">
+                        <div class="flex items-center gap-4">
+                            <span class="bg-blue-100 text-blue-700 font-bold px-2.5 py-1 rounded text-xs tracking-wide shrink-0">답변 완료</span>
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-[15px] group-hover:text-blue-600 transition truncate">[오류/버그] 지원금 신청 화면에서 버튼이 안눌려요</h3>
+                                <div class="flex gap-2 text-xs text-slate-400 mt-1 font-medium">
+                                    <span>접수일: 2026-03-26 10:15</span>
+                                    <span>|</span>
+                                    <span>ticket #932</span>
                                 </div>
                             </div>
                         </div>
+                        <svg class="w-5 h-5 text-slate-400 transition-transform duration-300 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
 
-                        <!-- 관리자가 단 답변 -->
-                        <div class="flex gap-4">
-                            <div class="w-8 h-8 rounded-full bg-blue-600 shrink-0 flex items-center justify-center font-bold text-white shadow-sm shadow-blue-500/30">A</div>
-                            <div class="flex-1 bg-blue-50/70 p-5 rounded-2xl rounded-tl-none border border-blue-100/50 relative overflow-hidden ring-1 ring-blue-600/10">
-                                <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-white/0 to-blue-200/20 rounded-full blur-xl -translate-y-4 translate-x-4 pointer-events-none"></div>
-                                <div class="text-xs font-bold text-blue-800/60 mb-3 flex justify-between items-center">
-                                    <span>답변 작성자 : 통합지원팀 시스템관리자</span>
-                                    <span>2026-03-26 11:30</span>
-                                </div>
-                                <div class="text-[14px] text-blue-900 leading-relaxed font-medium">
-                                    <p class="mb-2">담당자님 안녕하세요. 통합누리집 지원팀입니다.</p>
-                                    <p class="mb-2">말씀해주신 '지원금 신청' 단계에서의 버튼 멈춤 현상을 확인 결과, 오늘 새벽 정기 점검 시 도입된 보안 모듈과 호환성 충돌이 발생한 것으로 확인되었습니다.</p>
-                                    <p class="mb-4">해당 문제는 긴급 패치를 통해 <strong>현재 정상적으로 조치 완료</strong>되었습니다. 브라우저 창을 새로고침(F5) 하신 후 다시 시도해주시면 정상 접수가 가능합니다.</p>
+                    <!-- 아코디언 본문 (초기 상태 expanded) -->
+                    <div id="item-1" class="accordion-content expanded bg-slate-50/50">
+                        <div class="p-6">
 
-                                    <!-- 매뉴얼 가이드 첨부 -->
-                                    <div class="bg-white/80 p-3 rounded-xl border border-blue-200 flex items-center gap-3 w-fit cursor-pointer hover:bg-white transition shadow-sm">
-                                        <div class="bg-blue-100 p-2 rounded-lg text-blue-700">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <p class="text-xs font-bold text-slate-800">관련 가이드 퀵링크</p>
-                                            <p class="text-[10px] text-slate-500">지원금 신청 시 브라우저 캐시 삭제 안내</p>
-                                        </div>
+                            <!-- 사용자가 남긴 문의 -->
+                            <div class="mb-6 flex gap-4">
+                                <div class="w-8 h-8 rounded-full bg-slate-200 shrink-0 flex items-center justify-center font-bold text-slate-500 shadow-sm border border-slate-300">Q</div>
+                                <div class="flex-1 bg-white p-5 rounded-2xl rounded-tl-none shadow-sm border border-slate-200">
+                                    <div class="text-xs font-bold text-slate-400 mb-2 flex items-center gap-2">
+                                        <span class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">통합관리시스템</span>
+                                        <span>차량 제원 관리 > 지원금 신청</span>
+                                        <span>Chrome 122</span>
                                     </div>
+                                    <p class="text-[14px] text-slate-800 leading-relaxed whitespace-pre-line">안녕하세요. 지자체 차량 등록 담당자입니다.
+                                        오늘 아침 시스템 접속해서 '지원금 신청' 메뉴 들어가서 서류 업로드 다 하고 마지막에 파란색 [저장 후 다음단계] 버튼을 눌렀는데 아무런 에러창도 안 뜨고 조용히 먹통이 됩니다. 어제까지는 잘 됐거든요.
+                                        확인차 다른 컴퓨터에서 해봤는데도 똑같네요. 빠른 조치 부탁드립니다! 민원인 대기중이에요. ㅠㅠ</p>
+                                    <!-- 첨부 파일 -->
+                                    <div class="mt-4 flex gap-2">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 bg-slate-100 border border-slate-200 rounded cursor-pointer hover:bg-slate-200">
+                                            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
+                                            error_screen_capture.png
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
 
-                                    <p class="mt-4">바쁘신 업무에 불편을 드려 대단히 죄송합니다. 또 다른 문제 발생 시 언제든 문의 남겨주시길 바랍니다. 감사합니다!</p>
+                            <!-- 관리자가 단 답변 -->
+                            <div class="flex gap-4">
+                                <div class="w-8 h-8 rounded-full bg-blue-600 shrink-0 flex items-center justify-center font-bold text-white shadow-sm shadow-blue-500/30">A</div>
+                                <div class="flex-1 bg-blue-50/70 p-5 rounded-2xl rounded-tl-none border border-blue-100/50 relative overflow-hidden ring-1 ring-blue-600/10">
+                                    <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-white/0 to-blue-200/20 rounded-full blur-xl -translate-y-4 translate-x-4 pointer-events-none"></div>
+                                    <div class="text-xs font-bold text-blue-800/60 mb-3 flex justify-between items-center">
+                                        <span>답변 작성자 : 통합지원팀 시스템관리자</span>
+                                        <span>2026-03-26 11:30</span>
+                                    </div>
+                                    <div class="text-[14px] text-blue-900 leading-relaxed font-medium">
+                                        <p class="mb-2">담당자님 안녕하세요. 통합누리집 지원팀입니다.</p>
+                                        <p class="mb-2">말씀해주신 '지원금 신청' 단계에서의 버튼 멈춤 현상을 확인 결과, 오늘 새벽 정기 점검 시 도입된 보안 모듈과 호환성 충돌이 발생한 것으로 확인되었습니다.</p>
+                                        <p class="mb-4">해당 문제는 긴급 패치를 통해 <strong>현재 정상적으로 조치 완료</strong>되었습니다. 브라우저 창을 새로고침(F5) 하신 후 다시 시도해주시면 정상 접수가 가능합니다.</p>
+
+                                        <!-- 매뉴얼 가이드 첨부 -->
+                                        <div class="bg-white/80 p-3 rounded-xl border border-blue-200 flex items-center gap-3 w-fit cursor-pointer hover:bg-white transition shadow-sm">
+                                            <div class="bg-blue-100 p-2 rounded-lg text-blue-700">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs font-bold text-slate-800">관련 가이드 퀵링크</p>
+                                                <p class="text-[10px] text-slate-500">지원금 신청 시 브라우저 캐시 삭제 안내</p>
+                                            </div>
+                                        </div>
+
+                                        <p class="mt-4">바쁘신 업무에 불편을 드려 대단히 죄송합니다. 또 다른 문제 발생 시 언제든 문의 남겨주시길 바랍니다. 감사합니다!</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 항목 2: 답변 대기 -->
+                <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+                    <button onclick="toggleAccordion('item-2', this)" class="w-full text-left px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition outline-none">
+                        <div class="flex items-center gap-4">
+                            <span class="bg-amber-100 text-amber-700 font-bold px-2.5 py-1 rounded text-xs tracking-wide shrink-0">답변 대기</span>
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-[15px] group-hover:text-blue-600 transition truncate">[기능 제안] 리스트 화살표 키보드 조작 기능 추가 건</h3>
+                                <div class="flex gap-2 text-xs text-slate-400 mt-1 font-medium">
+                                    <span>접수일: 2026-03-25 15:20</span>
+                                    <span>|</span>
+                                    <span>ticket #910</span>
                                 </div>
                             </div>
                         </div>
+                        <svg class="w-5 h-5 text-slate-400 transition-transform duration-300 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
 
-                    </div>
-                </div>
-            </div>
-
-            <!-- 항목 2: 답변 대기 -->
-            <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-                <button onclick="toggleAccordion('item-2', this)" class="w-full text-left px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition outline-none">
-                    <div class="flex items-center gap-4">
-                        <span class="bg-amber-100 text-amber-700 font-bold px-2.5 py-1 rounded text-xs tracking-wide shrink-0">답변 대기</span>
-                        <div>
-                            <h3 class="font-bold text-slate-800 text-[15px] group-hover:text-blue-600 transition truncate">[기능 제안] 리스트 화살표 키보드 조작 기능 추가 건</h3>
-                            <div class="flex gap-2 text-xs text-slate-400 mt-1 font-medium">
-                                <span>접수일: 2026-03-25 15:20</span>
-                                <span>|</span>
-                                <span>ticket #910</span>
+                    <div id="item-2" class="accordion-content bg-slate-50/50">
+                        <div class="p-6">
+                            <div class="mb-2 flex gap-4">
+                                <div class="w-8 h-8 rounded-full bg-slate-200 shrink-0 flex items-center justify-center font-bold text-slate-500 shadow-sm border border-slate-300">Q</div>
+                                <div class="flex-1 bg-white p-5 rounded-2xl rounded-tl-none shadow-sm border border-slate-200">
+                                    <p class="text-[14px] text-slate-800 leading-relaxed whitespace-pre-line">게시판 리스트에서 마우스 대신 키보드 위 아래 화살표만으로 행을 이동하고 엔터를 쳐서 진입할 수 있으면 업무 속도가 훨씬 빠를 것 같습니다. 건의드려요.</p>
+                                </div>
+                            </div>
+                            <div class="ml-12 mt-4 px-4 py-3 bg-amber-50 border border-amber-100 rounded-lg text-xs font-bold text-amber-700 flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                관리자가 문의 내용을 확인 중이며, 곧 답변이 등록될 예정입니다.
                             </div>
                         </div>
                     </div>
-                    <svg class="w-5 h-5 text-slate-400 transition-transform duration-300 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-
-                <div id="item-2" class="accordion-content bg-slate-50/50">
-                    <div class="p-6">
-                        <div class="mb-2 flex gap-4">
-                            <div class="w-8 h-8 rounded-full bg-slate-200 shrink-0 flex items-center justify-center font-bold text-slate-500 shadow-sm border border-slate-300">Q</div>
-                            <div class="flex-1 bg-white p-5 rounded-2xl rounded-tl-none shadow-sm border border-slate-200">
-                                <p class="text-[14px] text-slate-800 leading-relaxed whitespace-pre-line">게시판 리스트에서 마우스 대신 키보드 위 아래 화살표만으로 행을 이동하고 엔터를 쳐서 진입할 수 있으면 업무 속도가 훨씬 빠를 것 같습니다. 건의드려요.</p>
-                            </div>
-                        </div>
-                        <div class="ml-12 mt-4 px-4 py-3 bg-amber-50 border border-amber-100 rounded-lg text-xs font-bold text-amber-700 flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            관리자가 문의 내용을 확인 중이며, 곧 답변이 등록될 예정입니다.
-                        </div>
-                    </div>
                 </div>
-            </div>
 
-        </div>
+            </div>
 
     </main>
 
@@ -213,6 +261,18 @@
             }
         }
     </script>
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
 </body>
+
 
 </html>

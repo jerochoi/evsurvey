@@ -168,9 +168,59 @@
             border: 1px solid #FF8389;
         }
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
 
 <body>
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">🚨</span> 접근 및 동시접속 이력 관리 안내
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 시스템 <b>로그인 시점의 보안 이력</b>을 관리하며, 특히 <b>해외 접속 시도</b>와 <b>동일 계정 중복 접속</b>에 대한 실시간 대응 결과를 기록합니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>계정 탈취 의심 사례(해외 IP, 취약 시간대 접근 등)를 시각적으로 구분하여 관리자에게 알립니다.</li>
+                        <li>보안 정책에 의해 차단된 '동시 접속' 사례를 분석하여 비정상적인 계정 공유 행위를 감지합니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[로그 분석 가이드]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">🌍 해외 IP 감지</td>
+                        <td class="help-col-desc">접속 IP 기반의 국가 정보(GeoIP)를 추출하여 한국 외 지역 접근을 식별합니다. 빨간색 강조 행은 보안 정책에 의해 '즉시 차단'된 사례입니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🌙 취약 시간대 접근</td>
+                        <td class="help-col-desc">환경 설정에서 지정한 업무 외 시간(예: 00시~06시)에 발생한 로그인을 별도 표시하며, 담당자에게 알림이 발송된 내역을 확인합니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">🚫 동시 접속 차단</td>
+                        <td class="help-col-desc">하나의 ID로 두 장소에서 동시 접근 시, 설정에 따라 '기존 세션 강제 종료' 처리된 결과를 보여줍니다.</td>
+                    </tr>
+                </table>
+
+                <h3 class="help-subtitle" style="margin-top:24px;">[상황별 대응 방안]</h3>
+                <div class="help-desc-box" style="background:#f8fafc;">
+                    <ul class="help-list">
+                        <li><strong>해외 차단 이력 빈번 시:</strong> 해당 계정 사용자의 비밀번호 변경 권고 및 본인인증 로그(DI값) 재검토가 필요합니다.</li>
+                        <li><strong>동시 접속 잦음:</strong> 계정 공유 금지 원칙을 위반한 사례일 수 있으므로 해당 담당자 교육 또는 권한 회수를 검토해야 합니다.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
     <header class="top-header">
         <div class="header-logo">시스템 관리자 <span>| 계정 보안 통제</span></div>
     </header>
@@ -190,87 +240,105 @@
 
         <!-- 1. 해외 IP 접근 이력 -->
         <div class="card">
-            <h2 class="card-title">로그인 접근 이력 (해외 IP 감지)</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th width="15%">접근 일시</th>
-                        <th width="15%">접속 계정</th>
-                        <th width="20%">접속 IP</th>
-                        <th width="15%">국가 구분</th>
-                        <th width="15%">상태</th>
-                        <th width="20%">비고</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>2026-03-26 14:32:11</td>
-                        <td>admin_master</td>
-                        <td>123.45.67.89</td>
-                        <td><span class="badge bg-green">대한민국 (KR)</span></td>
-                        <td><span class="badge" style="background:#E0EFFF; color:#0F62FE;">정상 승인</span></td>
-                        <td>-</td>
-                    </tr>
-                    <tr style="background:#FFF1F1;">
-                        <td>2026-03-26 03:15:22</td>
-                        <td>hong12</td>
-                        <td>45.22.11.9</td>
-                        <td><span class="badge bg-red">중국 (CN)</span></td>
-                        <td><span class="badge bg-red">해외IP 차단</span></td>
-                        <td>[보안경고] 취약 시간대 접근 시도</td>
-                    </tr>
-                    <tr>
-                        <td>2026-03-25 18:05:40</td>
-                        <td>maker_hyundai</td>
-                        <td>211.33.22.11</td>
-                        <td><span class="badge bg-green">대한민국 (KR)</span></td>
-                        <td><span class="badge" style="background:#E0EFFF; color:#0F62FE;">정상 승인</span></td>
-                        <td>-</td>
-                    </tr>
-                    <tr style="background:#FFF3EB;">
-                        <td>2026-03-25 04:22:10</td>
-                        <td>maker_tesla</td>
-                        <td>104.28.11.22</td>
-                        <td><span class="badge bg-orange">미국 (US)</span></td>
-                        <td><span class="badge" style="background:#E0EFFF; color:#0F62FE;">정상 승인</span></td>
-                        <td>[알림발송] 취약 시간대(04시) 접근</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+            <div class="help-modal-header">
+                <h2 class="card-title">로그인 접근 이력 (해외 IP 감지)</h2>
+            </div>
+            <div class="help-modal-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="15%">접근 일시</th>
+                            <th width="15%">접속 계정</th>
+                            <th width="20%">접속 IP</th>
+                            <th width="15%">국가 구분</th>
+                            <th width="15%">상태</th>
+                            <th width="20%">비고</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2026-03-26 14:32:11</td>
+                            <td>admin_master</td>
+                            <td>123.45.67.89</td>
+                            <td><span class="badge bg-green">대한민국 (KR)</span></td>
+                            <td><span class="badge" style="background:#E0EFFF; color:#0F62FE;">정상 승인</span></td>
+                            <td>-</td>
+                        </tr>
+                        <tr style="background:#FFF1F1;">
+                            <td>2026-03-26 03:15:22</td>
+                            <td>hong12</td>
+                            <td>45.22.11.9</td>
+                            <td><span class="badge bg-red">중국 (CN)</span></td>
+                            <td><span class="badge bg-red">해외IP 차단</span></td>
+                            <td>[보안경고] 취약 시간대 접근 시도</td>
+                        </tr>
+                        <tr>
+                            <td>2026-03-25 18:05:40</td>
+                            <td>maker_hyundai</td>
+                            <td>211.33.22.11</td>
+                            <td><span class="badge bg-green">대한민국 (KR)</span></td>
+                            <td><span class="badge" style="background:#E0EFFF; color:#0F62FE;">정상 승인</span></td>
+                            <td>-</td>
+                        </tr>
+                        <tr style="background:#FFF3EB;">
+                            <td>2026-03-25 04:22:10</td>
+                            <td>maker_tesla</td>
+                            <td>104.28.11.22</td>
+                            <td><span class="badge bg-orange">미국 (US)</span></td>
+                            <td><span class="badge" style="background:#E0EFFF; color:#0F62FE;">정상 승인</span></td>
+                            <td>[알림발송] 취약 시간대(04시) 접근</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
-        <!-- 2. 동시 접속 차단 이력 -->
-        <div class="card">
-            <h2 class="card-title">동시 접속 제한 현황</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th width="15%">차단 일시</th>
-                        <th width="15%">대상 계정 (ID)</th>
-                        <th width="20%">기존 접속 IP</th>
-                        <th width="20%">신규 접근 IP</th>
-                        <th width="30%">처리 결과</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>2026-03-26 10:15:00</td>
-                        <td>lee20</td>
-                        <td>192.168.1.10</td>
-                        <td>203.241.22.11</td>
-                        <td><span class="badge bg-red">접속 차단됨</span> (설정: 신규 접속 차단)</td>
-                    </tr>
-                    <tr>
-                        <td>2026-03-25 13:40:22</td>
-                        <td>kim_cs</td>
-                        <td>10.0.12.55</td>
-                        <td>121.134.45.99</td>
-                        <td><span class="badge bg-red">세션 강제 종료</span> (설정: 기존 세션 방출)</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+            <!-- 2. 동시 접속 차단 이력 -->
+            <div class="card">
+                <div class="help-modal-header">
+                    <h2 class="card-title">동시 접속 제한 현황</h2>
+                </div>
+                <div class="help-modal-body">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th width="15%">차단 일시</th>
+                                <th width="15%">대상 계정 (ID)</th>
+                                <th width="20%">기존 접속 IP</th>
+                                <th width="20%">신규 접근 IP</th>
+                                <th width="30%">처리 결과</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2026-03-26 10:15:00</td>
+                                <td>lee20</td>
+                                <td>192.168.1.10</td>
+                                <td>203.241.22.11</td>
+                                <td><span class="badge bg-red">접속 차단됨</span> (설정: 신규 접속 차단)</td>
+                            </tr>
+                            <tr>
+                                <td>2026-03-25 13:40:22</td>
+                                <td>kim_cs</td>
+                                <td>10.0.12.55</td>
+                                <td>121.134.45.99</td>
+                                <td><span class="badge bg-red">세션 강제 종료</span> (설정: 기존 세션 방출)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <script>
+                function toggleHelpModal() {
+                    var modal = document.getElementById("helpModal");
+                    if (modal.style.display === "block") {
+                        modal.style.display = "none";
+                    } else {
+                        modal.style.display = "block";
+                    }
+                }
+            </script>
 </body>
+
 
 </html>

@@ -245,152 +245,144 @@
         <div class="tabs">
             <a href="SFR-030_noti_dashboard.html" class="tab active">현황 및 통계</a>
             <a href="SFR-030_noti_template.html" class="tab">알림 템플릿 관리/테스트</a>
-            <a href="SFR-030_noti_history.html" class="tab">상세 발송 내역 조회</a>
-            <a href="SFR-030_noti_config.html" class="tab">API 연계 안내</a>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-box">
-                <span class="title">금월 총 발송 건수</span>
-                <span class="value">45,123 <span style="font-size: 14px; font-weight: 400;">건</span></span>
-            </div>
-            <div class="stat-box">
-                <span class="title">알림톡 (카카오) 발송</span>
-                <span class="value">38,500 <span style="font-size: 14px; font-weight: 400;">건 (85%)</span></span>
-            </div>
-            <div class="stat-box">
-                <span class="title">SMS / LMS 발송</span>
-                <span class="value">6,623 <span style="font-size: 14px; font-weight: 400;">건 (15%)</span></span>
-            </div>
-            <div class="stat-box">
-                <span class="title">예상 발송 비용 (API)</span>
-                <span class="value">₩ 724,000</span>
-            </div>
-        </div>
-
-        <div class="chart-row">
+            <a href="SFR-030_noti_history.html" class="tab">상세 발송 내역 �        <div class="chart-row">
+            <!-- 차트 1: 발송 추이 -->
             <div class="card" style="margin-bottom:0;">
-                <div class="help-modal-header">
-                    <h2 class="card-title">일자별/수단별 발송 추이</h2>
+                <h2 class="card-title">일자별/수단별 발송 추이</h2>
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
                 </div>
-                <div class="help-modal-body">
-                    <div class="chart-container">
-                        <canvas id="trendChart"></canvas>
+            </div>
+
+            <!-- 차트 2: 업무별 점유율 -->
+            <div class="card" style="margin-bottom:0;">
+                <h2 class="card-title">업무별 발송 점유율</h2>
+                <div class="chart-container">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 하단 상세 통계 테이블 -->
+        <div class="card">
+            <h2 class="card-title">시스템/업무별 상세 발송 통계 (최근 30일)</h2>
+            <div class="overflow-x-auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>업무/시스템 구분</th>
+                            <th>알림 목적</th>
+                            <th>기본 수단</th>
+                            <th>알림톡 (건수)</th>
+                            <th>SMS (건수)</th>
+                            <th>성공률</th>
+                            <th>전송률 추세</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>회원/계정 보안</td>
+                            <td>본인인증 번호, 로그인 차단 알림</td>
+                            <td><span class="badge bg-sms">SMS</span></td>
+                            <td>0</td>
+                            <td>2,450</td>
+                            <td>99.9%</td>
+                            <td><span style="color:var(--primary)">▲</span></td>
+                        </tr>
+                        <tr>
+                            <td>충전 인프라 (SFR-014)</td>
+                            <td>충전소 점검/고장 공지</td>
+                            <td><span class="badge bg-kakao">카카오</span></td>
+                            <td>12,500</td>
+                            <td>1,200</td>
+                            <td>98.5%</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>보조금 결제/배정</td>
+                            <td>보조금 지급 완료, 예산 배정 공지</td>
+                            <td><span class="badge bg-kakao">카카오</span></td>
+                            <td>21,400</td>
+                            <td>2,100</td>
+                            <td>99.0%</td>
+                            <td><span style="color:var(--primary)">▲</span></td>
+                        </tr>
+                        <tr>
+                            <td>HelpDesk (SFR-016)</td>
+                            <td>민원 접수 완료, 답변 등록 알림</td>
+                            <td><span class="badge bg-kakao">카카오</span></td>
+                            <td>4,600</td>
+                            <td>873</td>
+                            <td>99.1%</td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>         <td>98.5%</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>보조금 결제/배정</td>
+                                    <td>보조금 지급 완료, 예산 배정 공지</td>
+                                    <td><span class="badge bg-kakao">카카오</span></td>
+                                    <td>21,400</td>
+                                    <td>2,100</td>
+                                    <td>99.0%</td>
+                                    <td><span style="color:var(--primary)">▲</span></td>
+                                </tr>
+                                <tr>
+                                    <td>HelpDesk (SFR-016)</td>
+                                    <td>민원 접수 완료, 답변 등록 알림</td>
+                                    <td><span class="badge bg-kakao">카카오</span></td>
+                                    <td>4,600</td>
+                                    <td>873</td>
+                                    <td>99.1%</td>
+                                    <td>-</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            </div>
-            <div class="card" style="margin-bottom:0;">
-                <div class="help-modal-header">
-                    <h2 class="card-title">업무별 발송 점유율</h2>
-                </div>
-                <div class="help-modal-body">
-                    <div class="chart-container">
-                        <canvas id="pieChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <div>
-            <div class="card">
-                <div class="help-modal-header">
-                    <h2 class="card-title">시스템/업무별 상세 발송 통계 (최근 30일)</h2>
-                </div>
-                <div class="help-modal-body">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>업무/시스템 구분</th>
-                                <th>알림 목적</th>
-                                <th>기본 수단</th>
-                                <th>알림톡 (건수)</th>
-                                <th>SMS (건수)</th>
-                                <th>성공률</th>
-                                <th>전송률 추세</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>회원/계정 보안</td>
-                                <td>본인인증 번호, 로그인 차단 알림</td>
-                                <td><span class="badge bg-sms">SMS</span></td>
-                                <td>0</td>
-                                <td>2,450</td>
-                                <td>99.9%</td>
-                                <td><span style="color:var(--primary)">▲</span></td>
-                            </tr>
-                            <tr>
-                                <td>충전 인프라 (SFR-014)</td>
-                                <td>충전소 점검/고장 공지</td>
-                                <td><span class="badge bg-kakao">카카오</span></td>
-                                <td>12,500</td>
-                                <td>1,200</td>
-                                <td>98.5%</td>
-                                <td>-</td>
-                            </tr>
-                            <tr>
-                                <td>보조금 결제/배정</td>
-                                <td>보조금 지급 완료, 예산 배정 공지</td>
-                                <td><span class="badge bg-kakao">카카오</span></td>
-                                <td>21,400</td>
-                                <td>2,100</td>
-                                <td>99.0%</td>
-                                <td><span style="color:var(--primary)">▲</span></td>
-                            </tr>
-                            <tr>
-                                <td>HelpDesk (SFR-016)</td>
-                                <td>민원 접수 완료, 답변 등록 알림</td>
-                                <td><span class="badge bg-kakao">카카오</span></td>
-                                <td>4,600</td>
-                                <td>873</td>
-                                <td>99.1%</td>
-                                <td>-</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+                <script>
+                    const ctx1 = document.getElementById('trendChart').getContext('2d');
+                    new Chart(ctx1, {
+                        type: 'bar',
+                        data: {
+                            labels: ['3/20', '3/21', '3/22', '3/23', '3/24', '3/25', '3/26'],
+                            datasets: [
+                                { label: '카카오 알림톡', data: [1200, 1500, 1100, 1800, 1700, 1900, 2100], backgroundColor: '#FEE500' },
+                                { label: 'SMS/LMS', data: [300, 450, 200, 310, 250, 400, 380], backgroundColor: '#0F62FE' }
+                            ]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
+                    });
 
-    <script>
-        const ctx1 = document.getElementById('trendChart').getContext('2d');
-        new Chart(ctx1, {
-            type: 'bar',
-            data: {
-                labels: ['3/20', '3/21', '3/22', '3/23', '3/24', '3/25', '3/26'],
-                datasets: [
-                    { label: '카카오 알림톡', data: [1200, 1500, 1100, 1800, 1700, 1900, 2100], backgroundColor: '#FEE500' },
-                    { label: 'SMS/LMS', data: [300, 450, 200, 310, 250, 400, 380], backgroundColor: '#0F62FE' }
-                ]
-            },
-            options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
-        });
+                    const ctx2 = document.getElementById('pieChart').getContext('2d');
+                    new Chart(ctx2, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['보조금 결제 (52%)', '충전소 점검 (30%)', 'HelpDesk 지원 (12%)', '회원인증/기타 (6%)'],
+                            datasets: [{
+                                data: [52, 30, 12, 6],
+                                backgroundColor: ['#0F62FE', '#33B1FF', '#8A3FFC', '#BAE6FF']
+                            }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+                    });
+                </script>
 
-        const ctx2 = document.getElementById('pieChart').getContext('2d');
-        new Chart(ctx2, {
-            type: 'doughnut',
-            data: {
-                labels: ['보조금 결제 (52%)', '충전소 점검 (30%)', 'HelpDesk 지원 (12%)', '회원인증/기타 (6%)'],
-                datasets: [{
-                    data: [52, 30, 12, 6],
-                    backgroundColor: ['#0F62FE', '#33B1FF', '#8A3FFC', '#BAE6FF']
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
-        });
-    </script>
-
-    <script>
-        function toggleHelpModal() {
-            var modal = document.getElementById("helpModal");
-            if (modal.style.display === "block") {
-                modal.style.display = "none";
-            } else {
-                modal.style.display = "block";
-            }
-        }
-    </script>
+                <script>
+                    function toggleHelpModal() {
+                        var modal = document.getElementById("helpModal");
+                        if (modal.style.display === "block") {
+                            modal.style.display = "none";
+                        } else {
+                            modal.style.display = "block";
+                        }
+                    }
+                </script>
 </body>
 
 </html>

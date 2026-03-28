@@ -242,9 +242,63 @@
             border: 1px solid #24A148;
         }
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
 
 <body>
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">🛡️</span> 계정 보안 설정 및 정책 안내
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 시스템의 핵심 자산인 <b>관리자 및 사용자 계정을 보호</b>하기 위해 접근 통제 정책과 보안 규칙을 설정하는 화면입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>비정상적인 접근(해외 IP, 취약 시간대 등)을 실시간으로 감지하고 차단하거나 알림을 발송합니다.</li>
+                        <li>보안 사고 예방을 위해 동시 접속 제한 및 자동 잠금 등 고정 보안 정책을 함께 운영합니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[주요 보안 정책 상세]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">🚫 동시 접속 제한</td>
+                        <td class="help-col-desc">동일 계정으로 중복 로그인이 발생할 경우, 기존 세션을 강제 종료하여 계정 탈취를 방지합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🔒 계정 자동 잠금</td>
+                        <td class="help-col-desc">비밀번호 5회 연속 오류 시 계정을 즉시 잠금 처리하며, DI(연계정보) 로그를 기록하여 본인확인 후 재설정을 유도합니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">🌍 해외 IP 차단</td>
+                        <td class="help-col-desc">관리자 권한을 가진 계정이 해외 IP 대역에서 접근하는 것을 원천 차단하여 외부 위협으로부터 시스템을 보호합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">⏰ 취약 시간대 알림</td>
+                        <td class="help-col-desc">야간 등 관리 업무가 없는 시간대에 발생하는 접근 시도를 감지하여 담당자에게 즉시 SMS/알림톡을 전송합니다.</td>
+                    </tr>
+                </table>
+
+                <h3 class="help-subtitle" style="margin-top:24px;">[운영 팁]</h3>
+                <div class="help-desc-box" style="background:#f8fafc;">
+                    <ul class="help-list">
+                        <li><strong>보안 로그 연계:</strong> 설정된 정책을 위반한 사례는 [접근 및 차단 기록] 메뉴에서 IP 주소 및 상세 시간과 함께 확인 가능합니다.</li>
+                        <li><strong>본인인증 로그:</strong> 잠금 해제를 위한 본인확인 이력은 법적 근거 마련을 위해 DI값과 함께 보관됩니다.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
     <header class="top-header">
         <div class="header-logo">시스템 관리자 <span>| 계정 보안 통제</span></div>
         <div class="header-tools"><span style="font-size:13px;">관리자님</span></div>
@@ -264,62 +318,80 @@
         </div>
 
         <div class="card">
-            <h2 class="card-title">🛡️ 시스템 기본 보안 정책 (고정)</h2>
-            <div style="font-size: 13px; color: #525252; margin-bottom: 24px;">아래 정책은 시스템 전체에 기본적으로 적용되며 변경할 수 없습니다.</div>
-
-            <div class="form-row" style="padding: 12px 0;">
-                <div class="form-info">
-                    <strong style="display:flex; align-items:center; gap:8px;">동시 접속 제한 <span class="badge bg-green">기본 적용됨</span></strong>
-                    <p>동일한 계정으로 여러 IP에서 접속이 시도될 경우, 보안을 위해 기존 세션을 자동으로 방출(로그아웃)하고 이력을 기록합니다.</p>
-                </div>
+            <div class="help-modal-header">
+                <h2 class="card-title">🛡️ 시스템 기본 보안 정책 (고정)</h2>
             </div>
+            <div class="help-modal-body">
+                <div style="font-size: 13px; color: #525252; margin-bottom: 24px;">아래 정책은 시스템 전체에 기본적으로 적용되며 변경할 수 없습니다.</div>
 
-            <div class="form-row" style="padding: 12px 0;">
-                <div class="form-info">
-                    <strong style="display:flex; align-items:center; gap:8px;">로그인 5회 실패 시 계정 잠금 및 알림 발송 <span class="badge bg-green">기본 적용됨</span></strong>
-                    <p>비밀번호 입력을 연속으로 5회 실패할 경우 계정이 임시 잠금 처리되며, 계정 소유자에게 경고 알림 서비스(메일/SMS)가 자동 발송됩니다.</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2 class="card-title">🛡️ 관리자 추가 접근 통제 설정</h2>
-
-            <div class="form-row">
-                <div class="form-info">
-                    <strong>관리자 전용 해외 IP 접근 차단</strong>
-                    <p>플랫폼 시스템 관리자 계정(통합관리자 등)의 해외 IP 접근을 100% 차단하며 위반 내역을 기록합니다. 일반 사용자(대국민)는 포함되지 않습니다.</p>
-                </div>
-                <div>
-                    <label class="switch">
-                        <input type="checkbox">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-            </div>
-
-            <div class="form-row" style="align-items: flex-start;">
-                <div class="form-info">
-                    <strong>관리자 취약 시간대 접근 알림</strong>
-                    <p>시스템 사용이 적은 지정 시간대에 관리자 계정으로 로그인이 성공하거나 시도될 경우, <b>해당 계정 소유자의 연락처(이메일/SMS)로</b> 즉시 알림을 발송합니다.</p>
-                    <div class="input-group">
-                        <input type="time" class="form-control" value="00:00"> <span>~</span>
-                        <input type="time" class="form-control" value="06:00">
+                <div class="form-row" style="padding: 12px 0;">
+                    <div class="form-info">
+                        <strong style="display:flex; align-items:center; gap:8px;">동시 접속 제한 <span class="badge bg-green">기본 적용됨</span></strong>
+                        <p>동일한 계정으로 여러 IP에서 접속이 시도될 경우, 보안을 위해 기존 세션을 자동으로 방출(로그아웃)하고 이력을 기록합니다.</p>
                     </div>
                 </div>
-                <div>
-                    <label class="switch">
-                        <input type="checkbox" checked>
-                        <span class="slider"></span>
-                    </label>
+
+                <div class="form-row" style="padding: 12px 0;">
+                    <div class="form-info">
+                        <strong style="display:flex; align-items:center; gap:8px;">로그인 5회 실패 시 계정 잠금 및 알림 발송 <span class="badge bg-green">기본 적용됨</span></strong>
+                        <p>비밀번호 입력을 연속으로 5회 실패할 경우 계정이 임시 잠금 처리되며, 계정 소유자에게 경고 알림 서비스(메일/SMS)가 자동 발송됩니다.</p>
+                    </div>
                 </div>
             </div>
 
-            <div style="margin-top: 32px; text-align: right;">
-                <button class="btn btn-primary" onclick="alert('보안 정책 설정이 성공적으로 저장되었습니다.')">정책 저장하기</button>
+            <div class="card">
+                <div class="help-modal-header">
+                    <h2 class="card-title">🛡️ 관리자 추가 접근 통제 설정</h2>
+                </div>
+                <div class="help-modal-body">
+
+                    <div class="form-row">
+                        <div class="form-info">
+                            <strong>관리자 전용 해외 IP 접근 차단</strong>
+                            <p>플랫폼 시스템 관리자 계정(통합관리자 등)의 해외 IP 접근을 100% 차단하며 위반 내역을 기록합니다. 일반 사용자(대국민)는 포함되지 않습니다.</p>
+                        </div>
+                        <div>
+                            <label class="switch">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="align-items: flex-start;">
+                        <div class="form-info">
+                            <strong>관리자 취약 시간대 접근 알림</strong>
+                            <p>시스템 사용이 적은 지정 시간대에 관리자 계정으로 로그인이 성공하거나 시도될 경우, <b>해당 계정 소유자의 연락처(이메일/SMS)로</b> 즉시 알림을 발송합니다.</p>
+                            <div class="input-group">
+                                <input type="time" class="form-control" value="00:00"> <span>~</span>
+                                <input type="time" class="form-control" value="06:00">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 32px; text-align: right;">
+                        <button class="btn btn-primary" onclick="alert('보안 정책 설정이 성공적으로 저장되었습니다.')">정책 저장하기</button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
+
+            <script>
+                function toggleHelpModal() {
+                    var modal = document.getElementById("helpModal");
+                    if (modal.style.display === "block") {
+                        modal.style.display = "none";
+                    } else {
+                        modal.style.display = "block";
+                    }
+                }
+            </script>
 </body>
+
 
 </html>

@@ -18,48 +18,264 @@
             --radius: 12px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); line-height: 1.5; padding-bottom: 60px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        .top-header { background-color: #161616; color: #fff; padding: 0 40px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
-        .header-logo { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 12px;}
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding-bottom: 60px;
+        }
 
-        .container { max-width: 1400px; margin: 40px auto; padding: 0 20px; }
-        .page-header { margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 24px; }
-        .page-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
-        .page-header p { color: var(--text-secondary); font-size: 14px; }
-        
-        .tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); }
-        .tab { padding: 12px 24px; font-size: 15px; font-weight: 600; color: #525252; text-decoration: none; border-bottom: 3px solid transparent; margin-bottom: -1px; }
-        .tab:hover { color: var(--primary); }
-        .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .top-header {
+            background-color: #161616;
+            color: #fff;
+            padding: 0 40px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
-        .card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border-color); padding: 24px; margin-bottom: 24px; }
-        .card-title { font-size: 16px; font-weight: 700; margin-bottom: 20px; border-left: 4px solid var(--primary); padding-left: 12px; display:flex; justify-content:space-between; align-items:center;}
-        
+        .header-logo {
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 24px;
+        }
+
+        .page-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab {
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #525252;
+            text-decoration: none;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -1px;
+        }
+
+        .tab:hover {
+            color: var(--primary);
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .card {
+            background: #fff;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+            padding-left: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
         /* Stats Box */
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-        .stat-box { background: #F8F9FA; padding: 20px; border-radius: 8px; border: 1px solid #E0E0E0; display: flex; flex-direction: column; gap: 8px; }
-        .stat-box .title { font-size: 13px; color: #6F6F6F; font-weight: 600; }
-        .stat-box .value { font-size: 24px; font-weight: 700; color: #161616; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-box {
+            background: #F8F9FA;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #E0E0E0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .stat-box .title {
+            font-size: 13px;
+            color: #6F6F6F;
+            font-weight: 600;
+        }
+
+        .stat-box .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #161616;
+        }
 
         /* Table */
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { background: #F8F9FA; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 12px 16px; font-size: 13px; font-weight: 600; color: #525252; }
-        td { border-bottom: 1px solid #E0E0E0; padding: 14px 16px; font-size: 14px; }
-        tr:hover td { background-color: #FAFCFF; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
 
-        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-        .bg-gray { background: #E0E0E0; color: #161616; border: 1px solid #C6C6C6; }
-        .bg-blue { background: #E5F0FF; color: #0043CE; border: 1px solid #A6C8FF; }
-        
-        .filters { display: flex; gap: 12px; margin-bottom: 16px; align-items: center;}
-        .filters select, .filters input { padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; }
-        .btn-search { background: var(--text-main); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer;}
+        th {
+            background: #F8F9FA;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #525252;
+        }
+
+        td {
+            border-bottom: 1px solid #E0E0E0;
+            padding: 14px 16px;
+            font-size: 14px;
+        }
+
+        tr:hover td {
+            background-color: #FAFCFF;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .bg-gray {
+            background: #E0E0E0;
+            color: #161616;
+            border: 1px solid #C6C6C6;
+        }
+
+        .bg-blue {
+            background: #E5F0FF;
+            color: #0043CE;
+            border: 1px solid #A6C8FF;
+        }
+
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+
+        .filters select,
+        .filters input {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .btn-search {
+            background: var(--text-main);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
 
 <body>
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">📊</span> 메뉴 접근 상세 로그 및 통계 안내
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 시스템 내 모든 사용자의 <b>메뉴 접근 이력을 추적</b>하고, <b>주요 페이지별 이용 현황을 통계화</b>하여 관리하는 감사(Audit) 화면입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>'누가(ID), 언제(시간), 어디서(IP), 어떤 메뉴(Path)'에 접근했는지 기록하여 보안 사고 발생 시 추적 근거로 활용합니다.</li>
+                        <li>이상 징후(특정 계정의 과도한 데이터 조회 등)를 사전에 모니터링하여 데이터 유출 위험을 방지합니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[주요 확인 항목]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">📂 접근 메뉴 및 URL</td>
+                        <td class="help-col-desc">사용자가 실제 클릭한 메뉴명과 기술적인 URL 경로를 함께 기록하여 정확한 행위 위치를 식별합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🛡️ 사용 권한 정보</td>
+                        <td class="help-col-desc">접속 시점의 해당 사용자 권한(지자체, 제조사, 관리자 등)을 기록하여 권한 오남용 여부를 검토합니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">🌐 접속 정보 (IP/일시)</td>
+                        <td class="help-col-desc">부서 내 내부 IP 또는 외부 접근 여부를 판별하고, 작업이 집중되는 시간대를 분석하는 기초 데이터로 활용됩니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">📉 페이지별 통계</td>
+                        <td class="help-col-desc">최근 7일간 가장 많이 이용된 메뉴 Top 4를 보여줌으로써 시스템 부하 분석 및 UI 개선 우선순위 선정에 기여합니다.</td>
+                    </tr>
+                </table>
+
+                <h3 class="help-subtitle" style="margin-top:24px;">[관리자 검색 팁]</h3>
+                <div class="help-desc-box" style="background:#f8fafc;">
+                    <ul class="help-list">
+                        <li><strong>기간 검색:</strong> 로그 양이 방대하므로 일주일 단위로 검색하여 데이터를 확인하고, 필요한 경우 '엑셀 다운로드'를 통해 외부 보관하시기 바랍니다.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
     <header class="top-header">
         <div class="header-logo">시스템 관리자 <span>| 계정 보안 통제</span></div>
         <div class="header-tools"><span style="font-size:13px;">관리자님</span></div>
@@ -80,109 +296,121 @@
 
         <!-- 1. 통계 -->
         <div class="card">
-            <h2 class="card-title">📊 페이지별 접속 통계 (최근 7일)</h2>
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <span class="title">1위. 차량 제원 관리 목록</span>
-                    <span class="value">2,450 <span style="font-size: 14px; font-weight: 400;">회</span></span>
-                </div>
-                <div class="stat-box">
-                    <span class="title">2위. 수소충전소 정보관리</span>
-                    <span class="value">1,120 <span style="font-size: 14px; font-weight: 400;">회</span></span>
-                </div>
-                <div class="stat-box">
-                    <span class="title">3위. HelpDesk 민원 현황</span>
-                    <span class="value">845 <span style="font-size: 14px; font-weight: 400;">회</span></span>
-                </div>
-                <div class="stat-box">
-                    <span class="title">4위. 시스템 계정 관리</span>
-                    <span class="value">320 <span style="font-size: 14px; font-weight: 400;">회</span></span>
+            <div class="help-modal-header">
+                <h2 class="card-title">📊 페이지별 접속 통계 (최근 7일)</h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <span class="title">1위. 차량 제원 관리 목록</span>
+                        <span class="value">2,450 <span style="font-size: 14px; font-weight: 400;">회</span></span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="title">2위. 수소충전소 정보관리</span>
+                        <span class="value">1,120 <span style="font-size: 14px; font-weight: 400;">회</span></span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="title">3위. HelpDesk 민원 현황</span>
+                        <span class="value">845 <span style="font-size: 14px; font-weight: 400;">회</span></span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="title">4위. 시스템 계정 관리</span>
+                        <span class="value">320 <span style="font-size: 14px; font-weight: 400;">회</span></span>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 2. 메뉴 접근 로그 -->
-        <div class="card">
-            <h2 class="card-title">
-                📋 시스템 메뉴 접근 상세 로그
-                <button class="btn-search" style="font-size:11px; padding:6px 12px;">엑셀 다운로드</button>
-            </h2>
+            <!-- 2. 메뉴 접근 로그 -->
+            <div class="card">
+                <div class="help-modal-header">
+                    <h2 class="card-title">
+                        📋 시스템 메뉴 접근 상세 로그
+                        <button class="btn-search" style="font-size:11px; padding:6px 12px;">엑셀 다운로드</button>
+                    </h2>
+                </div>
+                <div class="help-modal-body">
 
-            <div class="filters">
-                <input type="date" value="2026-03-26">
-                <span>~</span>
-                <input type="date" value="2026-03-26">
-                <select>
-                    <option>전체 메뉴</option>
-                    <option>차량 제원 관리</option>
-                    <option>수소충전소 정보관리</option>
-                </select>
-                <input type="text" placeholder="아이디 또는 접속 IP 검색">
-                <button class="btn-search">검색</button>
+                    <div class="filters">
+                        <input type="date" value="2026-03-26">
+                        <span>~</span>
+                        <input type="date" value="2026-03-26">
+                        <select>
+                            <option>전체 메뉴</option>
+                            <option>차량 제원 관리</option>
+                            <option>수소충전소 정보관리</option>
+                        </select>
+                        <input type="text" placeholder="아이디 또는 접속 IP 검색">
+                        <button class="btn-search">검색</button>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>발생 일시</th>
+                                <th>접근 아이디</th>
+                                <th>사용 권한</th>
+                                <th>접속 IP</th>
+                                <th>접근 메뉴 (페이지)</th>
+                                <th>URL 경로</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2026-03-26 15:32:11</td>
+                                <td>admin_seoul</td>
+                                <td><span class="badge bg-blue">지자체(서울시)</span></td>
+                                <td>121.134.xx.xx</td>
+                                <td>차량 제원 관리 > 제원 목록</td>
+                                <td><span style="color:#6F6F6F; font-size:12px;">/ev/siteMng/carInfoMngList</span></td>
+                            </tr>
+                            <tr>
+                                <td>2026-03-26 15:28:45</td>
+                                <td>hyundai_mgr</td>
+                                <td><span class="badge bg-blue">제조수입사</span></td>
+                                <td>211.45.xx.xx</td>
+                                <td>제조사 포털 > 내 차량 제원 등록</td>
+                                <td><span style="color:#6F6F6F; font-size:12px;">/ev/mfr/carInsertForm</span></td>
+                            </tr>
+                            <tr>
+                                <td>2026-03-26 14:55:02</td>
+                                <td>sys_master</td>
+                                <td><span class="badge bg-gray">통합 시스템 관리자</span></td>
+                                <td>10.24.xx.xx</td>
+                                <td>계정 관리 > 보안 통제 설정</td>
+                                <td><span style="color:#6F6F6F; font-size:12px;">/ev/sec/configMng</span></td>
+                            </tr>
+                            <tr>
+                                <td>2026-03-26 14:10:19</td>
+                                <td>user123_test</td>
+                                <td><span class="badge bg-blue">기후대기과</span></td>
+                                <td>112.145.xx.xx</td>
+                                <td>수소충전소 관리 > 상업운영 비교</td>
+                                <td><span style="color:#6F6F6F; font-size:12px;">/ev/hs/operationList</span></td>
+                            </tr>
+                            <tr>
+                                <td>2026-03-26 11:42:55</td>
+                                <td>sys_master</td>
+                                <td><span class="badge bg-gray">통합 시스템 관리자</span></td>
+                                <td>10.24.xx.xx</td>
+                                <td>도움말 데스크 > 관리자 대시보드</td>
+                                <td><span style="color:#6F6F6F; font-size:12px;">/ev/help/adminDash</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>발생 일시</th>
-                        <th>접근 아이디</th>
-                        <th>사용 권한</th>
-                        <th>접속 IP</th>
-                        <th>접근 메뉴 (페이지)</th>
-                        <th>URL 경로</th>
-                        <th>비고</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>2026-03-26 15:32:11</td>
-                        <td>admin_seoul</td>
-                        <td><span class="badge bg-blue">지자체(서울시)</span></td>
-                        <td>121.134.xx.xx</td>
-                        <td>차량 제원 관리 > 제원 목록</td>
-                        <td><span style="color:#6F6F6F; font-size:12px;">/ev/siteMng/carInfoMngList</span></td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td>2026-03-26 15:28:45</td>
-                        <td>hyundai_mgr</td>
-                        <td><span class="badge bg-blue">제조수입사</span></td>
-                        <td>211.45.xx.xx</td>
-                        <td>제조사 포털 > 내 차량 제원 등록</td>
-                        <td><span style="color:#6F6F6F; font-size:12px;">/ev/mfr/carInsertForm</span></td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td>2026-03-26 14:55:02</td>
-                        <td>sys_master</td>
-                        <td><span class="badge bg-gray">통합 시스템 관리자</span></td>
-                        <td>10.24.xx.xx</td>
-                        <td>계정 관리 > 보안 통제 설정</td>
-                        <td><span style="color:#6F6F6F; font-size:12px;">/ev/sec/configMng</span></td>
-                        <td>정책 변경</td>
-                    </tr>
-                    <tr>
-                        <td>2026-03-26 14:10:19</td>
-                        <td>user123_test</td>
-                        <td><span class="badge bg-blue">기후대기과</span></td>
-                        <td>112.145.xx.xx</td>
-                        <td>수소충전소 관리 > 상업운영 비교</td>
-                        <td><span style="color:#6F6F6F; font-size:12px;">/ev/hs/operationList</span></td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td>2026-03-26 11:42:55</td>
-                        <td>sys_master</td>
-                        <td><span class="badge bg-gray">통합 시스템 관리자</span></td>
-                        <td>10.24.xx.xx</td>
-                        <td>도움말 데스크 > 관리자 대시보드</td>
-                        <td><span style="color:#6F6F6F; font-size:12px;">/ev/help/adminDash</span></td>
-                        <td>-</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+            <script>
+                function toggleHelpModal() {
+                    var modal = document.getElementById("helpModal");
+                    if (modal.style.display === "block") {
+                        modal.style.display = "none";
+                    } else {
+                        modal.style.display = "block";
+                    }
+                }
+            </script>
 </body>
+
 
 </html>

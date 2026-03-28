@@ -123,9 +123,60 @@
             min-height: 120px;
         }
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
 
 <body>
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">📊</span> 개인화 대시보드 및 시각화 안내
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 시스템의 핵심 지표(충전기, 보조금, 차량 통계)를 <b>실시간으로 모니터링</b>하고, 사용자의 업무 성향에 맞춰 <b>화면 구성을 자유롭게 편집</b>할 수 있는 내역입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>각 위젯은 드래그 앤 드롭으로 위치를 옮기거나 오른쪽 하단 모서리를 끌어 크기를 조절할 수 있습니다.</li>
+                        <li>업무별 최적화된 초기 템플릿(충전기, 보조금, 차량)을 선택하여 즉시 구성이 가능합니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[주요 대시보드 템플릿]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">🔌 충전기 현황</td>
+                        <td class="help-col-desc">전국 충전기 보급 대수, 급속/완속 비율, 운영사별 점유율 및 지역별 고장 신고 현황을 시각화합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">💰 보조금 집행</td>
+                        <td class="help-col-desc">당해 연도 예산 대비 실시간 집행률, 월별 지급 추이 및 지역별 잔여 예산 비중을 분석합니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">🚗 차량등록 정보</td>
+                        <td class="help-col-desc">전기차(EV), 수소차, 전기 건설기계 등 종별 등록 추이와 제조사별 점유율 변화를 확인합니다.</td>
+                    </tr>
+                </table>
+
+                <h3 class="help-subtitle" style="margin-top:24px;">[개인화 기능 활용법]</h3>
+                <div class="help-desc-box" style="background:#f8fafc;">
+                    <ul class="help-list">
+                        <li><strong>레이아웃 저장:</strong> 편집한 위젯 배치 상태를 [사용자 레이아웃 저장] 버튼으로 고정하면 재접속 시에도 유지됩니다.</li>
+                        <li><strong>템플릿 초기화:</strong> 편집 중 구성을 처음 상태로 되돌리고 싶을 때 활용하며, 저장된 사용자 설정은 삭제됩니다.</li>
+                        <li><strong>레이아웃 변경:</strong> 위젯 크기를 변경하면 내부 차트(ApexCharts)가 자동으로 최적 비율로 재렌더링됩니다.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
     <div class="all-container">
 
         <div class="container" style="margin-top: 100px;">
@@ -306,6 +357,18 @@
             }
         }
     </script>
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
 </body>
+
 
 </html>

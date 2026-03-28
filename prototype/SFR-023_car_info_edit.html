@@ -446,10 +446,80 @@
         }
 
         /* Default hidden fields (construction, hydrogen) */
+        
+        /* Help Modal Scrollability Fix */
+        .help-modal-content {
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .help-modal-body {
+            overflow-y: auto;
+            flex: 1;
+        }
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
 
 <body>
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">📝</span> 차량제원 상세 관리 및 승인 가이드
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 차량의 <b>세부 제원(배터리, 주행거리, 보조금 등)을 등록</b>하고 공단의 <b>최종 승인을 득하기 위한 상세 인터페이스</b>입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>차종 대분류(승용, 수소, 건설기계 등) 선택 시 관련 법령에 따른 필수 입력 항목이 동적으로 변경됩니다.</li>
+                        <li>화면 상단의 [시뮬레이터]를 통해 제조사(신청)와 담당자(검토)의 관점을 전환하며 테스트할 수 있습니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[역할별 주요 행동 지침]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">🏢 제조/수입사</td>
+                        <td class="help-col-desc">제원 정보를 입력하고 '승인 요청'을 클릭합니다. 승인 완료 후 정보를 수정하거나 비공개로 전환하려면 별도의 '변경 승인' 절차를 거쳐야 합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🛡️ 공단 담당자</td>
+                        <td class="help-col-desc">제출된 값의 오류를 검증합니다. 입력 항목을 검토하여 승인/반려를 확정합니다.</td>
+                    </tr>
+                </table>
+
+                <h3 class="help-subtitle" style="margin-top:24px;">[워크플로우 상세 단계]</h3>
+                <div class="help-desc-box" style="background:#f8fafc;">
+                    <ol class="help-list" style="margin-left:20px;">
+                        <li style="margin-bottom:8px;"><strong>1단계 (제원 작성):</strong> 제조사가 모델명, 배터리 종류, 최고속도 등 기술 스펙을 기입합니다.</li>
+                        <li style="margin-bottom:8px;"><strong>2단계 (승인 요청):</strong> 입력 완료 후 시스템 서류를 첨부하여 공단에 검토를 요청합니다. (이후 수정 불가)</li>
+                        <li style="margin-bottom:8px;"><strong>3단계 (담당자 검토):</strong> 공단에서 적합성을 판단합니다. 부적합 시 '반려' 사유와 함께 제조사로 회신됩니다.</li>
+                        <li><strong>4단계 (최종 표출):</strong> 승인 시 즉시 누리집에 공개되며 보조금 신청 시스템과 데이터가 동기화됩니다.</li>
+                    </ol>
+                </div>
+
+                <h3 class="help-subtitle" style="margin-top:24px;">[특이사항 처리]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">🔄 변경/비공개 요청</td>
+                        <td class="help-col-desc">이미 공개된 차량의 정보를 수정하거나 판매 중단 등으로 비공개 처리할 때 사용합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🖥️ 동적 레이아웃</td>
+                        <td class="help-col-desc">건설기계나 수소차 선택 시 일반 전기차와 다른 특수 제원(적재하공, 탱크용량 등) 입력 칸이 활성화됩니다.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
 
     <div class="container">
 
@@ -825,6 +895,18 @@
         chgCarKindBig();
         switchScenario('new_maker');
     </script>
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
 </body>
+
 
 </html>

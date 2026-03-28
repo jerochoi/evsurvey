@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,7 +20,12 @@
             --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-body);
@@ -27,57 +33,299 @@
             line-height: 1.5;
         }
 
-        .edit-container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
-        
-        .breadcrumb { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; display: flex; gap: 8px; }
-        .breadcrumb span:last-child { color: var(--text-main); font-weight: 600; }
+        .edit-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
 
-        .editor-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; border-bottom: 1px solid var(--border-color); padding-bottom: 24px; }
-        .header-left h1 { font-size: 24px; font-weight: 700; color: #161616; margin-bottom: 4px; }
-        .header-left p { color: var(--text-secondary); font-size: 14px; }
+        .breadcrumb {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            display: flex;
+            gap: 8px;
+        }
 
-        .editor-grid { display: grid; grid-template-columns: 320px 1fr; gap: 32px; align-items: start; }
+        .breadcrumb span:last-child {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 32px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 24px;
+        }
+
+        .header-left h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #161616;
+            margin-bottom: 4px;
+        }
+
+        .header-left p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .editor-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 32px;
+            align-items: start;
+        }
 
         /* Form Controls */
-        .card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border-color); padding: 32px; box-shadow: var(--shadow); }
-        .form-group { margin-bottom: 24px; }
-        .form-label { display: block; font-size: 14px; font-weight: 600; color: #161616; margin-bottom: 8px; }
-        .form-control { width: 100%; padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-color); outline: none; transition: border-color 0.2s; font-size: 14px; }
-        .form-control:focus { border-color: var(--primary); }
-        textarea.form-control { height: 120px; resize: none; }
+        .card {
+            background: #fff;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 32px;
+            box-shadow: var(--shadow);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #161616;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            outline: none;
+            transition: border-color 0.2s;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+        }
+
+        textarea.form-control {
+            height: 120px;
+            resize: none;
+        }
 
         /* Target User Tags */
-        .user-tag-box { border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; min-height: 48px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
-        .user-tag { background: #E0EFFF; color: var(--primary); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
-        .user-tag .remove { cursor: pointer; opacity: 0.6; }
+        .user-tag-box {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            min-height: 48px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .user-tag {
+            background: #E0EFFF;
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .user-tag .remove {
+            cursor: pointer;
+            opacity: 0.6;
+        }
 
         /* Step Builder */
-        .steps-wrapper { margin-top: 32px; }
-        .step-card { background: #fff; border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; margin-bottom: 20px; position: relative; border-left: 4px solid var(--primary); }
-        .step-num { font-size: 12px; font-weight: 700; color: var(--primary); margin-bottom: 12px; display: block; }
-        .step-delete { position: absolute; top: 20px; right: 20px; color: var(--text-secondary); cursor: pointer; font-size: 14px; }
-        .step-delete:hover { color: #DA1E28; }
+        .steps-wrapper {
+            margin-top: 32px;
+        }
+
+        .step-card {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            position: relative;
+            border-left: 4px solid var(--primary);
+        }
+
+        .step-num {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .step-delete {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .step-delete:hover {
+            color: #DA1E28;
+        }
 
         /* Dropzone Mockup */
-        .dropzone { border: 2px dashed var(--border-color); border-radius: 8px; padding: 24px; text-align: center; color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: all 0.2s; margin-top: 12px; }
-        .dropzone:hover { border-color: var(--primary); background: #F8FAFF; color: var(--primary); }
+        .dropzone {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 12px;
+        }
+
+        .dropzone:hover {
+            border-color: var(--primary);
+            background: #F8FAFF;
+            color: var(--primary);
+        }
 
         /* Buttons */
-        .btn { display: inline-flex; align-items: center; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; gap: 8px; }
-        .btn-primary { background: var(--primary); color: #fff; }
-        .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-color); }
-        .btn-full { width: 100%; justify-content: center; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-full {
+            width: 100%;
+            justify-content: center;
+        }
 
         /* Modal Overlay */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .modal { background: #fff; border-radius: 16px; width: 600px; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column; }
-        .modal-header { padding: 24px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .modal-body { padding: 24px; overflow-y: auto; }
-        .modal-footer { padding: 24px; border-top: 1px solid #eee; text-align: right; }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
 
+        .modal {
+            background: #fff;
+            border-radius: 16px;
+            width: 600px;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 24px;
+            border-top: 1px solid #eee;
+            text-align: right;
+        }
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
+
 <body>
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">📝</span> 이용안내 가이드 등록 안내
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 <b>사용자 역할별 맞춤형 업무 메뉴얼</b>을 등록하고 구성하는 관리자 전용 편집 화면입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>단순 텍스트 나열이 아닌, 이미지와 단계별 설명을 조합하여 직관적인 가이드를 구성할 수 있습니다.</li>
+                        <li>대상 사용자를 태그 방식으로 지정하여 해당 권한의 사용자에게만 가이드가 노출되도록 제어합니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[편집 주요 기능 및 항목]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">👤 대상 사용자 선정</td>
+                        <td class="help-col-desc">조회 팝업을 통해 관리자, 사업자, 담당자 등 가이드를 열람할 수 있는 대상 그룹을 다중 지정합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🔢 노출 우선순위</td>
+                        <td class="help-col-desc">도움말 목록이나 메인 대시보드에서 가이드가 표시될 순서를 설정합니다. (1: 가장 높음)</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">📸 단계별 스텝(Step)</td>
+                        <td class="help-col-desc">업무 흐름에 따라 여러 단계를 추가하고, 각 단계별로 스크린샷 캡처 이미지를 첨부하여 이해도를 높입니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">💾 미리보기 및 게시</td>
+                        <td class="help-col-desc">작성 중인 내용을 실제 사용자 뷰어 화면으로 미리 확인한 후, '즉시 게시' 또는 '임시 저장' 상태를 선택하여 배포합니다.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
 
     <div class="edit-container">
         <nav class="breadcrumb">
@@ -101,7 +349,7 @@
             <aside style="position: sticky; top: 40px;">
                 <div class="card" style="padding: 24px;">
                     <h3 style="font-size: 16px; margin-bottom: 20px;">콘텐츠 설정</h3>
-                    
+
                     <div class="form-group">
                         <label class="form-label">대상 사용자 선정</label>
                         <div class="user-tag-box">
@@ -197,14 +445,17 @@
     <div class="modal-overlay" id="userModal">
         <div class="modal">
             <header class="modal-header">
-                <h2 style="font-size: 18px;">사용자 그룹 상세 조회</h2>
-                <span style="cursor: pointer;" onclick="closeModal()">✕</span>
+                <div class="help-modal-header">
+                    <h2 style="font-size: 18px;">사용자 그룹 상세 조회</h2>
+                </div>
+                <div class="help-modal-body">
+                    <span style="cursor: pointer;" onclick="closeModal()">✕</span>
             </header>
             <div class="modal-body">
                 <div class="search-box" style="margin-bottom: 20px; position: relative;">
                     <input type="text" class="form-control" placeholder="사용자명, 아이디, 소속 부서 검색">
                 </div>
-                
+
                 <table style="width: 100%; font-size: 13px;">
                     <thead style="background: #F4F7FB;">
                         <tr>
@@ -248,5 +499,17 @@
         function closeModal() { document.getElementById('userModal').style.display = 'none'; }
     </script>
 
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
 </body>
+
 </html>

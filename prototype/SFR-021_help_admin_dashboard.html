@@ -14,9 +14,61 @@
             background-color: #f1f5f9;
         }
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
 
 <body class="text-slate-800 h-screen flex flex-col">
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">📊</span> 헬프데스크 관리 대시보드 안내
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 시스템 전체의 <b>문의 접수 및 처리 현황을 실시간으로 모니터링</b>하는 통합 관제 대시보드입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>각 시스템별(보조금, 누리집 등) 민원 비중을 차트로 분석하여 병목 현상이 발생하는 지점을 즉시 파악합니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[주요 관리 지표 및 가젯]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">📈 핵심 KPI 위젯</td>
+                        <td class="help-col-desc">총 접수량, 미처리 건수(답변 대기), 평균 처리 시간 등을 수치화하여 운영팀의 퍼포먼스를 정량적으로 측정합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">📉 시스템/유형 통계</td>
+                        <td class="help-col-desc">문의가 집중되는 특정 시스템이나 잦은 민원 유형(버그, 권한 등)을 시각화하여 상시 시스템 개선 근거로 활용합니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">⚠️ 지연 문의 모니터링</td>
+                        <td class="help-col-desc">24시간 이상 경과된 '미답변 문의'를 리스트 상단에 강조 표시하여 장기 미처리 민원이 발생하지 않도록 밀착 관리합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">📅 기간별 데이터 필터</td>
+                        <td class="help-col-desc">상단 필터를 통해 오늘, 주간, 월간 단위로 현황을 전환하며 특정 시점의 이슈 급증 여부를 추적합니다.</td>
+                    </tr>
+                </table>
+
+                <h3 class="help-subtitle" style="margin-top:24px;">[운영 팁]</h3>
+                <div class="help-desc-box" style="background:#f8fafc;">
+                    <ul class="help-list">
+                        <li><strong>응답률 최적화:</strong> '답변 대기'수치에 황색 링 표시가 활성화되면 담당자 배정 및 신속한 답변 처리를 권장합니다.</li>
+                        <li><strong>데이터 분석:</strong> 시스템별 비중 차트를 통해 특정 기능의 업데이트 후 오류 급증 여부를 모니터링할 수 있습니다.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- 상단 네비게이션바 -->
     <header class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center shrink-0 shadow-md z-20">
@@ -244,6 +296,18 @@
         </div>
     </main>
 
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
 </body>
+
 
 </html>

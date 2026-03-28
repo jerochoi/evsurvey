@@ -330,10 +330,59 @@
         .status-draft {
             background: var(--warning);
         }
+
+        .btn-floating-help {
+            top: 50px;
+        }
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
 
 <body>
+    <button class="btn-floating-help" style="top: 90px;" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">💡</span> 이용안내 콘텐츠 관리 안내
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 <b>이용자별 권한 및 시스템에 따른 맞춤형 이용 안내</b>를 등록하고 관리하는 화면입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>특정 업무에 대한 가이드 문서를 빌더형태로 직접 구성하고 배포할 수 있습니다.</li>
+                        <li>충전사업자, 지자체, 공단 등 대상 사용자 그룹별로 다른 매뉴얼을 노출하도록 설정이 가능합니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[주요 항목 및 기능 설명]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">🆕 신규 가이드 작성</td>
+                        <td class="help-col-desc">문서 빌더 화면으로 이동하여 텍스트, 이미지, 동영상 등 다양한 요소를 결합한 가이드 문서를 새롭게 생성합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🎯 대상 사용자 태그</td>
+                        <td class="help-col-desc">해당 가이드가 노출될 타겟(공단 상시자, 일반 사업자 등)을 시각적으로 구분하여 관리 효율성을 높입니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">📈 게시 상태 모니터링</td>
+                        <td class="help-col-desc">'게시 중'과 '임시 저장' 상태를 요약 지표 카드로 제공하여 가이드 관리의 진행 상황을 한눈에 파악합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">👁️ 미리보기 및 수정</td>
+                        <td class="help-col-desc">사용자에게 실제로 어떻게 표시되는지 뷰어를 통해 확인하고, 오타나 정책 변경 사항을 즉시 수정할 수 있습니다.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
 
     <div class="app-wrapper">
         <!-- 메인 콘텐츠 -->
@@ -516,6 +565,18 @@
         </main>
     </div>
 
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
 </body>
+
 
 </html>

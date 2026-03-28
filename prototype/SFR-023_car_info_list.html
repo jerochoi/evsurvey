@@ -254,9 +254,65 @@
             gap: 8px;
         }
     </style>
+
+    <link type="text/css" rel="stylesheet" href="prototype.css">
 </head>
 
 <body>
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">🚘</span> 차량제원 관리 및 승인 절차 안내
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 <b>제조·수입사의 신규 차량 정보 등록</b>과 <b>공단 담당자의 검토 및 승인</b> 프로세스를 통합 관리하는 화면입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>승인 완료된 차량 제원 정보는 통합누리집에 즉시 공개되며, 전기차 보조금 산정의 기초 데이터로 활용됩니다.</li>
+                        <li>접속 권한(역할)에 따라 편집 가능 범위와 관리 기능이 동적으로 전환됩니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[사용자 역할별 주요 기능]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">🏢 제조/수입사 권한</td>
+                        <td class="help-col-desc">신규 차량 정보 입력, 이미지 파일 업로드, 승인 요청 및 반려 건에 대한 보완 수정을 진행합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🛡️ 공단 담당자 권한</td>
+                        <td class="help-col-desc">제출된 제원 데이터를 검증하고 승인, 반려, 보완 요청을 결정합니다. 전체 제조사의 등록 현황을 통합 모니터링합니다.</td>
+                    </tr>
+                </table>
+
+                <h3 class="help-subtitle" style="margin-top:24px;">[주요 상태 및 처리 단계]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">📝 작성중 (Draft)</td>
+                        <td class="help-col-desc">제조사에서 정보를 입력 중인 단계로, 아직 공단 담당자에게 노출되지 않은 상태입니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">⏳ 승인요청 (Requested)</td>
+                        <td class="help-col-desc">데이터 입력 완료 후 검토를 요청한 상태입니다. 이 단계부터는 제조사의 수정이 제한됩니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">✅ 승인완료 (Approved)</td>
+                        <td class="help-col-desc">최종 검토가 완료되어 대외 사이트에 정보가 공개되고 보조금 시스템에 차량 보조금 등록 시 연계 가능한 상태입니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">❌ 반려/보완 (Rejected)</td>
+                        <td class="help-col-desc">데이터 오기입이나 서류 미비로 처리가 거부된 상태입니다. 제조사는 사유를 확인 후 재수정하여 제출해야 합니다.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
 
     <div class="container">
         <nav class="breadcrumb">
@@ -385,7 +441,9 @@
     <script>
         function switchRole(role) {
             document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            if (event) {
+                event.target.classList.add('active');
+            }
 
             if (role === 'admin') {
                 document.getElementById('roleInfo').innerHTML = 'ℹ️ 현재 접속 권한: <strong>한국환경공단 (담당자)</strong> / 제조사가 요청한 제원을 검토하고 승인/반려 또는 보완 요청을 진행합니다.';
@@ -399,6 +457,17 @@
                 document.getElementById('roleInfo').style.borderLeftColor = '#0F62FE';
                 document.getElementById('roleInfo').style.color = '#0043CE';
                 document.getElementById('searchMakerGroup').style.display = 'none';
+            }
+        }
+    </script>
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
             }
         }
     </script>
