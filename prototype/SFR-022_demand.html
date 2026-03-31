@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인천광역시 전기차 충전기 수요조사 관리</title>
+    <!-- Leaflet & CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            overflow: hidden;
+        }
+
+        #app {
+            display: flex;
+            height: 100vh;
+        }
+
+        #sidebar {
+            width: 400px;
+            background: #ffffff;
+            border-right: 1px solid #e0e0e0;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        #sidebar-header {
+            padding: 20px;
+            background: #0F62FE;
+            color: white;
+        }
+
+        #sidebar-header h1 {
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .sidebar-section {
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            color: #333;
+            display: block;
+        }
+
+        select,
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        button {
+            background: #0F62FE;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #0050e0;
+        }
+
+        button.secondary {
+            background: #6c757d;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+        }
+
+        .stat-val {
+            font-weight: bold;
+            color: #0F62FE;
+        }
+
+        #map {
+            flex: 1;
+            background: #eee;
+        }
+
+        /* Marker Customization */
+        .marker-fast {
+            background-color: #FA4D56;
+            /* Red for Fast */
+            border-radius: 50%;
+            width: 12px;
+            height: 12px;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .marker-slow {
+            background-color: #4589FF;
+            /* Blue for Slow */
+            border-radius: 50%;
+            width: 12px;
+            height: 12px;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .marker-demand {
+            background-color: #F1C21B;
+            /* Yellow for Demand */
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #333;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .legend {
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            font-size: 0.8rem;
+            line-height: 2;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            margin-right: 8px;
+            display: inline-block;
+            border: 1px solid #ccc;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+
+        /* Grouped Station Marker Styling */
+        .station-marker-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        /* Common properties for interactive markers */
+        .station-blob,
+        .me-star-icon,
+        .demand-square {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+
+        .station-blob,
+        .demand-square {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+            color: #fff;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .station-blob {
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+        }
+
+        .station-blob.has-fast {
+            background-color: #FA4D56;
+        }
+
+        .station-blob.only-slow {
+            background-color: #0062FF;
+        }
+
+        /* Square Demand Marker Styling */
+        .demand-square {
+            width: 14px;
+            height: 14px;
+            background-color: #F1C21B;
+            border: 1.5px solid #333;
+            border-radius: 2px;
+        }
+
+        /* Unselected Demand Styling */
+        .demand-square.unselected {
+            background-color: #adb5bd !important;
+            border: 1.5px dashed #444;
+            opacity: 0.6;
+        }
+
+        .station-blob:hover,
+        .me-star-icon:hover,
+        .demand-square:hover {
+            transform: scale(1.3);
+            z-index: 5000 !important;
+        }
+
+        /* Star ME Marker Styling */
+        .me-star-icon {
+            position: relative;
+            background: none !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .me-star-svg {
+            filter: drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.5));
+        }
+
+        .me-star-svg:hover {
+            transform: scale(1.3);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0F62FE;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        #detail-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 450px;
+            background: white;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            display: none;
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+            z-index: 1001;
+            border: 1px solid #0F62FE;
+        }
+
+        .detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        .detail-table th,
+        .detail-table td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .detail-table th {
+            background: #f8f9fa;
+            width: 120px;
+        }
+
+        /* Sidebar Tabs and Lists */
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-top: 15px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: #f4f4f4;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: #fff;
+            color: #0F62FE;
+            border-bottom-color: #0F62FE;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+            max-height: calc(100vh - 500px);
+            overflow-y: auto;
+            border-bottom-left-radius: 4px;
+            border-bottom-right-radius: 4px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .data-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .data-list-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.1s;
+            font-size: 0.85rem;
+        }
+
+        .data-list-item:hover {
+            background-color: #f0f7ff;
+        }
+
+        .data-list-item .item-title {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 3px;
+            color: #333;
+        }
+
+        .data-list-item .item-sub {
+            font-size: 0.75rem;
+            color: #777;
+            display: block;
+        }
+
+        .data-list-item.is-old {
+            border-left: 4px solid #FFD700;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            color: #999;
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            border: none;
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div id="sidebar">
+            <div id="sidebar-header">
+                <h1>수요조사 관리</h1>
+            </div>
+
+            <div class="sidebar-section">
+                <span class="section-title">분석 지역 설정</span>
+                <select id="guSelect" onchange="changeRegion()">
+                    <option value="" selected disabled>지역을 선택하세요</option>
+                    <option value="28260">서구 (28260)</option>
+                    <option value="28110">중구 (28110)</option>
+                    <option value="28140">동구 (28140)</option>
+                    <option value="28177">미추홀구 (28177)</option>
+                    <option value="28185">연수구 (28185)</option>
+                    <option value="28200">남동구 (28200)</option>
+                    <option value="28237">부평구 (28237)</option>
+                    <option value="28245">계양구 (28245)</option>
+                    <option value="28710">강화군 (28710)</option>
+                    <option value="28720">옹진군 (28720)</option>
+                </select>
+                <div id="region-status" style="font-size: 0.75rem; color: #666; margin-top: 5px;"></div>
+            </div>
+
+            <div class="sidebar-section">
+                <span class="section-title">충전소 현황 및 수요 신청</span>
+                <div class="stat-card">
+                    <div class="stat-item">
+                        <span class="stat-label">기존 충전소 (해당지역):</span>
+                        <span id="stat-count" class="stat-val">0</span>
+                    </div>
+                    <div class="stat-item" style="font-size:0.75rem; padding-left:10px;">
+                        <span>- 급속 (>50kW):</span>
+                        <span id="stat-fast" style="color:#ff0000;">0</span>
+                    </div>
+                    <div class="stat-item" style="font-size:0.75rem; padding-left:10px;">
+                        <span>- 완속 (&lt;50kW):</span>
+                        <span id="stat-slow" style="color:#4589FF;">0</span>
+                    </div>
+                    <hr style="border:0; border-top:1px solid #ddd; margin:10px 0;">
+                    <div class="stat-item">
+                        <span class="stat-label">수요 신청 건수:</span>
+                        <span id="demand-count" class="stat-val">0</span>
+                    </div>
+                </div>
+                <!-- Data List Tabs -->
+                <div class="sidebar-tabs">
+                    <button class="tab-btn active" onclick="switchTab('me-list')">기후부 충전소</button>
+                    <button class="tab-btn" onclick="switchTab('demand-list')">수요 신청</button>
+                </div>
+
+                <div id="me-list" class="tab-content active">
+                    <ul id="me-station-ul" class="data-list">
+                        <li style="padding:20px; color:#999; text-align:center; font-size:0.8rem;">지역을 선택하면 목록이 표시됩니다.</li>
+                    </ul>
+                </div>
+
+                <div id="demand-list" class="tab-content">
+                    <ul id="demand-ul" class="data-list">
+                        <li style="padding:20px; color:#999; text-align:center; font-size:0.8rem;">지역을 선택하면 목록이 표시됩니다.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="map"></div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading" class="loading-overlay">
+        <div style="text-align: center;">
+            <div class="spinner"></div>
+            <p style="margin-top:10px; font-weight:bold; color:#0F62FE;">데이터 처리 중...</p>
+        </div>
+    </div>
+
+    <!-- Detail Info Panel -->
+    <div id="detail-panel">
+        <button class="close-btn" onclick="closeDetailPanel()">×</button>
+        <h3 id="detail-title" style="margin-top:0; color:#0F62FE; font-size:1rem; border-bottom:2px solid #0F62FE; padding-bottom:5px;">상세 정보</h3>
+        <div id="detail-content"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <script>
+        // Performance Optimization: Use Canvas
+        const map = L.map('map', {
+            preferCanvas: true // Significant performance improvement for many markers
+        }).setView([37.456, 126.705], 11);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        const stationMarkers = L.layerGroup().addTo(map);
+        const demandMarkers = L.layerGroup().addTo(map);
+        let geoJsonLayer = null;
+        let boundaryLayer = null;
+        let originalCiliData = null;
+
+        // Constants
+        const sggBoundaryMap = {
+            "28110": "23010", "28140": "23020", "28177": "23030", "28185": "23040",
+            "28200": "23050", "28237": "23060", "28245": "23070", "28260": "23080",
+            "28710": "23310", "28720": "23320"
+        };
+        const sggNameMap = {
+            "28110": "중구", "28140": "동구", "28177": "미추홀구", "28185": "연수구",
+            "28200": "남동구", "28237": "부평구", "28245": "계양구", "28260": "서구",
+            "28710": "강화군", "28720": "옹진군"
+        };
+
+        let allStations = [];
+        let allDemandData = [];
+
+        // --- Marker Jitter Logic ---
+        const markerPositions = {};
+        function getJitteredCoords(lat, lng) {
+            const key = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+            if (!markerPositions[key]) {
+                markerPositions[key] = 1;
+                return [lat, lng];
+            } else {
+                const count = markerPositions[key]++;
+                const angle = count * (Math.PI / 4) * 1.5;
+                const dist = 0.00015 * count; // Tiny offset
+                return [lat + Math.cos(angle) * dist, lng + Math.sin(angle) * dist];
+            }
+        }
+
+        // --- Region Management ---
+        function changeRegion() {
+            const guCode = document.getElementById('guSelect').value;
+            if (!guCode) return;
+
+            if (boundaryLayer) map.removeLayer(boundaryLayer);
+
+            const boundaryPrefix = sggBoundaryMap[guCode];
+            const boundaryPath = `demand_data/${boundaryPrefix}_inline.geojson`;
+            showLoading(true);
+
+            fetch(boundaryPath)
+                .then(r => r.json())
+                .then(data => {
+                    boundaryLayer = L.geoJSON(data, {
+                        style: { color: '#0F62FE', weight: 3, fillOpacity: 0.03, dashArray: '5' }
+                    }).addTo(map);
+                    map.fitBounds(boundaryLayer.getBounds());
+
+                    loadCiliData(guCode);
+                    filterStations(guCode);
+                    filterDemand(guCode);
+
+                    showLoading(false);
+                })
+                .catch(e => {
+                    console.error("Boundary error:", e);
+                    showLoading(false);
+                });
+        }
+
+        // --- CILI Grade Visualizer ---
+        function loadCiliData(providedGuCode) {
+            const guCode = providedGuCode || document.getElementById('guSelect').value;
+            if (!guCode) return;
+
+            const dataPath = `demand_data/incheon_${guCode}_cili.geojson.gz`;
+
+            fetch(dataPath)
+                .then(r => r.arrayBuffer())
+                .then(buf => {
+                    const decompressed = pako.inflate(new Uint8Array(buf), { to: 'string' });
+                    originalCiliData = JSON.parse(decompressed);
+                    updateCiliMap();
+                    // Removed the activation text from info wrap/controls
+                })
+                .catch(e => console.error("CILI Error:", e));
+        }
+
+        function getColor(grade) {
+            const g = parseInt(grade); // Ensure it's a number
+            switch (g) {
+                case 1: return '#fca5a5';
+                case 2: return '#fdba74';
+                case 3: return '#fef08a';
+                case 4: return '#bbf7d0';
+                case 5: return '#86efac';
+                default: return '#e5e7eb';
+            }
+        }
+
+        function updateCiliMap() {
+            if (geoJsonLayer) map.removeLayer(geoJsonLayer);
+
+            geoJsonLayer = L.geoJSON(originalCiliData, {
+                interactive: true,
+                style: (f) => ({
+                    fillColor: getColor(f.properties.grade),
+                    weight: 1,
+                    opacity: 0.3,
+                    color: '#ffffff',
+                    fillOpacity: 0.4
+                }),
+                onEachFeature: (f, l) => {
+                    l.on({
+                        mouseover: (e) => { e.target.setStyle({ fillOpacity: 0.7, weight: 2 }); },
+                        mouseout: (e) => { geoJsonLayer.resetStyle(e.target); },
+                        click: (e) => {
+                            L.DomEvent.stopPropagation(e);
+                            geoJsonLayer.eachLayer(layer => geoJsonLayer.resetStyle(layer));
+                            l.setStyle({ weight: 3, color: '#000', opacity: 1, fillOpacity: 0.8 });
+                        }
+                    });
+                }
+            }).addTo(map);
+
+            if (geoJsonLayer) geoJsonLayer.bringToBack();
+        }
+
+        // --- Station JSON Loader ---
+        function loadStationData() {
+            const gzPath = 'demand_data/stat_incheon.json.gz';
+            fetch(gzPath)
+                .then(r => r.arrayBuffer())
+                .then(buf => {
+                    const decompressed = pako.inflate(new Uint8Array(buf), { to: 'string' });
+                    allStations = JSON.parse(decompressed);
+                })
+                .catch(e => console.error("Station Load Error:", e));
+        }
+
+        // --- Tab Management ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            const activeBtn = event ? event.currentTarget : document.querySelector(`[onclick="switchTab('${tabId}')"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function zoomToLocation(lat, lng, detailCallback) {
+            map.flyTo([lat, lng], 16);
+            if (detailCallback) detailCallback();
+        }
+
+        function filterStations(guCode) {
+            if (!allStations.length) return;
+            stationMarkers.clearLayers();
+            Object.keys(markerPositions).forEach(k => delete markerPositions[k]);
+
+            const meUl = document.getElementById('me-station-ul');
+            meUl.innerHTML = '';
+
+            const stationGroups = {};
+            allStations.forEach(item => {
+                if (item.zscode !== guCode) return;
+                const id = item.statId;
+                if (!stationGroups[id]) {
+                    stationGroups[id] = {
+                        statId: id,
+                        statNm: item.statNm,
+                        addr: item.addr,
+                        addrDetail: item.addrDetail,
+                        lat: parseFloat(item.lat),
+                        lng: parseFloat(item.lng),
+                        busiId: item.busiId,
+                        year: item.year,
+                        zscode: item.zscode,
+                        chargers: []
+                    };
+                }
+                stationGroups[id].chargers.push({
+                    output: parseInt(item.output || 0),
+                    type: item.chgerType,
+                    busiId: item.busiId
+                });
+            });
+
+            let fastTotal = 0, slowTotal = 0, filteredCount = 0;
+            const currentYear = new Date().getFullYear();
+
+            Object.values(stationGroups).forEach(group => {
+                if (isNaN(group.lat) || isNaN(group.lng)) return;
+
+                filteredCount++;
+                const count = group.chargers.length;
+                const fasts = group.chargers.filter(c => c.output >= 50).length;
+                const slows = count - fasts;
+                const hasME = group.chargers.some(c => c.busiId === "ME");
+
+                const isOldME = hasME && group.year && (currentYear - parseInt(group.year) >= 8);
+
+                fastTotal += fasts;
+                slowTotal += slows;
+
+                const [lat, lng] = getJitteredCoords(group.lat, group.lng);
+
+                let markerHtml = '';
+                if (hasME) {
+                    const strokeColor = isOldME ? '#FFD700' : 'white';
+                    const strokeWidth = isOldME ? 4 : 2;
+                    markerHtml = `
+                        <div class="me-star-icon ${isOldME ? 'old-me-charger' : ''}">
+                            <svg class="me-star-svg" width="26" height="26" viewBox="0 0 24 24" fill="${fasts > 0 ? '#FA4D56' : '#0062FF'}" stroke="${strokeColor}" stroke-width="${strokeWidth}">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z"/>
+                            </svg>
+                            ${count > 1 ? `<span class="station-count" style="position:absolute; top:4px; font-size:9px; color:#fff; text-shadow:1px 1px 1px #000;">${count}</span>` : ''}
+                            ${isOldME ? '<span style="position:absolute; bottom:-5px; right:-5px; background:yellow; color:black; font-size:9px; padding:0 2px; border:1px solid #000; border-radius:2px; font-weight:bold;">OLD</span>' : ''}
+                        </div>`;
+                } else {
+                    markerHtml = `
+                        <div class="station-blob ${fasts > 0 ? 'has-fast' : 'only-slow'}" 
+                             style="width:${12 + Math.min(count, 5) * 2}px; height:${12 + Math.min(count, 5) * 2}px;">
+                            ${count > 1 ? `<span class="station-count">${count}</span>` : ''}
+                        </div>`;
+                }
+
+                const marker = L.marker([lat, lng], {
+                    icon: L.divIcon({
+                        className: 'station-marker-container',
+                        html: markerHtml,
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12]
+                    }),
+                    zIndexOffset: 1000
+                }).on('click', (e) => {
+                    L.DomEvent.stopPropagation(e);
+                    showStationDetail(group);
+                }).addTo(stationMarkers);
+
+                // Add to ME List Tab if applicable
+                if (hasME) {
+                    const li = document.createElement('li');
+                    li.className = `data-list-item ${isOldME ? 'is-old' : ''}`;
+                    li.innerHTML = `
+                        <span class="item-title">${group.statNm} ${isOldME ? '⚠️' : ''}</span>
+                        <span class="item-sub">${group.addr}</span>
+                        <span class="item-sub" style="color:#0F62FE;">${group.year}년 설치 | 총 ${count}대</span>
+                    `;
+                    li.onclick = () => zoomToLocation(lat, lng, () => showStationDetail(group));
+                    meUl.appendChild(li);
+                }
+            });
+
+            if (meUl.innerHTML === '') {
+                meUl.innerHTML = '<li style="padding:20px; color:#999; text-align:center; font-size:0.8rem;">검색된 기후부 충전소가 없습니다.</li>';
+            }
+
+            document.getElementById('stat-count').innerText = filteredCount + "곳 (" + (fastTotal + slowTotal) + "개)";
+            document.getElementById('stat-fast').innerText = fastTotal;
+            document.getElementById('stat-slow').innerText = slowTotal;
+        }
+        // --- Demand CSV Loader ---
+        function loadDemandCsv() {
+            const csvPath = 'demand_data/수요신청.csv';
+            fetch(csvPath)
+                .then(r => r.text())
+                .then(csvText => {
+                    Papa.parse(csvText, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: (results) => { allDemandData = results.data; }
+                    });
+                })
+                .catch(e => console.error("CSV Load Error:", e));
+        }
+
+        function filterDemand(guCode) {
+            const demandUl = document.getElementById('demand-ul');
+            demandUl.innerHTML = '';
+
+            if (!allDemandData || !allDemandData.length) {
+                document.getElementById('demand-count').innerText = "0";
+                demandUl.innerHTML = '<li style="padding:20px; color:#999; text-align:center; font-size:0.8rem;">수요 데이터가 로드되지 않았습니다.</li>';
+                return;
+            }
+
+            demandMarkers.clearLayers();
+            const guName = sggNameMap[guCode];
+            let count = 0;
+
+            allDemandData.forEach(row => {
+                // The CSV contains "시군구" (name), not "시군구코드"
+                if (row["시군구"] !== guName) return;
+
+                const lngRaw = parseFloat(row["위도"]), latRaw = parseFloat(row["경도"]);
+                if (isNaN(latRaw) || isNaN(lngRaw)) return;
+
+                count++;
+                const [lat, lng] = getJitteredCoords(latRaw, lngRaw);
+
+                const stage = row["단계"] || "";
+                const isUnselected = (stage === "미선정" || stage === "부지 사용 협약 불가");
+
+                const marker = L.marker([lat, lng], {
+                    icon: L.divIcon({
+                        className: 'station-marker-container',
+                        html: `<div class="demand-square ${isUnselected ? 'unselected' : ''}"></div>`,
+                        iconSize: [14, 14],
+                        iconAnchor: [7, 7]
+                    }),
+                    zIndexOffset: 2000
+                }).on('click', (e) => {
+                    L.DomEvent.stopPropagation(e);
+                    showDemandDetail(row);
+                }).addTo(demandMarkers);
+
+                // Add to List Tab
+                const li = document.createElement('li');
+                li.className = `data-list-item ${isUnselected ? 'unselected-item' : ''}`;
+                if (isUnselected) li.style.opacity = '0.6';
+                li.innerHTML = `
+                    <span class="item-title">${row["충전소명"] || "미지정 수요"}</span>
+                    <span class="item-sub">${row["주소"] || "주소 정보 없음"}</span>
+                    <span class="item-sub" style="color:${isUnselected ? '#666' : '#F1C21B'}; font-weight:bold;">${stage || '신청완료'}</span>
+                `;
+                li.onclick = () => zoomToLocation(lat, lng, () => showDemandDetail(row));
+                demandUl.appendChild(li);
+            });
+
+            if (demandUl.innerHTML === '') {
+                demandUl.innerHTML = '<li style="padding:20px; color:#999; text-align:center; font-size:0.8rem;">검색된 수요 신청 내역이 없습니다.</li>';
+            }
+
+            document.getElementById('demand-count').innerText = count;
+        }
+
+        loadDemandCsv(); // Initial load
+
+        // --- Detail Panel ---
+        function showStationDetail(group) {
+            const currentYear = new Date().getFullYear();
+            const panel = document.getElementById('detail-panel');
+            const content = document.getElementById('detail-content');
+            const hasME = group.chargers.some(c => c.busiId === "ME");
+            const isOldME = hasME && group.year && (currentYear - parseInt(group.year) >= 8);
+            const fasts = group.chargers.filter(c => c.output >= 50).length;
+            const slows = group.chargers.length - fasts;
+
+            document.getElementById('detail-title').innerText = `충전소 상세 정보: ${group.statNm}`;
+
+            let html = `
+                <div style="background:#f4f4f4; padding:10px; margin-bottom:10px; border-left:4px solid ${fasts > 0 ? '#ff0000' : '#4589FF'};">
+                    <b style="font-size:1.1rem;">${group.statNm}</b><br/>
+                    <div style="margin-top:5px;">
+                        <span class="badge" style="background:${hasME ? '#0F62FE' : '#666'}; color:#fff; padding:2px 5px; font-size:10px; border-radius:3px;">
+                            ${hasME ? '기후부(ME) 운영' : '민간/기타'}
+                        </span>
+                        ${isOldME ? '<span class="badge" style="background:#f1c21b; color:#000; padding:2px 5px; font-size:10px; border-radius:3px; margin-left:5px; font-weight:bold;">⚠️ 노후 충전기 (8년 경과)</span>' : ''}
+                    </div>
+                    <div style="margin-top:5px; font-size:12px;">총 ${group.chargers.length}대 (급속 ${fasts}, 완속 ${slows})</div>
+                </div>
+                <table class="detail-table">
+                    <tr><th>충전소 ID</th><td>${group.statId || ''}</td></tr>
+                    <tr><th>설치년도</th><td><b>${(group.year && group.year !== 'null') ? group.year + '년' : ''}</b> ${isOldME ? '(교체 권장)' : ''}</td></tr>
+                    <tr><th>운영기관</th><td>${group.busiId || ''}</td></tr>
+                    <tr><th>기본 주소</th><td>${group.addr || ''}</td></tr>
+                    <tr><th>상세 주소</th><td>${(group.addrDetail && group.addrDetail !== 'null') ? group.addrDetail : ''}</td></tr>
+                </table>
+                <div style="margin-top:15px; font-weight:bold; font-size:0.9rem; border-bottom:1px solid #ccc; padding-bottom:5px;">충전기 목록</div>
+                <div style="max-height:200px; overflow-y:auto;">
+                    <table class="detail-table" style="font-size:12px;">
+                        ${group.chargers.map((c, i) => `
+                            <tr>
+                                <th>#${i + 1}</th>
+                                <td>${c.output}kW (${c.type || '타입미정'}) - ${c.busiId}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                </div>
+            `;
+            content.innerHTML = html;
+            panel.style.display = 'block';
+        }
+
+        function showDemandDetail(data) {
+            const panel = document.getElementById('detail-panel');
+            const content = document.getElementById('detail-content');
+            document.getElementById('detail-title').innerText = `수요신청: ${data["충전소명"] || "미지정"}`;
+
+            let html = '<table class="detail-table">';
+            const skipKeys = ["위도", "경도", "시도", "시군구코드"];
+            for (const [key, val] of Object.entries(data)) {
+                if (skipKeys.includes(key)) continue;
+
+                let displayVal = val;
+                if (val === null || val === undefined || val === "null" || val === "") {
+                    displayVal = "";
+                }
+                html += `<tr><th>${key}</th><td>${displayVal}</td></tr>`;
+            }
+            html += '</table>';
+            content.innerHTML = html;
+            panel.style.display = 'block';
+        }
+
+        function closeDetailPanel() {
+            document.getElementById('detail-panel').style.display = 'none';
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'flex' : 'none';
+        }
+
+        // Initialize Legend
+        const legend = L.control({ position: 'bottomright' });
+        legend.onAdd = function () {
+            const div = L.DomUtil.create('div', 'legend');
+            div.innerHTML = `
+                <div class="legend-item"><span class="legend-color" style="background:#FA4D56; border-radius:50%;"></span>급속 (&gt;=50kW)</div>
+                <div class="legend-item"><span class="legend-color" style="background:#0062FF; border-radius:50%;"></span>완속 (&lt;50kW)</div>
+                <div class="legend-item">
+                    <span class="legend-color" style="display:inline-flex; align-items:center; vertical-align:middle; background:none; border:none; width:auto; height:auto;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="red" stroke="red" stroke-width="2">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z"/>
+                        </svg>
+                    </span> 기후부(ME) 운영 지점
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="display:inline-flex; align-items:center; vertical-align:middle; background:none; border:none; width:auto; height:auto;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="red" stroke="#FFD700" stroke-width="4">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z"/>
+                        </svg>
+                    </span> ⚠️ 노후 충전기 (8년 이상)
+                </div>
+                <div class="legend-item"><span class="legend-color" style="background:#F1C21B; border:1.5px solid #333; width:12px; height:12px; border-radius:1px;"></span>수요 신청 지점</div>
+                <hr style="margin:5px 0; border:0; border-top:1px solid #ddd;">
+                <div style="font-weight:bold; margin-bottom:5px;">CILI 등급</div>
+                <div class="legend-item"><span class="legend-color" style="background:#fca5a5;"></span>1등급 (매우 높음)</div>
+                <div class="legend-item"><span class="legend-color" style="background:#fdba74;"></span>2등급</div>
+                <div class="legend-item"><span class="legend-color" style="background:#fef08a;"></span>3등급</div>
+                <div class="legend-item"><span class="legend-color" style="background:#bbf7d0;"></span>4등급</div>
+                <div class="legend-item"><span class="legend-color" style="background:#86efac;"></span>5등급 (매우 낮음)</div>
+            `;
+            return div;
+        };
+        legend.addTo(map);
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadStationData();
+            loadDemandCsv();
+        });
+
+    </script>
+</body>
+
+</html>
