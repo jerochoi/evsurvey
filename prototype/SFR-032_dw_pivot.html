@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>통계서비스 - 피벗</title>
+
+    <!-- PivotTable.js CDN -->
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.23.0/pivot.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- jQuery CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <!-- jQuery UI CDN (PivotUI 필수 의존성) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
+    <!-- PivotTable.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.23.0/pivot.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.23.0/pivot.ko.min.js"></script>
+
+    <style>
+        /* ========================= 
+           KECO 기존 CSS 이관 (hevhtml/common.css 벤치마킹)
+           ========================= */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', 'Noto Sans KR', dotum, sans-serif;
+            background: #f0f4f8;
+            color: #333;
+            font-size: 14px;
+        }
+
+        /* GNB */
+        .top-frame {
+            background: #fff;
+            border-bottom: 1px solid #dde3ea;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .top-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 20px;
+            border-bottom: 1px solid #eef0f3;
+        }
+
+        .top-logo-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: #004ea1;
+            letter-spacing: -0.5px;
+        }
+
+        .top-logo-text span {
+            color: #2ecc71;
+        }
+
+        .user-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-name {
+            font-size: 13px;
+            color: #555;
+        }
+
+        .btn-black {
+            background: #2d3748;
+            color: #fff;
+            border: none;
+            padding: 5px 14px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .top-menu {
+            padding: 0 20px;
+        }
+
+        .tap-menu {
+            display: flex;
+            gap: 0;
+        }
+
+        .menu-box {
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            color: #555;
+            border-bottom: 3px solid transparent;
+            transition: all .2s;
+        }
+
+        .menu-box:hover {
+            color: #004ea1;
+        }
+
+        .menu-box.active {
+            color: #004ea1;
+            border-bottom: 3px solid #004ea1;
+            font-weight: 600;
+        }
+
+        .menu-box a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* 전체 컨테이너 */
+        .all-container {
+            padding-top: 90px;
+        }
+
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .content-title {
+            margin-bottom: 16px;
+        }
+
+        .txt-icon {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .txt-icon span {
+            margin: 0 4px;
+        }
+
+        .txt-icon span.on {
+            color: #004ea1;
+            font-weight: 600;
+        }
+
+        .page-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        /* 버튼 클래스 (KECO 기존 클래스 이관) */
+        .btn-wrap {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn_square {
+            padding: 7px 18px;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all .15s;
+        }
+
+        .btn_navy_bg {
+            background: #004ea1;
+            color: #fff;
+        }
+
+        .btn_navy_bg:hover {
+            background: #003a7a;
+        }
+
+        .btn_green_bg {
+            background: #27ae60;
+            color: #fff;
+        }
+
+        .btn_green_bg:hover {
+            background: #1e8449;
+        }
+
+        .btn_white_bg {
+            background: #fff;
+            color: #004ea1;
+            border: 1px solid #004ea1;
+        }
+
+        .btn_white_bg:hover {
+            background: #eef5ff;
+        }
+
+        /* 도메인 탭 - 신규 추가 요소 */
+        .domain-tab-wrap {
+            display: flex;
+            gap: 0;
+            margin-bottom: 16px;
+            border-bottom: 2px solid #dee5ed;
+            /* 🔴 신규 추가 컴포넌트 강조 */
+            border: 2px dashed red;
+            border-radius: 4px;
+            padding: 4px;
+            position: relative;
+        }
+
+        .domain-tab-wrap::before {
+            content: '🆕 신규추가: 도메인 선택 탭';
+            position: absolute;
+            top: -22px;
+            left: 0;
+            font-size: 11px;
+            color: red;
+            font-weight: bold;
+        }
+
+        .domain-tab {
+            padding: 9px 24px;
+            background: #f8f9fb;
+            border: 1px solid #dee5ed;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 13px;
+            color: #555;
+            transition: all .2s;
+            margin-right: 4px;
+        }
+
+        .domain-tab.active {
+            background: #004ea1;
+            color: #fff;
+            font-weight: 600;
+            border-color: #004ea1;
+        }
+
+        .domain-tab:hover:not(.active) {
+            background: #eef5ff;
+            color: #004ea1;
+        }
+
+        /* 필터 조건 영역 - 신규 추가 요소 */
+        .search-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: #fff;
+            border-radius: 8px;
+            border: 2px dashed red;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            position: relative;
+        }
+
+        .search-wrap::before {
+            content: '🆕 신규추가: 기간·지역 필터';
+            position: absolute;
+            top: -22px;
+            left: 0;
+            font-size: 11px;
+            color: red;
+            font-weight: bold;
+        }
+
+        .search-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #47525e;
+            white-space: nowrap;
+        }
+
+        .selc_style02 {
+            height: 32px;
+            padding: 0 10px;
+            border: 1px solid #c0ccda;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #333;
+            background: #fff;
+        }
+
+        input[type="month"].selc_style02 {
+            width: 140px;
+        }
+
+        /* 안내박스 */
+        .instruction-box {
+            background: #edf2f7;
+            padding: 13px 18px;
+            border-left: 5px solid #004ea1;
+            margin-bottom: 20px;
+            font-size: 13px;
+            border-radius: 0 8px 8px 0;
+            color: #4a5568;
+        }
+
+        /* 피벗 컨테이너 */
+        .pivot-container {
+            background: #fff;
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid #e0e6ed;
+            min-height: 500px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, .05);
+        }
+
+        .pvtUI {
+            width: 100% !important;
+            border-collapse: collapse;
+        }
+
+        .pvtAxisContainer.pvtRows {
+            width: 180px !important;
+            min-width: 180px !important;
+            background: #f8f9fb !important;
+            border: 1px solid #dce3eb !important;
+            padding: 10px !important;
+        }
+
+        .pvtAxisContainer.pvtCols,
+        .pvtAxisContainer.pvtUnused {
+            background: #f8f9fb !important;
+            border: 1px solid #dce3eb !important;
+            padding: 10px !important;
+        }
+
+        .pvtVals {
+            background: #fff !important;
+            border: 1px solid #dce3eb !important;
+            padding: 10px !important;
+            text-align: center;
+        }
+
+        .pvtAttr {
+            background: #fff !important;
+            border: 1px solid #c0ccda !important;
+            border-radius: 4px !important;
+            padding: 4px 10px !important;
+            margin: 3px !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .05) !important;
+            font-size: 13px !important;
+            color: #47525e !important;
+            cursor: move;
+        }
+
+        .pvtAttr:hover {
+            background: #f0f4f8 !important;
+            border-color: #004ea1 !important;
+        }
+
+        .pvtTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .pvtTable th,
+        .pvtTable td {
+            border: 1px solid #dee5ed !important;
+            padding: 10px 14px !important;
+            font-size: 13px !important;
+        }
+
+        .pvtTable th {
+            background: #f1f4f9 !important;
+            color: #334155 !important;
+            font-weight: 600 !important;
+        }
+
+        .pvtTable td {
+            color: #475569 !important;
+        }
+
+        .pvtTotal,
+        .pvtGrandTotal {
+            font-weight: bold !important;
+            background: #f8fafc !important;
+            color: #004ea1 !important;
+        }
+
+        .pvtAggregator,
+        .pvtRenderer {
+            padding: 5px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        /* 차트 영역 */
+        .chart-section {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .chart-card {
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid #e0e6ed;
+            padding: 20px;
+            flex: 1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .05);
+        }
+
+        .chart-card-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 14px;
+            border-left: 4px solid #004ea1;
+            padding-left: 10px;
+        }
+
+        .chart-wrap {
+            position: relative;
+            height: 220px;
+        }
+
+        /* 탭 패널 */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 뱃지 */
+        .badge-new {
+            display: inline-block;
+            font-size: 10px;
+            background: red;
+            color: white;
+            padding: 1px 6px;
+            border-radius: 10px;
+            margin-left: 6px;
+            vertical-align: middle;
+            font-weight: bold;
+        }
+
+        /* 풍선(Balloon) 안내 스타일 */
+        .balloon {
+            position: absolute;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            text-align: center;
+            line-height: 22px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            cursor: default;
+        }
+
+        /* 하단 기능 설명 테이블 스타일 */
+        .func-table-wrap {
+            margin-top: 40px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #c0ccda;
+            max-width: 1440px;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, .05);
+        }
+
+        .func-table-wrap h3 {
+            font-size: 16px;
+            color: #004ea1;
+            margin-bottom: 15px;
+            border-left: 4px solid #004ea1;
+            padding-left: 10px;
+        }
+
+        .func-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .func-table th,
+        .func-table td {
+            border: 1px solid #dce3eb;
+            padding: 12px;
+            line-height: 1.5;
+        }
+
+        .func-table th {
+            background: #f0f4f8;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+        }
+
+        .func-table td.num {
+            text-align: center;
+            font-weight: bold;
+            color: #ff4757;
+        }
+
+        /* 로딩 오버레이 */
+        #loadingOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, .3);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #loadingOverlay.show {
+            display: flex;
+        }
+
+        .loading-box {
+            background: #fff;
+            border-radius: 12px;
+            padding: 30px 40px;
+            text-align: center;
+            font-size: 15px;
+            color: #004ea1;
+            font-weight: 600;
+        }
+
+        @media print {
+
+            .top-frame,
+            .btn-wrap,
+            .domain-tab-wrap,
+            .search-wrap,
+            .instruction-box {
+                display: none;
+            }
+
+            .all-container {
+                padding-top: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 로딩 오버레이 -->
+    <div id="loadingOverlay">
+        <div class="loading-box">⏳ 데이터를 불러오는 중...</div>
+    </div>
+
+    <!-- GNB -->
+    <div class="top-frame">
+        <div class="top-title">
+            <div class="top-logo-text">통계서비스</div>
+            <div class="user-wrap">
+                <div class="user-name">통계관리자 님</div>
+                <button class="btn-black">로그아웃</button>
+            </div>
+        </div>
+        <div class="top-menu">
+            <div class="tap-menu">
+                <div class="menu-box active"><a href="#">통계</a></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="all-container">
+        <div class="container">
+            <!-- 제목 및 버튼 -->
+            <div class="content-title">
+                <p class="txt-icon">
+                    <span class="home">홈</span> &gt; <span>통계분석</span> &gt; <span class="on">엑셀형 피벗 분석</span>
+                </p>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+                    <div class="page-title">자유 항목 피벗 분석 <span class="badge-new">DW 연계</span></div>
+                    <div class="btn-wrap" style="position:relative;">
+                        <div class="balloon" style="top:-12px; left:-12px;">3</div>
+                        <button class="btn_square btn_green_bg" onclick="fnExportExcel()">📥 엑셀 다운로드</button>
+                        <button class="btn_square btn_navy_bg" onclick="window.print()">🖨 화면 출력</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 🆕 도메인 탭 (4대 통계) -->
+            <div style="margin-top: 28px; margin-bottom: 6px;">
+                <div class="domain-tab-wrap" style="position:relative;">
+                    <div class="balloon" style="top:5px; left:-12px;">1</div>
+                    <div class="domain-tab active" id="tabCharger" onclick="fnChangeDomain('CHARGER', this)">⚡ 충전기 통계</div>
+                    <div class="domain-tab" id="tabSubsidy" onclick="fnChangeDomain('SUBSIDY', this)">💰 보조금 상세 (RFP)</div>
+                    <div class="domain-tab" id="tabVehicle" onclick="fnChangeDomain('VEHICLE', this)">🚗 국토부 전기차 통계</div>
+                    <div class="domain-tab" id="tabComplex" onclick="fnChangeDomain('COMPLEX', this)" style="background:#fff3cd; color:#856404; border-color:#ffeeba;">🔗 보조금+국토부 복합통계</div>
+                </div>
+            </div>
+
+            <!-- 🆕 필터 조건 -->
+            <div class="search-wrap" style="margin-top: 28px; position:relative;">
+                <div class="balloon" style="top:10px; left:-12px;">2</div>
+                <span class="search-label">조회기간</span>
+                <input type="month" id="startYM" class="selc_style02" value="2025-01">
+                <span style="color:#888">~</span>
+                <input type="month" id="endYM" class="selc_style02" value="2025-12">
+                <span class="search-label" style="margin-left:12px;">광역시도</span>
+                <select id="selZcode" class="selc_style02">
+                    <option value="">전국</option>
+                    <option value="11">서울특별시</option>
+                    <option value="26">부산광역시</option>
+                    <option value="27">대구광역시</option>
+                    <option value="28">인천광역시</option>
+                    <option value="29">광주광역시</option>
+                    <option value="30">대전광역시</option>
+                    <option value="31">울산광역시</option>
+                    <option value="36">세종특별자치시</option>
+                    <option value="41">경기도</option>
+                    <option value="42">강원특별자치도</option>
+                    <option value="43">충청북도</option>
+                    <option value="44">충청남도</option>
+                    <option value="45">전북특별자치도</option>
+                    <option value="46">전라남도</option>
+                    <option value="47">경상북도</option>
+                    <option value="48">경상남도</option>
+                    <option value="50">제주특별자치도</option>
+                </select>
+                <button class="btn_square btn_navy_bg" onclick="fnSearch()">🔍 조회</button>
+                <button class="btn_square btn_white_bg" onclick="fnReset()">초기화</button>
+            </div>
+
+            <!-- 요약 KPI 카드 -->
+            <div class="chart-section" id="kpiSection">
+                <div class="chart-card" style="flex:0 0 220px; text-align:center;">
+                    <div class="chart-card-title">전체 레코드 수</div>
+                    <div id="totalCnt" style="font-size:36px; font-weight:800; color:#004ea1; margin:20px 0;">23,540</div>
+                    <div style="font-size:12px; color:#888;">건 (현재 도메인 기준)</div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-title">지역별 분포 (Top 5)</div>
+                    <div class="chart-wrap"><canvas id="chartRegion"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-title">항목별 비율</div>
+                    <div class="chart-wrap"><canvas id="chartPie"></canvas></div>
+                </div>
+            </div>
+
+            <!-- 안내박스 -->
+            <div class="instruction-box">
+                💡 <b>분석 가이드:</b> 하단 피벗 테이블에서 필드를 드래그하여 행/열을 자유롭게 구성하세요.
+                집계 함수(합계·평균·건수)와 렌더러(표·가로막대·세로막대)를 변경할 수 있습니다.
+                완성된 피벗을 <b>[엑셀 다운로드]</b>로 저장하세요.
+            </div>
+
+            <!-- 피벗 테이블 영역 -->
+            <div class="pivot-container" style="position:relative;">
+                <div class="balloon" style="top:-10px; left:-10px;">4</div>
+                <div id="pivotOutput"></div>
+            </div>
+
+            <!-- 하단 통계 기능 가이드 테이블 (KECO 산출물 양식) -->
+            <div class="func-table-wrap">
+                <h3>📊 [DW 피벗 통계 서비스] 상세 비즈니스/이벤트 로직 설명</h3>
+                <table class="func-table">
+                    <colgroup>
+                        <col width="6%">
+                        <col width="20%">
+                        <col width="74%">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>번호</th>
+                            <th>기능(UI 위치)</th>
+                            <th>상세 비즈니스 처리 절차 및 이벤트 흐름</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="num">1</td>
+                            <td>도메인 및 권한 통제 탭</td>
+                            <td><b>[클릭]</b> 사용자의 열람 권한에 따라 노출되는 4개 도메인(충전기/보조금/국토부/복합통계)을 클릭하면 <code>fnChangeDomain()</code> 함수가 호출되며, 기존 캐시를 초기화하고 Ajax POST로 해당 DW 마트(FACT) 데이터를 동적으로 조회합니다.</td>
+                        </tr>
+                        <tr>
+                            <td class="num">2</td>
+                            <td>검색 조건 및 조회 버튼</td>
+                            <td><b>[조회 이벤트]</b> 설정된 연월(YYYYMM) 및 지역코드 파라미터를 기반으로 조회 요청 시, 유효성 검증(기간 역전 여부 등)을 실시한 뒤 서버에서 대용량 데이터를 JSON 포맷으로 브라우저에 적재합니다.</td>
+                        </tr>
+                        <tr>
+                            <td class="num">3</td>
+                            <td>엑셀 다운로드 및 출력</td>
+                            <td><b>[클릭]</b> 현재 완성된 집계표 모양 그대로 SheetJS를 통해 <code>XLSX.utils.table_to_book()</code>으로 변환하여 로컬 파일 시스템에 저장합니다. 내보낼 데이터 검증 로직이 동작합니다.</td>
+                        </tr>
+                        <tr>
+                            <td class="num">4</td>
+                            <td>동적 피벗 영역</td>
+                            <td><b>[드래그&드롭]</b> 수신된 Raw 데이터를 <code>PivotTable.js</code>가 브라우저 단에서 렌더링하며, 행/열/값 요소를 동적으로 재배치할 시 클라이언트 사이드에서 즉시 재집계 연산(Aggregation)이 수행됩니다.</td>
+                        </tr>
+                        <tr>
+                            <td class="num">5</td>
+                            <td>[RFP] 보조금+국토부 복합통계</td>
+                            <td><b>[복합 집계 (DW 조인)]</b> <code>FACT_VEHICLE_REG</code>(신규등록) 테이블과 <code>FACT_SUBSIDY</code>(지급대수) 테이블을 <b>'기준연월', '제작사/모델', '지역'</b> 기준으로 백엔드에서 사전 Group 조인하여, 클라이언트에 마트 데이터를 제공함으로써 <b>실제 보급률 체감 통계</b>를 지원합니다.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div><!-- /container -->
+    </div><!-- /all-container -->
+
+    <script>
+        /* =====================================================================
+           MOCK 데이터 (DW 기반 3개 테이블 시뮬레이션)
+           ===================================================================== */
+        const MOCK = {
+            CHARGER: [
+                { 설치장소대분류: '공용(지자체)', 충전소ID: 'M0001', 광역시도: '서울특별시', 속도분류: '초급속', 운영기관: '환경부', 기준연월: '202501', 충전기수: 10 },
+                { 설치장소대분류: '공용(지자체)', 충전소ID: 'M0002', 광역시도: '서울특별시', 속도분류: '완속', 운영기관: '환경부', 기준연월: '202501', 충전기수: 5 },
+                { 설치장소대분류: '고속도로', 충전소ID: 'M0003', 광역시도: '경기도', 속도분류: '초급속', 운영기관: '한국도로공사', 기준연월: '202501', 충전기수: 12 },
+                { 설치장소대분류: '공동주택', 충전소ID: 'P0001', 광역시도: '서울특별시', 속도분류: '완속', 운영기관: '민간', 기준연월: '202502', 충전기수: 20 },
+                { 설치장소대분류: '상업시설', 충전소ID: 'P0002', 광역시도: '부산광역시', 속도분류: '급속', 운영기관: '민간', 기준연월: '202502', 충전기수: 4 },
+                { 설치장소대분류: '공용(사업소)', 충전소ID: 'M0004', 광역시도: '경기도', 속도분류: '초급속', 운영기관: '민간', 기준연월: '202503', 충전기수: 6 },
+                { 설치장소대분류: '공공기관', 충전소ID: 'M0005', 광역시도: '인천광역시', 속도분류: '완속', 운영기관: '지자체', 기준연월: '202503', 충전기수: 2 },
+                { 설치장소대분류: '공동주택', 충전소ID: 'P0003', 광역시도: '대구광역시', 속도분류: '완속', 운영기관: '민간', 기준연월: '202504', 충전기수: 50 },
+            ],
+            SUBSIDY: [
+                { 사업연도: '2025', 차종: '승용', 신청주체: '개인', 광역시도: '서울특별시', 지자체: '서울시청', 제조사: '현대', 모델명: '아이오닉6', 진행단계: '지급완료', 지급대수: 12, 국비지급액: 72000000, 지방비지급액: 24000000, 보조금합계: 96000000 },
+                { 사업연도: '2025', 차종: '승용', 신청주체: '법인', 광역시도: '서울특별시', 지자체: '서울시청', 제조사: '기아', 모델명: 'EV6', 진행단계: '지급완료', 지급대수: 10, 국비지급액: 55000000, 지방비지급액: 18000000, 보조금합계: 73000000 },
+                { 사업연도: '2025', 차종: '승용', 신청주체: '개인', 광역시도: '경기도', 지자체: '수원시', 제조사: '테슬라', 모델명: 'Model Y', 진행단계: '지급완료', 지급대수: 5, 국비지급액: 35000000, 지방비지급액: 10000000, 보조금합계: 45000000 },
+                { 사업연도: '2025', 차종: '이륜', 신청주체: '법인', 광역시도: '서울특별시', 지자체: '서울시청', 제조사: '대림', 모델명: '씨티100', 진행단계: '접수완료', 지급대수: 10, 국비지급액: 15000000, 지방비지급액: 5000000, 보조금합계: 20000000 },
+                { 사업연도: '2025', 차종: '수소(승용)', 신청주체: '개인', 광역시도: '경기도', 지자체: '화성시', 제조사: '현대', 모델명: '넥쏘', 진행단계: '지급완료', 지급대수: 2, 국비지급액: 56000000, 지방비지급액: 16000000, 보조금합계: 72000000 },
+                { 사업연도: '2024', 차종: '승용', 신청주체: '개인', 광역시도: '부산광역시', 지자체: '부산시청', 제조사: '현대', 모델명: '아이오닉5', 진행단계: '지급완료', 지급대수: 8, 국비지급액: 73600000, 지방비지급액: 24800000, 보조금합계: 98400000 },
+                { 사업연도: '2025', 차종: '화물', 신청주체: '개인', 광역시도: '경기도', 지자체: '성남시', 제조사: '기아', 모델명: '봉고 EV', 진행단계: '지급대기', 지급대수: 15, 국비지급액: 180000000, 지방비지급액: 45000000, 보조금합계: 225000000 },
+            ],
+            VEHICLE: [
+                { 기준연월: '202501', 광역시도: '서울특별시', 연료종별: '전기', 차종: '승용', 제조사: '현대', 차명: '아이오닉6', 국산수입: '국산', 신규등록대수: 1250 },
+                { 기준연월: '202501', 광역시도: '서울특별시', 연료종별: '전기', 차종: '승용', 제조사: '기아', 차명: 'EV6', 국산수입: '국산', 신규등록대수: 980 },
+                { 기준연월: '202501', 광역시도: '서울특별시', 연료종별: '전기', 차종: '승용', 제조사: '테슬라', 차명: 'Model Y', 국산수입: '수입', 신규등록대수: 760 },
+                { 기준연월: '202501', 광역시도: '경기도', 연료종별: '전기', 차종: '승용', 제조사: '현대', 차명: '아이오닉6', 국산수입: '국산', 신규등록대수: 2100 },
+                { 기준연월: '202502', 광역시도: '서울특별시', 연료종별: '수소', 차종: '승용', 제조사: '현대', 차명: '넥쏘', 국산수입: '국산', 신규등록대수: 45 },
+                { 기준연월: '202502', 광역시도: '경기도', 연료종별: '전기', 차종: '화물', 제조사: '기아', 차명: '봉고 EV', 국산수입: '국산', 신규등록대수: 520 },
+                { 기준연월: '202503', 광역시도: '부산광역시', 연료종별: '전기', 차종: '승용', 제조사: '현대', 차명: '아이오닉5', 국산수입: '국산', 신규등록대수: 310 },
+                { 기준연월: '202503', 광역시도: '대구광역시', 연료종별: '하이브리드', 차종: '승용', 제조사: '현대', 차명: '그랜저 HEV', 국산수입: '국산', 신규등록대수: 1540 },
+            ],
+            COMPLEX: [
+                { 기준연월: '202501', 광역시도: '서울특별시', 차종: '승용', 제조사: '현대', 모델명: '아이오닉6', 국토부_신규등록대수: 1250, 보조금_지급대수: 1200, 보조금지급액: 9600000000 },
+                { 기준연월: '202501', 광역시도: '서울특별시', 차종: '승용', 제조사: '테슬라', 모델명: 'Model Y', 국토부_신규등록대수: 760, 보조금_지급대수: 750, 보조금지급액: 4500000000 },
+                { 기준연월: '202501', 광역시도: '경기도', 차종: '화물', 제조사: '현대', 모델명: '포터 EV', 국토부_신규등록대수: 380, 보조금_지급대수: 380, 보조금지급액: 7600000000 },
+                { 기준연월: '202502', 광역시도: '부산광역시', 차종: '승용', 제조사: '현대', 모델명: '아이오닉5', 국토부_신규등록대수: 850, 보조금_지급대수: 800, 보조금지급액: 6000000000 },
+                { 기준연월: '202502', 광역시도: '부산광역시', 차종: '승용', 제조사: '테슬라', 모델명: 'Model Y', 국토부_신규등록대수: 420, 보조금_지급대수: 300, 보조금지급액: 1800000000 },
+                { 기준연월: '202503', 광역시도: '경기도', 차종: '화물', 제조사: '기아', 모델명: '봉고 EV', 국토부_신규등록대수: 520, 보조금_지급대수: 500, 보조금지급액: 10000000000 },
+            ]
+        };
+
+        /* 기본 피벗 설정 */
+        const PIVOT_CONFIG = {
+            CHARGER: { rows: ['광역시도', '설치장소대분류'], cols: ['속도분류'], vals: ['충전기수'], agg: 'Integer Sum' },
+            SUBSIDY: { rows: ['광역시도', '지자체', '차종'], cols: ['신청주체'], vals: ['지급대수'], agg: 'Integer Sum' },
+            VEHICLE: { rows: ['제조사', '차명'], cols: ['광역시도'], vals: ['신규등록대수'], agg: 'Integer Sum' },
+            COMPLEX: { rows: ['제조사', '모델명'], cols: ['기준연월'], vals: ['국토부_신규등록대수'], agg: 'Integer Sum' }
+        };
+
+
+        let currentDomain = 'CHARGER';
+        let chartRegion, chartPie;
+
+        /* =====================================================================
+           초기화
+           ===================================================================== */
+        $(function () {
+            fnInitCharts();
+            fnLoadPivot('CHARGER');
+        });
+
+        /* =====================================================================
+           도메인 변경
+           ===================================================================== */
+        function fnChangeDomain(domain, el) {
+            currentDomain = domain;
+            // 탭 활성화
+            document.querySelectorAll('.domain-tab').forEach(t => t.classList.remove('active'));
+            if (el) el.classList.add('active');
+            fnLoadPivot(domain);
+        }
+
+        /* =====================================================================
+           피벗 로드
+           ===================================================================== */
+        function fnLoadPivot(domain) {
+            document.getElementById('loadingOverlay').classList.add('show');
+            setTimeout(() => {
+                const data = MOCK[domain];
+                const cfg = PIVOT_CONFIG[domain];
+                $('#pivotOutput').empty();
+                $('#pivotOutput').pivotUI(data, {
+                    rows: cfg.rows,
+                    cols: cfg.cols,
+                    vals: cfg.vals,
+                    aggregatorName: cfg.agg,
+                    rendererName: 'Table',
+                }, false, 'ko');
+                document.getElementById('totalCnt').textContent = data.length.toLocaleString();
+                fnUpdateCharts(domain);
+                document.getElementById('loadingOverlay').classList.remove('show');
+            }, 600);
+        }
+
+        /* =====================================================================
+           조회
+           ===================================================================== */
+        function fnSearch() {
+            const s = document.getElementById('startYM').value.replace('-', '');
+            const e = document.getElementById('endYM').value.replace('-', '');
+            if (!/^\d{6}$/.test(s) || !/^\d{6}$/.test(e)) {
+                alert('날짜 형식이 올바르지 않습니다. (YYYYMM)');
+                return;
+            }
+            if (s > e) {
+                alert('종료 연월이 시작 연월보다 이릅니다.');
+                return;
+            }
+            fnLoadPivot(currentDomain);
+        }
+
+        function fnReset() {
+            document.getElementById('startYM').value = '2025-01';
+            document.getElementById('endYM').value = '2025-12';
+            document.getElementById('selZcode').value = '';
+        }
+
+        /* =====================================================================
+           엑셀 다운로드
+           ===================================================================== */
+        function fnExportExcel() {
+            const table = document.querySelector('.pvtTable');
+            if (!table) { alert('내보낼 데이터가 없습니다.'); return; }
+            try {
+                const wb = XLSX.utils.table_to_book(table, { sheet: 'PivotData' });
+                const d = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                XLSX.writeFile(wb, `KECO_Pivot_${currentDomain}_${d}.xlsx`);
+            } catch (e) { console.error(e); alert('엑셀 변환 중 오류가 발생했습니다.'); }
+        }
+
+        /* =====================================================================
+           차트 초기화 및 업데이트
+           ===================================================================== */
+        function fnInitCharts() {
+            chartRegion = new Chart(document.getElementById('chartRegion'), {
+                type: 'bar',
+                data: { labels: [], datasets: [{ label: '건수', data: [], backgroundColor: '#004ea1aa', borderRadius: 6 }] },
+                options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } }, responsive: true, maintainAspectRatio: false }
+            });
+            chartPie = new Chart(document.getElementById('chartPie'), {
+                type: 'doughnut',
+                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#004ea1', '#27ae60', '#e67e22', '#8e44ad', '#e74c3c'] }] },
+                options: { plugins: { legend: { position: 'right', labels: { font: { size: 11 } } } }, responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function fnUpdateCharts(domain) {
+            const data = MOCK[domain];
+            // 지역별
+            const regionMap = {};
+            data.forEach(d => {
+                if (d['광역시도']) regionMap[d['광역시도']] = (regionMap[d['광역시도']] || 0) + 1;
+            });
+            const sorted = Object.entries(regionMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            chartRegion.data.labels = sorted.map(x => x[0]);
+            chartRegion.data.datasets[0].data = sorted.map(x => x[1]);
+            chartRegion.update();
+
+            // 항목 비율
+            const typeKey = { VEHICLE: '차종', SUBSIDY: '차종', CHARGER: '속도분류', COMPLEX: '차종' }[domain];
+            const typeMap = {};
+            data.forEach(d => {
+                if (d[typeKey]) typeMap[d[typeKey]] = (typeMap[d[typeKey]] || 0) + 1;
+            });
+            chartPie.data.labels = Object.keys(typeMap);
+            chartPie.data.datasets[0].data = Object.values(typeMap);
+            chartPie.update();
+        }
+    </script>
+</body>
+
+</html>

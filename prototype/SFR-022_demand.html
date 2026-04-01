@@ -496,9 +496,7 @@
 
     <script>
         // Performance Optimization: Use Canvas
-        const map = L.map('map', {
-            preferCanvas: true // Significant performance improvement for many markers
-        }).setView([37.456, 126.705], 11);
+        const map = L.map('map').setView([37.456, 126.705], 11);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
@@ -555,9 +553,11 @@
                 .then(r => r.json())
                 .then(data => {
                     boundaryLayer = L.geoJSON(data, {
-                        style: { color: '#0F62FE', weight: 3, fillOpacity: 0.03, dashArray: '5' }
+                        interactive: false,
+                        style: { color: '#0F62FE', weight: 4, fillOpacity: 0.05, dashArray: '5' }
                     }).addTo(map);
                     map.fitBounds(boundaryLayer.getBounds());
+                    if (boundaryLayer) boundaryLayer.bringToBack();
 
                     loadCiliData(guCode);
                     filterStations(guCode);
@@ -569,6 +569,19 @@
                     console.error("Boundary error:", e);
                     showLoading(false);
                 });
+        }
+
+        // --- Point in Polygon Utility ---
+        function isPointInPolygon(latlng, polyPoints) {
+            const x = latlng.lng, y = latlng.lat;
+            let inside = false;
+            for (let i = 0, j = polyPoints.length - 1; i < polyPoints.length; j = i++) {
+                const xi = polyPoints[i][0], yi = polyPoints[i][1];
+                const xj = polyPoints[j][0], yj = polyPoints[j][1];
+                const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+                if (intersect) inside = !inside;
+            }
+            return inside;
         }
 
         // --- CILI Grade Visualizer ---
@@ -584,7 +597,6 @@
                     const decompressed = pako.inflate(new Uint8Array(buf), { to: 'string' });
                     originalCiliData = JSON.parse(decompressed);
                     updateCiliMap();
-                    // Removed the activation text from info wrap/controls
                 })
                 .catch(e => console.error("CILI Error:", e));
         }
@@ -605,22 +617,25 @@
             if (geoJsonLayer) map.removeLayer(geoJsonLayer);
 
             geoJsonLayer = L.geoJSON(originalCiliData, {
-                interactive: true,
                 style: (f) => ({
                     fillColor: getColor(f.properties.grade),
-                    weight: 1,
-                    opacity: 0.3,
-                    color: '#ffffff',
-                    fillOpacity: 0.4
+                    weight: 1.5,
+                    opacity: 0.8,
+                    color: '#666666',
+                    fillOpacity: 0.45
                 }),
-                onEachFeature: (f, l) => {
-                    l.on({
-                        mouseover: (e) => { e.target.setStyle({ fillOpacity: 0.7, weight: 2 }); },
+                onEachFeature: (f, layer) => {
+                    const p = f.properties;
+                    layer.bindPopup(`<b>${p.SPO_NO_CD}</b><br/>등급: <b style="color:${getColor(p.grade)}">${p.grade}등급 (CILI)</b><br/>총점: ${p.finalScore.toFixed(4)}`);
+
+                    layer.on({
+                        mouseover: (e) => { e.target.setStyle({ fillOpacity: 0.8, weight: 2.5 }); },
                         mouseout: (e) => { geoJsonLayer.resetStyle(e.target); },
                         click: (e) => {
-                            L.DomEvent.stopPropagation(e);
-                            geoJsonLayer.eachLayer(layer => geoJsonLayer.resetStyle(layer));
-                            l.setStyle({ weight: 3, color: '#000', opacity: 1, fillOpacity: 0.8 });
+                            // stopPropagation was blocking popup - do NOT call it here
+                            geoJsonLayer.eachLayer(l => geoJsonLayer.resetStyle(l));
+                            e.target.setStyle({ weight: 3, color: '#000', opacity: 1, fillOpacity: 0.9 });
+                            layer.openPopup();
                         }
                     });
                 }
