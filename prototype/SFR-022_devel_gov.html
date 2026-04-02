@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수요발굴(토지-국공유지, 건축물대장 활용)</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- pako for client-side gzip decompression -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            background: #fafafa;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        /* Sidebar (Top-Left) */
+        #sidebar {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 2000;
+            background: white;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+            width: 340px;
+            max-height: 42vh;
+            overflow-y: auto;
+            border: 1px solid #eee;
+        }
+
+        h2 {
+            margin: 0 0 12px;
+            font-size: 1rem;
+            color: #0F62FE;
+            border-bottom: 2px solid #f4f6ff;
+            padding-bottom: 8px;
+        }
+
+        .control-group {
+            background: #f8fbff;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #eef;
+            padding-bottom: 6px;
+        }
+
+        .control-row:last-child {
+            margin-bottom: 0;
+            border: none;
+        }
+
+        .toggle-label {
+            flex: 1;
+            font-size: 11px;
+            font-weight: bold;
+            color: #444;
+            cursor: pointer;
+        }
+
+        .chk-box {
+            width: 16px;
+            height: 16px;
+            accent-color: #0F62FE;
+            cursor: pointer;
+        }
+
+        .rad-box {
+            width: 13px;
+            height: 13px;
+            accent-color: #FA4D56;
+            cursor: pointer;
+        }
+
+        /* Sidebar Info */
+        #info-panel {
+            margin-top: 12px;
+            border-top: 1.5px solid #eee;
+            padding-top: 12px;
+            display: none;
+        }
+
+        .info-title {
+            font-weight: bold;
+            color: #0F62FE;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            display: block;
+            border-left: 3px solid #0F62FE;
+            padding-left: 8px;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        .info-table th {
+            text-align: left;
+            background: #fafafa;
+            padding: 6px;
+            border-bottom: 1px solid #efefef;
+            width: 85px;
+            color: #888;
+        }
+
+        .info-table td {
+            padding: 6px;
+            border-bottom: 1px solid #f0f0f0;
+            font-weight: 500;
+        }
+
+        /* Detail Panel (Bottom-Left) */
+        #detail-panel {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            width: 360px;
+            background: white;
+            box-shadow: 10px 0 35px rgba(0, 0, 0, 0.18);
+            border-radius: 16px;
+            display: none;
+            padding: 18px;
+            max-height: 48vh;
+            overflow-y: auto;
+            z-index: 3000;
+            border: 2px solid #0F62FE;
+        }
+
+        .detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        .detail-table th,
+        .detail-table td {
+            text-align: left;
+            padding: 5px;
+            border-bottom: 1px solid #f2f2f2;
+        }
+
+        .detail-table th {
+            background: #f8f9fa;
+            color: #666;
+            width: 90px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: #bbb;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+            margin-right: 4px;
+        }
+
+        /* Leaflet Control Adjustment */
+        .leaflet-control-layers {
+            border-radius: 8px !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
+            border: none !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="sidebar">
+        <h2>수요발굴(토지-국공유지, 건축물대장 활용)</h2>
+        <div class="control-group">
+            <div class="control-row">
+                <input type="checkbox" id="chk-land" class="chk-box" checked onchange="toggleLayer('land', this.checked)">
+                <input type="radio" name="layer-pri" id="rad-land" class="rad-box" checked onchange="updateZOrder()">
+                <label for="rad-land" class="toggle-label">국공유지 부지</label>
+            </div>
+            <div class="control-row">
+                <input type="checkbox" id="chk-station" class="chk-box" checked onchange="toggleLayer('station', this.checked)">
+                <input type="radio" name="layer-pri" id="rad-station" class="rad-box" onchange="updateZOrder()">
+                <label for="rad-station" class="toggle-label">충전소</label>
+            </div>
+            <div style="margin-top:10px;">
+                <select id="sel-radius" onchange="updateMeRadius(this.value)" style="width:100%; font-size:11px; padding:4px; border-radius:4px; border:1px solid #ddd;">
+                    <option value="0">기후부(ME) 반경 분석 감추기</option>
+                    <option value="500">기후부(ME) 500M 서비스 반경</option>
+                    <option value="1000">기후부(ME) 1KM 서비스 반경</option>
+                </select>
+            </div>
+        </div>
+        <div id="info-panel">
+            <span class="info-title">🏢 필지 속부 정보</span>
+            <table class="info-table" id="info-summary-table"></table>
+            <div id="additional-land-info" style="margin-top:10px; font-size:10px; color:#999; background:#fcfcfc; padding:6px; border-radius:4px; border:1px dashed #eee;"></div>
+        </div>
+    </div>
+
+    <div id="detail-panel">
+        <button class="close-btn" onclick="closeDetailPanel()">×</button>
+        <div id="detail-content"></div>
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Gzip Decompression Helper
+        async function fetchGzippedJson(url) {
+            const response = await fetch(url);
+            const arrayBuffer = await response.arrayBuffer();
+            const decompressed = pako.ungzip(new Uint8Array(arrayBuffer), { to: 'string' });
+            return JSON.parse(decompressed);
+        }
+
+        // Base Layers
+        const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OSM' });
+        const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EBP, and the GIS User Community'
+        });
+
+        const map = L.map('map', {
+            center: [37.545, 126.67],
+            zoom: 12,
+            layers: [streetLayer]
+        });
+
+        const baseMaps = {
+            "일반지도": streetLayer,
+            "항공지도": satelliteLayer
+        };
+        L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
+
+        const landPane = map.createPane('landPane');
+        const stationPane = map.createPane('stationPane');
+        landPane.style.zIndex = 400;
+        landPane.style.opacity = 0.8;
+        stationPane.style.zIndex = 650;
+
+        let parcelLayer, stationGroup = L.layerGroup().addTo(map);
+        let meRadiusLayers = L.layerGroup().addTo(map);
+        let allStations = [], meStatsLookup = {};
+
+        fetch('./data_devel/me_charger_stat.json').then(res => res.json()).then(data => data.forEach(d => {
+            meStatsLookup[`${d.statId}_${d.chgerId.padStart(2, '0')}`] = d;
+        }));
+
+        // Load Compressed GeoJSON
+        fetchGzippedJson('./data_devel/gov_with_ledger.geojson.gz').then(data => {
+            parcelLayer = L.geoJSON(data, {
+                pane: 'landPane',
+                style: (f) => ({
+                    color: '#333', weight: 1.2, fillColor: (f.properties.A10 || '').includes('1') ? '#28a745' : '#e67e22', fillOpacity: 1
+                }),
+                onEachFeature: (f, l) => {
+                    l.on('click', (e) => { showDetail('land', f.properties); L.DomEvent.stopPropagation(e); });
+                    l.bindTooltip(`<b>${f.properties.건물명 || '시설물'}</b>`, { sticky: true, pane: 'tooltipPane' });
+                }
+            }).addTo(map);
+            if (data.features.length) map.fitBounds(parcelLayer.getBounds());
+            updateZOrder();
+        }).catch(err => console.error("Error loading GeoJSON.gz: ", err));
+
+        // Load Compressed Charger List
+        fetchGzippedJson('./data_devel/seogu_chargers_detailed.json.gz').then(data => {
+            allStations = data;
+            data.forEach(s => {
+                let html = s.is_me ? `
+                <div class="me-star-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="${s.has_fast ? '#FA4D56' : '#0062FF'}" stroke="white" stroke-width="2" style="filter:drop-shadow(0 2px 3px rgba(0,0,0,0.3)); opacity: 0.9;">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z"/>
+                    </svg>
+                    ${s.total_count > 1 ? `<span style="position:absolute; top:6px; width:100%; text-align:center; color:#fff; font-size:8px; text-shadow:1px 1px 1px #000; font-weight:bold;">${s.total_count}</span>` : ''}
+                </div>` :
+                    `<div style="border-radius:50%; border:1.5px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,0.3); color:#fff; display:flex; justify-content:center; align-items:center; font-size:9px; font-weight:bold; opacity:0.9; width:18px; height:18px; background:${s.has_fast ? '#FA4D56' : '#4589FF'}">${s.total_count}</div>`;
+
+                const marker = L.marker([s.lat, s.lng], {
+                    pane: 'stationPane', icon: L.divIcon({ className: 'station-marker-container', html: html, iconSize: [24, 24], iconAnchor: [12, 12] }),
+                    opacity: 0.9
+                }).addTo(stationGroup);
+                marker.on('click', (e) => { showStationDetail(s); L.DomEvent.stopPropagation(e); });
+            });
+        }).catch(err => console.error("Error loading detailed stations.gz: ", err));
+
+        function toggleLayer(type, show) {
+            if (type === 'land') { if (show) map.addLayer(parcelLayer); else map.removeLayer(parcelLayer); }
+            if (type === 'station') { if (show) map.addLayer(stationGroup); else map.removeLayer(stationGroup); }
+        }
+
+        function updateZOrder() {
+            const landPriority = document.getElementById('rad-land').checked;
+            landPane.style.zIndex = landPriority ? 620 : 380;
+            stationPane.style.zIndex = landPriority ? 390 : 650;
+        }
+
+        function updateMeRadius(radius) {
+            meRadiusLayers.clearLayers();
+            radius = parseInt(radius);
+            if (radius <= 0) return;
+
+            allStations.filter(s => s.is_me).forEach(st => {
+                let uSum = 0; let mCount = 0;
+                st.chargers.forEach(c => {
+                    const stats = meStatsLookup[`${st.statId}_${c.chgerId.padStart(2, '0')}`];
+                    if (stats) { uSum += stats.utilization_rate; mCount++; }
+                });
+                const util = mCount > 0 ? (uSum / mCount) : 0;
+
+                const weight = 1.5 + (util / 4) * 3;
+                const fillOpacity = 0.05;
+                const strokeOpacity = 0.4 + (util / 30) * 0.4;
+
+                L.circle([st.lat, st.lng], {
+                    radius: radius,
+                    color: '#FA4D56',
+                    weight: Math.min(20, weight),
+                    opacity: Math.min(0.9, strokeOpacity),
+                    fillColor: '#FA4D56',
+                    fillOpacity: fillOpacity,
+                    interactive: false
+                }).addTo(meRadiusLayers);
+            });
+        }
+
+        function closeDetailPanel() { document.getElementById('detail-panel').style.display = 'none'; }
+
+        function showStationDetail(group) {
+            const panel = document.getElementById('detail-panel');
+            const content = document.getElementById('detail-content');
+            let dCount = 0; let uSum = 0; let mCount = 0;
+            group.chargers.forEach(c => {
+                const st = meStatsLookup[`${group.statId}_${c.chgerId.padStart(2, '0')}`];
+                if (st) { dCount += st.avg_daily_count; uSum += st.utilization_rate; mCount++; }
+            });
+            let html = `
+            <div style="background:#f9f9f9; padding:12px; margin-bottom:12px; border-left:5px solid ${group.has_fast ? '#FA4D56' : '#4589FF'};">
+                <b style="font-size:1.1rem;">${group.statNm}</b><br/>
+                <div style="margin-top:5px;">
+                    <span class="badge" style="background:${group.is_me ? '#0F62FE' : '#666'}">${group.is_me ? '기후부(ME)' : '민간'}</span>
+                    <span style="font-size:12px; color:#555; margin-left:6px;">총 ${group.total_count}대 (급 ${group.fast_count}, 완 ${group.slow_count})</span>
+                </div>
+            </div>
+            <table class="detail-table"><tr><th>주소</th><td>${group.addr || ''}</td></tr><tr><th>설치년도</th><td><b>${group.year ? group.year + '년' : '정보없음'}</b></td></tr></table>
+            <div style="margin:20px 0 8px; font-weight:bold; font-size:0.9rem; color:#0F62FE; border-bottom:1px solid #0F62FE; padding-bottom:6px; display:flex; justify-content:space-between;">
+                <span>충전기 목록</span>
+                ${mCount > 0 ? `<span style="font-size:11px; color:#FA4D56; font-weight:normal;">일평균 ${(dCount / group.total_count).toFixed(1)}건 | 이용률 ${(uSum / mCount).toFixed(1)}%</span>` : ''}
+            </div>
+            <div style="max-height:180px; overflow-y:auto; border: 1px solid #efefef; border-radius:6px; background:#fff;">
+                <table class="detail-table" style="margin:0;">
+                    ${group.chargers.map((c, i) => {
+                const s = meStatsLookup[`${group.statId}_${c.chgerId.padStart(2, '0')}`];
+                const usageStr = s ? `<br/><b style='color:#FA4D56; font-size:10px;'>일평균 ${s.avg_daily_count}건 | ${s.utilization_rate}%</b>` : '';
+                return `<tr><th style="background:#fff; font-weight:bold; color:#444; width:150px;">#${i + 1} (${c.chgerId})</th><td>${c.output}kW (${c.chgerType}) - ${c.busiId}${usageStr}</td></tr>`;
+            }).join('')}
+                </table>
+            </div>`;
+            content.innerHTML = html;
+            panel.style.display = 'block';
+        }
+
+        function showDetail(type, data) {
+            if (type === 'station') { showStationDetail(data); return; }
+            const panel = document.getElementById('info-panel');
+            document.getElementById('info-summary-table').innerHTML = `
+            <tr><th>시설명</th><td><b>${data.건물명 || '-'}</b></td></tr>
+            <tr><th>상세주소</th><td>${data.A2} ${data.A5} <br>${data.도로명대지위치 || ''}</td></tr>
+            <tr><th>용도분류</th><td>${data.A16 || '-'}</td></tr>
+            <tr><th>주차대수</th><td>옥외 ${data['옥외자주식대수(대)'] || 0} / 옥내 ${data['옥내자주식대수(대)'] || 0}</td></tr>`;
+            document.getElementById('additional-land-info').innerHTML = `PNU: ${data.PNU || '-'}<br>지목: ${data.A14 || '-'}`;
+            panel.style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>

@@ -166,6 +166,16 @@
             border: 1px solid #ccc;
         }
 
+        /* Radius Select styling */
+        #radius-select {
+            width: auto !important;
+            padding: 2px 5px !important;
+            margin: 0 !important;
+            font-size: 0.75rem !important;
+            height: 24px;
+            border-color: #ddd;
+        }
+
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -434,6 +444,43 @@
             cursor: pointer;
             accent-color: #0F62FE;
         }
+
+        /* Top-Right Info Box */
+        .data-info-box {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            border: 1px solid #0F62FE;
+            z-index: 1002;
+            font-size: 0.8rem;
+            line-height: 1.8;
+            color: #333;
+            pointer-events: none;
+            min-width: 200px;
+        }
+
+        .data-info-box h4 {
+            margin: 0 0 10px 0;
+            color: #0F62FE;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+        .data-info-item {
+            display: flex;
+            gap: 8px;
+        }
+
+        .data-info-label {
+            font-weight: bold;
+            color: #555;
+            min-width: 65px;
+        }
     </style>
 </head>
 
@@ -465,7 +512,7 @@
                 <div class="layer-toggle-wrap">
                     <label class="layer-toggle-item">
                         <input type="checkbox" id="toggle-cili" checked onchange="toggleCiliLayer(this.checked)">
-                        <span>CILI 격자</span>
+                        <span>CILI</span>
                     </label>
                     <label class="layer-toggle-item">
                         <input type="checkbox" id="toggle-boundary" checked onchange="toggleBoundaryLayer(this.checked)">
@@ -473,8 +520,16 @@
                     </label>
                     <label class="layer-toggle-item">
                         <input type="checkbox" id="toggle-aerial" onchange="toggleAerialLayer(this.checked)">
-                        <span>항공이미지</span>
+                        <span>항공사진</span>
                     </label>
+                    <div style="border-left: 1px solid #ddd; margin-left:5px; padding-left:10px; display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:0.75rem; color:#555;">반경:</span>
+                        <select id="radius-select" onchange="updateMeRadius(this.value)">
+                            <option value="0">감추기</option>
+                            <option value="500">500M</option>
+                            <option value="1000">1KM</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -519,7 +574,21 @@
             </div>
         </div>
 
-        <div id="map"></div>
+        <div id="map">
+            <!-- Data Info Box -->
+            <div class="data-info-box">
+                <h4>데이터 분석 기준</h4>
+                <div class="data-info-item">
+                    <span class="data-info-label">충전소정보</span> <span>OpenAPI</span>
+                </div>
+                <div class="data-info-item">
+                    <span class="data-info-label">충전이력</span> <span>통합관리시스템 (3/25~31)</span>
+                </div>
+                <div class="data-info-item">
+                    <span class="data-info-label">수요신청</span> <span>급속 충전시설 지점관리</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Loading Overlay -->
@@ -558,9 +627,11 @@
 
         const stationMarkers = L.layerGroup().addTo(map);
         const demandMarkers = L.layerGroup().addTo(map);
+        const meRadiusLayers = L.layerGroup().addTo(map);
         let geoJsonLayer = null;
         let boundaryLayer = null;
         let originalCiliData = null;
+        let currentFilteredMeStations = []; // To store locations for radius redraw
 
         // --- Layer Toggle Functions ---
         function toggleCiliLayer(visible) {
@@ -608,6 +679,7 @@
 
         let allStations = [];
         let allDemandData = [];
+        let meStatsLookup = {};
 
         // --- Marker Jitter Logic ---
         const markerPositions = {};
@@ -738,13 +810,57 @@
         // --- Station JSON Loader ---
         function loadStationData() {
             const gzPath = 'demand_data/stat_incheon.json.gz';
+            const meStatPath = 'demand_data/me_charger_stat.json';
+
+            // Load Metadata
             fetch(gzPath)
                 .then(r => r.arrayBuffer())
                 .then(buf => {
                     const decompressed = pako.inflate(new Uint8Array(buf), { to: 'string' });
                     allStations = JSON.parse(decompressed);
+                    if (document.getElementById('guSelect').value) changeRegion();
                 })
                 .catch(e => console.error("Station Load Error:", e));
+
+            // Load ME Stats
+            fetch(meStatPath)
+                .then(r => r.json())
+                .then(data => {
+                    meStatsLookup = {};
+                    data.forEach(stat => {
+                        // Key: statId + _ + zero-padded chgerId
+                        const chgerIdNum = parseInt(stat.chgerId);
+                        const chgerIdPadded = isNaN(chgerIdNum) ? stat.chgerId : chgerIdNum.toString().padStart(2, '0');
+                        const key = `${stat.statId}_${chgerIdPadded}`;
+                        meStatsLookup[key] = stat;
+                    });
+                })
+                .catch(e => console.error("ME Stat Load Error:", e));
+        }
+
+        // --- ME Radius Logic ---
+        function updateMeRadius(radius) {
+            meRadiusLayers.clearLayers();
+            radius = parseInt(radius);
+            if (radius <= 0) return;
+
+            currentFilteredMeStations.forEach(st => {
+                const util = st.avgUtil;
+                // Aggressive thickness for high utilization areas
+                const weight = 1.5 + (util / 4) * 3; // Steep increase: 1.5px base + ~0.75px per 1% util
+                const fillOpacity = 0.05;
+                const strokeOpacity = 0.4 + (util / 30) * 0.4;
+
+                L.circle([st.lat, st.lng], {
+                    radius: radius,
+                    color: '#FA4D56',
+                    weight: Math.min(20, weight), // Cap at 20px for extreme cases
+                    opacity: Math.min(0.9, strokeOpacity),
+                    fillColor: '#FA4D56',
+                    fillOpacity: fillOpacity,
+                    interactive: false
+                }).addTo(meRadiusLayers);
+            });
         }
 
         // --- Tab Management ---
@@ -789,6 +905,7 @@
                     };
                 }
                 stationGroups[id].chargers.push({
+                    chgerId: item.chgerId,
                     output: parseInt(item.output || 0),
                     type: item.chgerType,
                     busiId: item.busiId
@@ -797,6 +914,8 @@
 
             let fastTotal = 0, slowTotal = 0, filteredCount = 0;
             const currentYear = new Date().getFullYear();
+
+            currentFilteredMeStations = []; // Reset for this region
 
             Object.values(stationGroups).forEach(group => {
                 if (isNaN(group.lat) || isNaN(group.lng)) return;
@@ -813,6 +932,31 @@
                 slowTotal += slows;
 
                 const [lat, lng] = getJitteredCoords(group.lat, group.lng);
+
+                // Calculate summary stats if ME exists for radius storage
+                let groupDailyCount = 0;
+                let groupSumUtil = 0;
+                let meCountInGroup = 0;
+
+                group.chargers.forEach(c => {
+                    const chgerIdNum = parseInt(c.chgerId);
+                    const chgerIdPadded = isNaN(chgerIdNum) ? c.chgerId : chgerIdNum.toString().padStart(2, '0');
+                    const key = `${group.statId}_${chgerIdPadded}`;
+                    if (meStatsLookup[key]) {
+                        groupDailyCount += meStatsLookup[key].avg_daily_count;
+                        groupSumUtil += meStatsLookup[key].utilization_rate;
+                        meCountInGroup++;
+                    }
+                });
+                const groupAvgUtil = meCountInGroup > 0 ? (groupSumUtil / meCountInGroup) : 0;
+
+                if (hasME) {
+                    currentFilteredMeStations.push({
+                        lat: lat,
+                        lng: lng,
+                        avgUtil: groupAvgUtil
+                    });
+                }
 
                 let markerHtml = '';
                 if (hasME) {
@@ -851,15 +995,22 @@
                 if (hasME) {
                     const li = document.createElement('li');
                     li.className = `data-list-item ${isOldME ? 'is-old' : ''}`;
+
                     li.innerHTML = `
                         <span class="item-title">${group.statNm} ${isOldME ? '⚠️' : ''}</span>
                         <span class="item-sub">${group.addr}</span>
-                        <span class="item-sub" style="color:#0F62FE;">${group.year}년 설치 | 총 ${count}대</span>
+                        <div style="display:flex; justify-content:space-between; align-items: flex-end;">
+                            <span class="item-sub" style="color:#0F62FE;">${group.year}년 설치 | 총 ${count}대</span>
+                            ${groupDailyCount > 0 ? `<span class="item-sub" style="color:#FA4D56; font-weight:bold; font-size:0.7rem;">일평균 ${groupDailyCount.toFixed(1)}건 | 평균이용률 ${groupAvgUtil.toFixed(1)}%</span>` : ''}
+                        </div>
                     `;
                     li.onclick = () => zoomToLocation(lat, lng, () => showStationDetail(group));
                     meUl.appendChild(li);
                 }
             });
+
+            // Draw radius if already selected
+            updateMeRadius(document.getElementById('radius-select').value);
 
             if (meUl.innerHTML === '') {
                 meUl.innerHTML = '<li style="padding:20px; color:#999; text-align:center; font-size:0.8rem;">검색된 기후부 충전소가 없습니다.</li>';
@@ -956,6 +1107,22 @@
             const fasts = group.chargers.filter(c => c.output >= 50).length;
             const slows = group.chargers.length - fasts;
 
+            // Recalculate summary stats for header
+            let groupDailyCount = 0;
+            let groupSumUtil = 0;
+            let meCountInGroup = 0;
+            group.chargers.forEach(c => {
+                const chgerIdNum = parseInt(c.chgerId);
+                const chgerIdPadded = isNaN(chgerIdNum) ? c.chgerId : chgerIdNum.toString().padStart(2, '0');
+                const key = `${group.statId}_${chgerIdPadded}`;
+                if (meStatsLookup[key]) {
+                    groupDailyCount += meStatsLookup[key].avg_daily_count;
+                    groupSumUtil += meStatsLookup[key].utilization_rate;
+                    meCountInGroup++;
+                }
+            });
+            const groupAvgUtil = meCountInGroup > 0 ? (groupSumUtil / meCountInGroup) : 0;
+
             document.getElementById('detail-title').innerText = `충전소 상세 정보: ${group.statNm}`;
 
             let html = `
@@ -976,15 +1143,28 @@
                     <tr><th>기본 주소</th><td>${group.addr || ''}</td></tr>
                     <tr><th>상세 주소</th><td>${(group.addrDetail && group.addrDetail !== 'null') ? group.addrDetail : ''}</td></tr>
                 </table>
-                <div style="margin-top:15px; font-weight:bold; font-size:0.9rem; border-bottom:1px solid #ccc; padding-bottom:5px;">충전기 목록</div>
+                <div style="margin-top:15px; font-weight:bold; font-size:0.9rem; border-bottom:1px solid #ccc; padding-bottom:5px; display:flex; justify-content:space-between; align-items: baseline;">
+                    <span>충전기 목록</span>
+                    ${hasME && groupDailyCount > 0 ? `
+                        <span style="font-size:0.75rem; color:#FA4D56; font-weight:normal;">
+                            기기당 일평균 ${(groupDailyCount / group.chargers.length).toFixed(1)}건 | 평균이용률 ${groupAvgUtil.toFixed(1)}%
+                        </span>` : ''}
+                </div>
                 <div style="max-height:200px; overflow-y:auto;">
                     <table class="detail-table" style="font-size:12px;">
-                        ${group.chargers.map((c, i) => `
+                        ${group.chargers.map((c, i) => {
+                const chgerIdNum = parseInt(c.chgerId);
+                const chgerIdPadded = isNaN(chgerIdNum) ? c.chgerId : chgerIdNum.toString().padStart(2, '0');
+                const key = `${group.statId}_${chgerIdPadded}`;
+                const stats = meStatsLookup[key];
+                const statInfo = stats ? `<br/><span style="color:#FA4D56; font-weight:bold;">일평균 ${stats.avg_daily_count}건 | 이용률 ${stats.utilization_rate}%</span>` : '';
+                return `
                             <tr>
-                                <th>#${i + 1}</th>
-                                <td>${c.output}kW (${c.type || '타입미정'}) - ${c.busiId}</td>
+                                <th>#${i + 1} (${c.chgerId})</th>
+                                <td>${c.output}kW (${c.type || '타입미정'}) - ${c.busiId}${statInfo}</td>
                             </tr>
-                        `).join('')}
+                            `;
+            }).join('')}
                     </table>
                 </div>
             `;
