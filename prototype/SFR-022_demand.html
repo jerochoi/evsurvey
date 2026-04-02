@@ -45,7 +45,7 @@
         }
 
         .sidebar-section {
-            padding: 20px;
+            padding: 10px;
             border-bottom: 1px solid #f0f0f0;
         }
 
@@ -402,6 +402,38 @@
         .close-btn:hover {
             color: #333;
         }
+
+        /* Layer Toggle Controls - Compact Row */
+        .layer-toggle-wrap {
+            display: flex;
+            flex-direction: row;
+            gap: 12px;
+            padding: 8px 0;
+        }
+
+        .layer-toggle-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            user-select: none;
+            color: #555;
+            white-space: nowrap;
+        }
+
+        .layer-toggle-item:hover {
+            color: #0F62FE;
+        }
+
+        .layer-toggle-item input[type=checkbox] {
+            width: 14px;
+            height: 14px;
+            margin: 0;
+            padding: 0;
+            cursor: pointer;
+            accent-color: #0F62FE;
+        }
     </style>
 </head>
 
@@ -427,7 +459,23 @@
                     <option value="28710">강화군 (28710)</option>
                     <option value="28720">옹진군 (28720)</option>
                 </select>
-                <div id="region-status" style="font-size: 0.75rem; color: #666; margin-top: 5px;"></div>
+            </div>
+
+            <div class="sidebar-section" style="padding: 10px 20px; background: #fafafa;">
+                <div class="layer-toggle-wrap">
+                    <label class="layer-toggle-item">
+                        <input type="checkbox" id="toggle-cili" checked onchange="toggleCiliLayer(this.checked)">
+                        <span>CILI 격자</span>
+                    </label>
+                    <label class="layer-toggle-item">
+                        <input type="checkbox" id="toggle-boundary" checked onchange="toggleBoundaryLayer(this.checked)">
+                        <span>행정구역</span>
+                    </label>
+                    <label class="layer-toggle-item">
+                        <input type="checkbox" id="toggle-aerial" onchange="toggleAerialLayer(this.checked)">
+                        <span>항공이미지</span>
+                    </label>
+                </div>
             </div>
 
             <div class="sidebar-section">
@@ -498,15 +546,53 @@
         // Performance Optimization: Use Canvas
         const map = L.map('map').setView([37.456, 126.705], 11);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        const baseOsm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
+
+        // Aerial/Satellite tile layer (Esri World Imagery - no API key needed)
+        const aerialTile = L.tileLayer(
+            'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+            { attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community' }
+        );
 
         const stationMarkers = L.layerGroup().addTo(map);
         const demandMarkers = L.layerGroup().addTo(map);
         let geoJsonLayer = null;
         let boundaryLayer = null;
         let originalCiliData = null;
+
+        // --- Layer Toggle Functions ---
+        function toggleCiliLayer(visible) {
+            if (!geoJsonLayer) return;
+            if (visible) {
+                map.addLayer(geoJsonLayer);
+            } else {
+                map.removeLayer(geoJsonLayer);
+            }
+        }
+
+        function toggleBoundaryLayer(visible) {
+            if (!boundaryLayer) return;
+            if (visible) {
+                map.addLayer(boundaryLayer);
+            } else {
+                map.removeLayer(boundaryLayer);
+            }
+        }
+
+        function toggleAerialLayer(visible) {
+            if (visible) {
+                map.removeLayer(baseOsm);
+                aerialTile.addTo(map);
+            } else {
+                map.removeLayer(aerialTile);
+                baseOsm.addTo(map);
+            }
+            // Re-ensure overlay layers are on top after base tile change
+            if (geoJsonLayer && map.hasLayer(geoJsonLayer)) geoJsonLayer.bringToBack();
+            if (boundaryLayer && map.hasLayer(boundaryLayer)) boundaryLayer.bringToBack();
+        }
 
         // Constants
         const sggBoundaryMap = {
@@ -604,12 +690,12 @@
         function getColor(grade) {
             const g = parseInt(grade); // Ensure it's a number
             switch (g) {
-                case 1: return '#fca5a5';
-                case 2: return '#fdba74';
-                case 3: return '#fef08a';
-                case 4: return '#bbf7d0';
-                case 5: return '#86efac';
-                default: return '#e5e7eb';
+                case 1: return '#ff0000';
+                case 2: return '#ffa500';
+                case 3: return '#ffff00';
+                case 4: return '#90ee90';
+                case 5: return '#008000';
+                default: return '#cccccc';
             }
         }
 
@@ -620,9 +706,10 @@
                 style: (f) => ({
                     fillColor: getColor(f.properties.grade),
                     weight: 1.5,
-                    opacity: 0.8,
-                    color: '#666666',
-                    fillOpacity: 0.45
+                    opacity: 1,
+                    color: 'white',
+                    dashArray: '3',
+                    fillOpacity: 0.6
                 }),
                 onEachFeature: (f, layer) => {
                     const p = f.properties;
@@ -641,6 +728,10 @@
                 }
             }).addTo(map);
 
+            // Respect toggle checkbox state
+            if (!document.getElementById('toggle-cili').checked) {
+                map.removeLayer(geoJsonLayer);
+            }
             if (geoJsonLayer) geoJsonLayer.bringToBack();
         }
 
@@ -954,11 +1045,11 @@
                 <div class="legend-item"><span class="legend-color" style="background:#F1C21B; border:1.5px solid #333; width:12px; height:12px; border-radius:1px;"></span>수요 신청 지점</div>
                 <hr style="margin:5px 0; border:0; border-top:1px solid #ddd;">
                 <div style="font-weight:bold; margin-bottom:5px;">CILI 등급</div>
-                <div class="legend-item"><span class="legend-color" style="background:#fca5a5;"></span>1등급 (매우 높음)</div>
-                <div class="legend-item"><span class="legend-color" style="background:#fdba74;"></span>2등급</div>
-                <div class="legend-item"><span class="legend-color" style="background:#fef08a;"></span>3등급</div>
-                <div class="legend-item"><span class="legend-color" style="background:#bbf7d0;"></span>4등급</div>
-                <div class="legend-item"><span class="legend-color" style="background:#86efac;"></span>5등급 (매우 낮음)</div>
+                <div class="legend-item"><span class="legend-color" style="background:#ff0000;"></span>1등급 (매우 높음)</div>
+                <div class="legend-item"><span class="legend-color" style="background:#ffa500;"></span>2등급</div>
+                <div class="legend-item"><span class="legend-color" style="background:#ffff00;"></span>3등급</div>
+                <div class="legend-item"><span class="legend-color" style="background:#90ee90;"></span>4등급</div>
+                <div class="legend-item"><span class="legend-color" style="background:#008000;"></span>5등급 (매우 낮음)</div>
             `;
             return div;
         };
