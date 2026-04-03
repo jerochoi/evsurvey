@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link type="text/css" rel="stylesheet" href="../prototype.css">
     <style>
         body,
         html {
@@ -42,7 +43,6 @@
             font-size: 1.2rem;
             margin-bottom: 10px;
             color: #343a40;
-            border-bottom: 2px solid #007bff;
             padding-bottom: 5px;
             display: flex;
             justify-content: space-between;
@@ -246,6 +246,40 @@
 </head>
 
 <body>
+    <button class="btn-floating-help" style="width: auto !important;" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title" style="justify-content: flex-start !important;">
+                    <span class="help-title-icon">🗺️</span> CILI 지수 시뮬레이터 가이드
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 전기차 충전소 최적 입지 선정을 위한 <b>CILI를 시뮬레이션</b>하는 도구입니다. 지표별 가중치를 조정하여 정밀한 입지 타당성 스코어를 산출합니다.
+                    </p>
+                </div>
+
+                <h3 class="help-subtitle">[시뮬레이션 방법]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">🎚️ 가중치 조정</td>
+                        <td class="help-col-desc">대분류(PDI, UCI 등) 및 하위 세부지표의 슬라이더를 조절합니다. 각 그룹 내 합계는 자동으로 1.0(100%)으로 유지됩니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🔄 지수 맵 재생산</td>
+                        <td class="help-col-desc">'지수 맵 재생산' 버튼을 클릭하면 변경된 가중치가 적용된 5단계 등급 지도가 즉시 렌더링됩니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">📂 설정 저장/로드</td>
+                        <td class="help-col-desc">분석한 가중치 조합을 이름 붙여 저장하거나, 이전에 저장된 설정을 불러와 비교 분석할 수 있습니다.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
     <div id="container">
         <div id="sidebar">
             <h2>
@@ -273,7 +307,7 @@
 
                 베이스 지표 데이터 버전:
                 <select id="dataVersionSelect" onchange="loadDistrictData()" style="padding:5px; width:100%; border:1px solid #ddd; border-radius:3px; margin-top:5px;">
-                    <option value="v1.1" selected>v1.1 (2026년 3월 정기 업로드)</option>
+                    <option value="v1.1" selected>v1.1 (2026년 3월)</option>
                     <option value="v1.0">v1.0 (2025년 4분기 원본)</option>
                 </select>
             </div>
@@ -490,7 +524,6 @@
                         document.getElementById('disp_w_' + k).innerText = v.toFixed(3);
                     }
                 }
-                alert(`가중치 정보를 장부로부터 불러왔습니다.\n(저장 시 보정된 합산 1의 수치 적용됨)`);
                 calculateAndStyle(); // 즉시 맵 재계산
             }
         }
@@ -600,10 +633,19 @@
 
 
 
-        // Start
-        createWeightControls();
-        loadDistrictData();
+        window.onload = function () {
+            createWeightControls();
+            loadDistrictData();
+        };
 
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
     </script>
 </body>
 

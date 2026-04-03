@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CILI 지표 데이터 버전 및 업로드 관리</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="../prototype.css">
     <style>
         :root {
             --primary: #0F62FE;
@@ -148,6 +149,46 @@
 </head>
 
 <body>
+    <button class="btn-floating-help" style="width: auto !important;" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">📁</span> CILI 지표 데이터 관리 가이드
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 시뮬레이터 분석의 기초가 되는 <b>원천 데이터셋을 업로드하고 관리</b>하는 시스템 관리자용 화면입니다. 데이터의 무결성을 정밀하게 검증합니다.
+                    </p>
+                </div>
+
+                <h3 class="help-subtitle">[워크플로우 핵심 가이드]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">📤 지표 데이터 업로드</td>
+                        <td class="help-col-desc">PDI, UCI 등 개별 지표 그룹별로 가공된 최신 정보 파일을 시스템에 등록합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🧪 자동 유효성 검증</td>
+                        <td class="help-col-desc">업로드 즉시 <b>파일 포맷, CRS(좌표계), 격자 매핑, 스키마</b> 등 4가지 관점에서 자동 검증을 수행하여 오류를 사전 차단합니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">🚀 마스터 모델 배포</td>
+                        <td class="help-col-desc">업로드 완료된 각 지표 모듈들을 통합하여 시뮬레이터에 즉시 적용 가능한 '최종 master 버전'으로 빌드 및 배포합니다.</td>
+                    </tr>
+                </table>
+
+                <h3 class="help-subtitle" style="margin-top:24px;">[데이터 준비 주의사항]</h3>
+                <ul class="help-list">
+                    <li>좌표계는 반드시 <strong>EPSG:4326 (WGS84)</strong> 형식을 준수해야 지도상에 정합성을 가집니다.</li>
+                    <li>기존 로드된 격자(Grid) 셀 번호 컬럼이 누락되지 않았는지 확인 후 업로드하십시오.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
     <header class="top-header">
         <div class="header-logo" style="font-weight:700;">시스템 관리자 <span style="font-weight:400; font-size:15px; margin-left:8px;">| CILI 지표 데이터 관리</span></div>
     </header>
@@ -299,6 +340,15 @@
                     tb.insertAdjacentHTML('afterbegin', newRow);
                 }
             }, 800);
+        }
+
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
         }
     </script>
 </body>

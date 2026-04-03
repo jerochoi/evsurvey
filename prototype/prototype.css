@@ -58,6 +58,8 @@
 
 .help-modal-body {
     padding: 30px;
+    max-height: 70vh;
+    overflow-y: auto;
 }
 
 .help-close-btn {
@@ -135,7 +137,8 @@
     border: 1px solid #e0e0e0;
     border-radius: 8px;
     overflow: hidden;
-    overflow-wrap: break-word; /* 넘치는 텍스트 줄바꿈 */
+    overflow-wrap: break-word;
+    /* 넘치는 텍스트 줄바꿈 */
 }
 
 .help-table tr.alt-row {
@@ -153,7 +156,8 @@
 .help-table td {
     padding: 14px 18px;
     line-height: 1.6;
-    vertical-align: middle; /* 중앙 정렬 유지 */
+    vertical-align: middle;
+    /* 중앙 정렬 유지 */
     border-bottom: 1px solid #eee;
 }
 

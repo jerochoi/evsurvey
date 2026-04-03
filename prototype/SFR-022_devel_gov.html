@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- pako for client-side gzip decompression -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="prototype.css">
     <style>
         body,
         html {
@@ -197,6 +198,55 @@
 </head>
 
 <body>
+    <button class="btn-floating-help" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">🏢</span> 수요발굴-국공유지 추출
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 국공유지 필지 데이터와 건축물대장 정보를 결합하여, 전기차 충전기 설치가 가능한 <b>유휴 부지와 유망 입지를 발굴</b>하기 위한 전용 분석 도구입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>정부 및 지자체 소유 부지의 위치와 토지대장/건축물대장 속성 정보를 한눈에 확인합니다.</li>
+                        <li>기존 충전소 분포와 교차 분석하여 인프라 사각지대에 위치한 국공유지를 우선 발굴합니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[분석 도구 활용 안내]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">🟩 국공유지 부지 분석</td>
+                        <td class="help-col-desc">인천 서구 내 국유지(초록) 및 공유지(주황) 필지를 매핑하여 설치 가능한 유휴 부지를 시각화합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">📄 건축물대장 연동</td>
+                        <td class="help-col-desc">선택한 필지의 주차 대수 및 용도 정보를 즉시 확인하여, 충전기 설치 행정 절차 및 물리적 공간 확보 가능성을 점검합니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">📍 충전 인프라 중첩</td>
+                        <td class="help-col-desc">기존 충전소 위치와 함께 표시하여, 주변 인프라가 부족하면서도 주차 공간이 확보된 필지를 선별합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">📡 서비스 반경 분석</td>
+                        <td class="help-col-desc">기본 인프라(ME)의 500m/1km 영향권을 오버레이하여 중복 투자를 방지하고 효율적인 입지 선정을 지원합니다.</td>
+                    </tr>
+                </table>
+
+                <h3 class="help-subtitle" style="margin-top:24px;">[부지 발굴 전략]</h3>
+                <div class="help-desc-box" style="background:#f0fffa; border-left-color:#28a745;">
+                    <ul class="help-list">
+                        <li><strong>우선순위:</strong> 옥외 자주식 주차 공간이 확보된 국유지 중, 기존 충전소 서비스 반경 밖에 위치한 필지를 최우선 타겟으로 삼습니다.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div id="sidebar">
         <h2>수요발굴(토지-국공유지, 건축물대장 활용)</h2>
@@ -398,6 +448,15 @@
             <tr><th>주차대수</th><td>옥외 ${data['옥외자주식대수(대)'] || 0} / 옥내 ${data['옥내자주식대수(대)'] || 0}</td></tr>`;
             document.getElementById('additional-land-info').innerHTML = `PNU: ${data.PNU || '-'}<br>지목: ${data.A14 || '-'}`;
             panel.style.display = 'block';
+        }
+
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
         }
     </script>
 </body>

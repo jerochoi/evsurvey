@@ -7,6 +7,7 @@
     <title>인천광역시 전기차 충전기 수요조사 관리</title>
     <!-- Leaflet & CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link type="text/css" rel="stylesheet" href="prototype.css">
     <style>
         body,
         html {
@@ -448,14 +449,14 @@
         /* Top-Right Info Box */
         .data-info-box {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            bottom: 20px;
+            right: 220px;
             background: rgba(255, 255, 255, 0.95);
             padding: 15px;
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
             border: 1px solid #0F62FE;
-            z-index: 1002;
+            z-index: 1001;
             font-size: 0.8rem;
             line-height: 1.8;
             color: #333;
@@ -485,6 +486,52 @@
 </head>
 
 <body>
+    <button class="btn-floating-help" style="width: auto !important;" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">📊</span> 수요조사 관리 및 입지 타당성 분석
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 접수된 <b>전기차 충전기 수요신청 현황을 GIS(지도) 기반으로 통합 관리</b>하고, 주변 인프라 데이터를 결합하여 설치 타당성을 다각도로 검토하기 위한 화면입니다.
+                    </p>
+                    <ul class="help-list">
+                        <li>신규 신청 건에 대해 주변 환경과 과거 이력을 대조하여 '수용 여부'를 정밀하게 판단합니다.</li>
+                        <li>단순 위치 확인을 넘어 기후부 충전기의 실질 이용률과 CILI 등급을 연계한 입지 분석 기능을 제공합니다.</li>
+                    </ul>
+                </div>
+
+                <h3 class="help-subtitle">[분석 및 관리 기능 안내]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">📑 수요 생애주기 관리</td>
+                        <td class="help-col-desc">과거 취소된 지점, 현재 진행 중인 곳, 신규 신청 지점을 지도상에 통합 노출하여 중복 신청 방지 및 누적 히스토리를 관리합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">📍 정밀 입지 매핑</td>
+                        <td class="help-col-desc">해당 격자의 <b>CILI 등급</b>을 확인하여 객관적인 설치 우선순위를 점검합니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">📡 주변 환경 연계</td>
+                        <td class="help-col-desc">인근 민간/공용 충전소 분포와 함께 <b>기후부(ME) 충전기의 이용률 통계</b>를 오버레이하여 서비스 과잉 또는 공백 여부를 판별합니다.</td>
+                    </tr>
+                </table>
+
+                <h3 class="help-subtitle" style="margin-top:24px;">[관리자 의사결정 지원]</h3>
+                <div class="help-desc-box" style="background:#f0f7ff;">
+                    <ul class="help-list">
+                        <li><strong>신규 수용 검토:</strong> 신청 지점 주변의 기존 충전소 이용률이 현저히 낮거나, 이미 반경 내에 충분한 시설이 있는 경우 '미수용' 또는 '입지 조정'을 검토할 수 있습니다.</li>
+                        <li><strong>이력 추적:</strong> 과거에 신청했다가 취소된 지점과 신규 건이 겹칠 경우, 사전에 취소 사유를 파악하여 불필요한 행정 소요를 줄입니다.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
     <div id="app">
         <div id="sidebar">
             <div id="sidebar-header">
@@ -1240,6 +1287,14 @@
             loadDemandCsv();
         });
 
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
     </script>
 </body>
 

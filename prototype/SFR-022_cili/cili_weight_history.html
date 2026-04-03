@@ -7,6 +7,7 @@
     <title>CILI 사용자 가중치 이력 관리</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link type="text/css" rel="stylesheet" href="../prototype.css">
     <style>
         :root {
             --primary: #0F62FE;
@@ -115,6 +116,46 @@
 </head>
 
 <body>
+    <button class="btn-floating-help" style="width: auto !important;" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    <span class="help-title-icon">🕒</span> CILI 가중치 이력 관리 가이드
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        본 화면은 시뮬레이터에서 저장된 <b>CILI 지표 가중치 구성의 변경 이력</b>을 추적하고 점검하는 관리 화면입니다. 다양한 분석 주체와 시나리오별 가중치 추이를 한눈에 확인할 수 있습니다.
+                    </p>
+                </div>
+
+                <h3 class="help-subtitle">[이력 관리 활용 가이드]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">🔍 이력 조회</td>
+                        <td class="help-col-desc">각 기관 담당자가 저장한 시나리오 명칭, 저장 일시, 가중치 세부값(PDI~DI)을 목록에서 확인합니다.</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">📉 변동 추이 시각화</td>
+                        <td class="help-col-desc">하단 차트를 통해 최근 5개의 주요 설정값들이 어떻게 변화했는지 비교 분석하여 모델의 신뢰성을 점검합니다.</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">⚖️ 기준 모델 설정</td>
+                        <td class="help-col-desc">'기본값 적용' 기능을 통해 특정 시나리오를 기본 분석 모델로 채택하거나 복구할 수 있습니다.</td>
+                    </tr>
+                </table>
+
+                <h3 class="help-subtitle" style="margin-top:24px;">[분석 인사이트]</h3>
+                <ul class="help-list">
+                    <li>환경 중심, 수요 중심 등 각기 다른 정책 목표에 따른 가중치 분석 결과의 차이를 확인합니다.</li>
+                    <li>사용자들이 어떤 지표에 가중치를 부여해서 이용하는지 확인합니다.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
     <header class="top-header">
         <div class="header-logo" style="font-weight:700;">시스템 관리자 <span style="font-weight:400; font-size:15px; margin-left:8px;">| CILI 지표 가중치 이력 관리</span></div>
     </header>
@@ -234,10 +275,10 @@
             type: 'bar',
             data: {
                 labels: [
-                    '인천시 충전기반 확충안', 
-                    '환경영향 (17.5%) 중심안', 
-                    '이용편의 (70%) 극대화안', 
-                    '잠재수요 (70%) 중심 설정안', 
+                    '인천시 충전기반 확충안',
+                    '환경영향 (17.5%) 중심안',
+                    '이용편의 (70%) 극대화안',
+                    '잠재수요 (70%) 중심 설정안',
                     '환경, 재난 배제 가중치'
                 ],
                 datasets: [
@@ -250,6 +291,15 @@
             },
             options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true, max: 1 } } }
         });
+
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
     </script>
 </body>
 
