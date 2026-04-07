@@ -236,6 +236,42 @@
                 padding: 40px;
             }
         }
+
+        /* Print styling for PDF export */
+        @media print {
+            .sidebar {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                padding: 0 !important;
+                max-width: 100% !important;
+            }
+
+            .page-section {
+                page-break-inside: avoid;
+                margin-bottom: 40px;
+            }
+
+            .list-box, .callout, .link-card {
+                page-break-inside: avoid;
+            }
+
+            .doc-title {
+                font-size: 2rem;
+            }
+
+            body {
+                background-color: white !important;
+            }
+
+            /* Ensure links are readable but not clicking in PDF if needed */
+            .link-card {
+                border: 1px solid var(--border) !important;
+                background-color: white !important;
+            }
+        }
     </style>
 </head>
 
