@@ -255,6 +255,7 @@
                 <a href="#cili-system" class="nav-item">CILI 시뮬레이션 체계</a>
                 <a href="#demand-system" class="nav-item">수요조사 관리 고도화</a>
                 <a href="#stats-system" class="nav-item">통계 기반 인프라 분석</a>
+                <a href="#analysis-reports" class="nav-item">주제별 심층 입지 분석 리포트</a>
                 <a href="#future-schedule" class="nav-item">향후 일정</a>
             </div>
 
@@ -315,8 +316,9 @@
                 <p>기존의 정적인 위치 선정 정보를 동적 시뮬레이션 체계로 전환하여 정책 수용성을 높였습니다.</p>
                 <div class="list-box">
                     <ul>
-                        <li><strong>지표 데이터 버전 관리:</strong> 원천 지표 데이터를 버전화하여 관리하고 시뮬레이션에 즉시 투입할 수 있는 환경을 제공합니다.</li>
-                        <li><strong>사용자 맞춤형 가중치 제어:</strong> 특정 권한 사용자가 가중치를 직접 슬라이더로 조절하여 최적의 CILI 등급을 도출합니다.</li>
+                        <li><strong>AS-IS 개선:</strong> 기존 '급속/완속 충전시설 지점관리' 시스템의 지표 및 가중치 선정 화면에 최신 데이터와 고도화된 연산 로직을 적용합니다.</li>
+                        <li><strong>신규 개발 (시뮬레이터):</strong> 가중치 조절을 통한 지산출 시뮬레이션을 신규 화면으로 제공합니다. (지자체, 공공기관, 민간 사업자 등 권한 기반 제공 제안)</li>
+                        <li><strong>지포 데이터 버전 관리:</strong> 원천 지표 데이터를 버전화하여 관리하고 시뮬레이션에 즉시 투입할 수 있는 환경을 제공합니다.</li>
                         <li><strong>가중치 이력 추적:</strong> 사용자가 저장한 가중치 설정 내역을 관리자가 조회하여 정책 방향성을 모니터링합니다.</li>
                     </ul>
                 </div>
@@ -350,6 +352,7 @@
                 <p>단순 신청 접수 중심에서 분석 기반의 '전략적 신청' 환경으로 개편하였습니다.</p>
                 <div class="list-box">
                     <ul>
+                        <li><strong>AS-IS 개선:</strong> 기존 단순 접수 중심의 관리 화면에 인프라 분석 데이터(이용량, 노후도 등)와 GIS 정보를 연계하여 행정 효율성을 증대합니다.</li>
                         <li><strong>주변 인프라 시각화:</strong> 신청지 반경 내 기존 충전소 정보, 이용량, 노후도를 오버레이하여 중복 설치를 방지합니다.</li>
                         <li><strong>과거 신청 이력 연동:</strong> 동일 부지에 대한 과거 미선정 사유나 신청 히스토리를 지도상에 표출하여 행정을 효율화합니다.</li>
                     </ul>
@@ -416,11 +419,11 @@
             <section id="analysis-reports" class="page-section">
                 <h2>7. 주제별 심층 입지 분석 리포트</h2>
                 <p>국공유지 및 건축물 특성을 활용한 정밀한 수요 발굴 모델링 결과입니다.</p>
-                <div class="callout" style="border-left-color: #0F62FE; background-color: #F0F6FF;">
-                    <strong style="color: #0F62FE;">분석 인사이트 (Insights)</strong>
-                    <ul style="font-size: 0.9rem; margin-top: 10px; color: #333; padding-left: 20px;">
-                        <li><strong>국공유지 부지 활용성:</strong> 충전 취약 지역 내 소유 구분이 '국유지' 또는 '공유지'인 필지를 우선 추출하여, 부지 확보가 용이하고 즉시 설치 가능한 수요 발굴의 핵심 후보지로 활용할 수 있습니다.</li>
-                        <li><strong>건축물 속성 정밀 배분:</strong> 보다 정교한 수요 예측을 위해, 기 설치된 충전소의 명칭과 위치 정보를 기반으로 해당 건축물의 세부 속성(상업/주거/공공 등)을 역으로 매핑하여 분석하는 체계가 필요합니다.</li>
+                <div class="list-box">
+                    <ul>
+                        <li><strong>신규 개발 (결합 분석):</strong> 국공유지, 건축물 대장, 충전 취약 지역 데이터를 융합하여 최적 후보지를 자동 발굴하고 결과를 추출하는 분석 인터페이스를 구축합니다.</li>
+                        <li><strong>국공유지 부지 활용성:</strong> 충전 취약 지역 내 소유 구분이 '국유지' 또는 '공유지'인 필지를 우선 추출하여 핵심 후보지로 활용합니다.</li>
+                        <li><strong>건축물 속성 정밀 배분:</strong> 기 설치된 충전소 명칭/위치 기반으로 건축물 세부 속성을 역으로 매핑하는 분석 체계를 강화합니다.</li>
                     </ul>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
