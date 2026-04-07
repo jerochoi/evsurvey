@@ -254,7 +254,9 @@
                 margin-bottom: 40px;
             }
 
-            .list-box, .callout, .link-card {
+            .list-box,
+            .callout,
+            .link-card {
                 page-break-inside: avoid;
             }
 
@@ -266,16 +268,59 @@
                 background-color: white !important;
             }
 
-            /* Ensure links are readable but not clicking in PDF if needed */
             .link-card {
                 border: 1px solid var(--border) !important;
                 background-color: white !important;
             }
+
+            /* Logo Header & Footer for Print */
+            .print-header {
+                display: block !important;
+                position: absolute; /* Only first page */
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 50px;
+            }
+
+            .print-footer {
+                display: block !important;
+                position: fixed; /* Every page */
+                bottom: 0px;
+                right: 0px;
+                width: 100%;
+                height: 40px;
+                text-align: right;
+            }
+
+            .print-header img,
+            .print-footer img {
+                height: 35px;
+                object-fit: contain;
+            }
+
+            /* Adjust content to not overlap with fixed logos */
+            body {
+                margin-top: 70px !important; /* Enough space for header */
+                margin-bottom: 50px !important;
+            }
+        }
+
+        .print-header,
+        .print-footer {
+            display: none;
         }
     </style>
 </head>
 
 <body>
+    <!-- Print-only elements -->
+    <div class="print-header">
+        <img src="./환경공단CI.jpg" alt="환경공단">
+    </div>
+    <div class="print-footer">
+        <img src="./모비젠CI.png" alt="모비젠">
+    </div>
 
     <div class="layout">
         <!-- Sidebar -->
