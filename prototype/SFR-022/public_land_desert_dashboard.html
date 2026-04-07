@@ -321,20 +321,39 @@
             <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
             <div class="help-modal-header">
                 <h2 class="help-title">
-                    🏜️ 국공유지 충전 취약 지역(Desert) 분석 대시보드
+                    🏜️ 국공유지 충전 취약 지역(사각지대) 분석 대시보드
                 </h2>
             </div>
             <div class="help-modal-body">
                 <div class="help-desc-box">
                     <p class="help-desc-text">
-                        충전기 설치가 부족한 취약 지역(사각지대)과 국공유지를 겹쳐 표시하여, 공공 주도의 충전기 확충 입지를 선정하기 위한 분석 화면입니다.
+                        충전기 보급이 저조한 취약 지역(사각지대)과 실제 활용 가능한 국공유지 정보를 지도상에 오버레이하여, 공공 주도의 충전 인프라 확충을 위한 최적의 거점을 발굴하는 분석 화면입니다.
                     </p>
                 </div>
+                <h3 class="help-subtitle">[주요 기능]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">📑 격자 기반 취약도 분석</td>
+                        <td class="help-col-desc">기존 충전기와의 거리를 계산하여 최우선(500m+), 보완(200~500m) 등의 취약 단계를 시각화</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🔲 국공유지 교차 필터링</td>
+                        <td class="help-col-desc">행정동별 분포, 지목별(대, 주차장, 공원 등) 통계를 통해 실제 즉시 활용 가능한 유휴 부지 선별</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">📍 부지 속성 연동</td>
+                        <td class="help-col-desc">개별 후보지의 소유 기관, 관리 부서, 지목, 주차 가능 면수 등 행정 정보를 팝업으로 즉각 확인</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">📋 우선순위 리스트</td>
+                        <td class="help-col-desc">취약도가 높고 활용성이 좋은 상위 100개 후보지를 자동으로 추출</td>
+                    </tr>
+                </table>
                 <h3 class="help-subtitle">[주요 확인 사항]</h3>
                 <div class="help-desc-box" style="background:#f0f7ff;">
                     <ul class="help-list">
-                        <li><strong>분석 목표:</strong> 격자별 충전 취약도 확인</li>
-                        <li><strong>의사 결정:</strong> 인근 국공유지 활용 가능 대상지 발굴</li>
+                        <li><strong>분석 목표:</strong> 충전 취약 지역 내 국공유지 기반의 신규 입지 후보군 도출</li>
+                        <li><strong>의사 결정:</strong> 공공 부지 활용을 통한 예산 절감 및 취약 지역 인프라 보급 우선순위 결정</li>
                     </ul>
                 </div>
             </div>

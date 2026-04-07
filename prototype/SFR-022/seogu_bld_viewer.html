@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <title>인천 서구 GIS 건물정보 및 충전 사각지대 분석</title>
@@ -13,63 +14,202 @@
             --bg: #F4F7FB;
             --sidebar-w: 360px;
         }
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Pretendard', sans-serif; overflow: hidden; background: var(--bg); }
-        
-        #map { height: 100%; width: calc(100% - var(--sidebar-w)); margin-left: var(--sidebar-w); }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Pretendard', sans-serif;
+            overflow: hidden;
+            background: var(--bg);
+        }
+
+        #map {
+            height: 100%;
+            width: calc(100% - var(--sidebar-w));
+            margin-left: var(--sidebar-w);
+        }
 
         #sidebar {
-            position: absolute; left: 0; top: 0; width: var(--sidebar-w); height: 100%;
-            background: #fff; z-index: 1000; box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-            display: flex; flex-direction: column; padding: 20px; box-sizing: border-box;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: var(--sidebar-w);
+            height: 100%;
+            background: #fff;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
             overflow-y: auto;
         }
 
-        h1 { font-size: 1.25rem; margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 12px; }
-        .stats { font-size: 0.85rem; color: #666; margin-bottom: 15px; }
+        h1 {
+            font-size: 1.25rem;
+            margin-top: 0;
+            color: var(--primary);
+            border-bottom: 2px solid var(--bg);
+            padding-bottom: 12px;
+        }
 
-        .section-title { font-weight: bold; font-size: 0.95rem; margin: 15px 0 10px; color: #333; display: flex; align-items: center; gap: 8px; }
-        
-        .filter-section { margin-bottom: 10px; }
-        .filter-item { 
-            display: flex; align-items: center; padding: 8px 12px; margin-bottom: 6px; 
-            border-radius: 8px; font-size: 0.9rem; cursor: pointer; transition: 0.2s;
+        .stats {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-weight: bold;
+            font-size: 0.95rem;
+            margin: 15px 0 10px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-section {
+            margin-bottom: 10px;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
             border: 1px solid #eee;
         }
-        .filter-item:hover { background: #f8f9ff; }
-        .filter-item input { margin-right: 12px; accent-color: var(--primary); transform: scale(1.1); }
-        .color-tag { width: 14px; height: 14px; border-radius: 3px; margin-right: 8px; border: 1px solid rgba(0,0,0,0.1); }
+
+        .filter-item:hover {
+            background: #f8f9ff;
+        }
+
+        .filter-item input {
+            margin-right: 12px;
+            accent-color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .color-tag {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            margin-right: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
 
         .analysis-box {
-            background: #fff5f5; border: 1px solid #ffcfcf; padding: 12px; border-radius: 10px; margin-bottom: 15px;
+            background: #fff5f5;
+            border: 1px solid #ffcfcf;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
         }
 
         .loading-overlay {
-            position: fixed; inset: 0; background: rgba(255,255,255,0.8); 
-            z-index: 2000; display: flex; align-items: center; justify-content: center;
-            font-weight: bold; flex-direction: column; gap: 15px;
-        }
-        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .popup-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
-        .popup-table th, .popup-table td { text-align: left; padding: 4px 8px; border-bottom: 1px solid #eee; }
-        .popup-table th { background: #f9f9f9; color: #888; font-weight: normal; width: 120px; }
-        .popup-title { font-weight: bold; font-size: 1rem; color: var(--primary); margin-bottom: 5px; }
-
-        .detail-panel { 
-            position: fixed; bottom: 20px; left: 380px; background: #fff; z-index: 1500; 
-            padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); 
-            width: 320px; display: none; border-left: 5px solid var(--primary);
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-direction: column;
+            gap: 15px;
         }
 
-        .btn-sm { padding: 4px 8px; font-size: 11px; cursor: pointer; border: 1px solid #ddd; background: #fff; border-radius: 4px; }
-        .btn-sm:hover { background: #f0f0f0; }
-        .btn-sm.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .popup-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .popup-table th,
+        .popup-table td {
+            text-align: left;
+            padding: 4px 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .popup-table th {
+            background: #f9f9f9;
+            color: #888;
+            font-weight: normal;
+            width: 120px;
+        }
+
+        .popup-title {
+            font-weight: bold;
+            font-size: 1rem;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .detail-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 380px;
+            background: #fff;
+            z-index: 1500;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            width: 320px;
+            display: none;
+            border-left: 5px solid var(--primary);
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 11px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            background: #fff;
+            border-radius: 4px;
+        }
+
+        .btn-sm:hover {
+            background: #f0f0f0;
+        }
+
+        .btn-sm.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
     </style>
     <link type="text/css" rel="stylesheet" href="../prototype.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
 </head>
+
 <body>
 
     <button class="btn-floating-help" style="width: auto !important; z-index:9999;" onclick="toggleHelpModal()">💬 화면 설명</button>
@@ -84,14 +224,33 @@
             <div class="help-modal-body">
                 <div class="help-desc-box">
                     <p class="help-desc-text">
-                        건축물대장 데이터와 GIS를 결합하여, 관내 건물의 용도, 연면적, 세대수 등을 지도상에서 확인하는 시스템입니다.
+                        건축물대장의 정밀 속성 데이터와 GIS 공간 정보를 결합하여, 관내 건축물의 물리적 특성뿐만 아니라 충전 사각지대 및 거점 단지를 종합적으로 분석하고 시뮬레이션하는 인터페이스입니다.
                     </p>
                 </div>
+                <h3 class="help-subtitle">[주요 기능]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">📑 건축물 용도별 가시화</td>
+                        <td class="help-col-desc">공동주택, 업무시설 등 8대 주요 용도별로 건물을 분류하여 지도상에 컬러링 및 필터링 제공</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🔲 사각지대 시뮬레이션</td>
+                        <td class="help-col-desc">기존 급속 충전소로부터의 서비스 경계(1km)를 시각화하여 인프라 증설이 필요한 음영 구역을 탐색</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">📍 추천 거점(Hubs) 추출</td>
+                        <td class="help-col-desc">배후 수요와 접근성을 고려한 최적의 거점 후보지를 표출</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">📋 개별 건물 속성 조회</td>
+                        <td class="help-col-desc">클릭 한 번으로 건물의 PNU, 실제 주소, 세대수/주차수, 사용승인일 등 상세 건축 정보 확인</td>
+                    </tr>
+                </table>
                 <h3 class="help-subtitle">[주요 확인 사항]</h3>
                 <div class="help-desc-box" style="background:#f0f7ff;">
                     <ul class="help-list">
-                        <li><strong>분석 목표:</strong> 개별 건축물의 물리적 특성 확인</li>
-                        <li><strong>의사 결정:</strong> 건축물 규모 기반의 충전 인프라 잠재 수요 추정</li>
+                        <li><strong>분석 목표:</strong> 건축물 데이터 기반의 충전 인프라 잠재 수요와 보급 사각지대의 정합성 분석</li>
+                        <li><strong>의사 결정:</strong> 건물 밀집도와 노후도를 고려한 거점형 급속 충전소 신규 구축 입지 선정</li>
                     </ul>
                 </div>
             </div>
@@ -107,7 +266,7 @@
     <div id="sidebar">
         <h1>서구 EV 입지 분석 시스템</h1>
         <div id="info-summary" class="stats">데이터 로딩 중...</div>
-        
+
         <div style="margin-bottom:20px;">
             <div class="section-title">🗺️ 배경 지도</div>
             <div style="display:flex; gap:5px;">
@@ -162,15 +321,15 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         const map = L.map('map', { preferCanvas: true }).setView([37.545, 126.68], 12);
-        
+
         // Base Layers
-        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
-            attribution: '&copy; OSM', opacity: 0.8 
+        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OSM', opacity: 0.8
         });
         const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             attribution: 'Tiles &copy; Esri'
         });
-        
+
         osm.addTo(map);
         let currentBase = osm;
 
@@ -183,7 +342,7 @@
         }
 
         const colorMap = {
-            '01': '#28a745', '02': '#0062FF', '03': '#F1C21B', '04': '#E67E22', 
+            '01': '#28a745', '02': '#0062FF', '03': '#F1C21B', '04': '#E67E22',
             '14': '#8A3FFC', '17': '#FA4D56', '07': '#007D79', 'default': '#A8A8A8'
         };
 
@@ -203,7 +362,7 @@
                     if (!res.ok) return null;
                     if (url.includes('.gz')) {
                         const buf = await res.arrayBuffer();
-                        return JSON.parse(pako.ungzip(new Uint8Array(buf), {to: 'string'}));
+                        return JSON.parse(pako.ungzip(new Uint8Array(buf), { to: 'string' }));
                     }
                     return await res.json();
                 };
@@ -214,12 +373,12 @@
                     fetchJson('data/seogu_fast_shadow_poly.geojson'),
                     fetchJson('data/seogu_shadow_hubs.geojson')
                 ]);
-                
+
                 data.coll = dColl; data.gen = dGen; data.shadow = dShadow; data.hubs = dHubs;
-                
+
                 // Count Stats
                 const counts = { coll: {}, gen: {} };
-                [ 'coll', 'gen' ].forEach(t => {
+                ['coll', 'gen'].forEach(t => {
                     if (data[t]) data[t].features.forEach(f => {
                         const code = (f.properties.A29 || '').substring(0, 2);
                         counts[t][code] = (counts[t][code] || 0) + 1;
@@ -227,7 +386,7 @@
                 });
 
                 document.getElementById('info-summary').innerText = `건물: ${dColl.features.length + dGen.features.length}동 / 후보지: ${dHubs ? dHubs.features.length : 0}곳`;
-                
+
                 renderFilters('coll', counts.coll);
                 renderFilters('gen', counts.gen);
 
@@ -241,7 +400,7 @@
 
         function renderFilters(type, counts) {
             const container = document.getElementById('filters-' + type);
-            Object.entries(counts).sort((a,b) => b[1] - a[1]).forEach(([code, count]) => {
+            Object.entries(counts).sort((a, b) => b[1] - a[1]).forEach(([code, count]) => {
                 const name = usageNames[code] || code;
                 const div = document.createElement('div');
                 div.className = 'filter-item';
@@ -295,7 +454,7 @@
                 if (data[t]) {
                     layers[t] = L.geoJSON(data[t], {
                         filter: f => activeSets[t].has((f.properties.A29 || '').substring(0, 2)),
-                        style: f => ({ 
+                        style: f => ({
                             fillColor: colorMap[(f.properties.A29 || '').substring(0, 2)] || colorMap.default,
                             weight: 1, color: 'white', fillOpacity: t === 'coll' ? 0.7 : 0.4
                         }),
@@ -334,4 +493,5 @@
     </script>
 
 </body>
+
 </html>

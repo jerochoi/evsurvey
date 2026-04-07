@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>인천 전기차 충전소 연도별 구축 현황</title>
+    <title>전기차 충전소 연도별 구축 현황</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
@@ -270,26 +270,44 @@
             <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
             <div class="help-modal-header">
                 <h2 class="help-title">
-                    📅 인천시 전기차 충전기 보급 타임라인
+                    📅 전기차 충전기 보급 타임라인
                 </h2>
             </div>
             <div class="help-modal-body">
                 <div class="help-desc-box">
                     <p class="help-desc-text">
-                        인천시 구별/연도별 전기차 충전기 보급 추이를 시계열 형태로 시각화하여, 설치 속도 및 증가율을 파악하는 대시보드입니다.
+                        전기차 충전기 보급 역사를 시계열(Time-Series) 데이터로 재구성하여 연도별 구축 속도와 지역별 증가 추이를 동적으로 분석하는 대시보드입니다.
                     </p>
                 </div>
+                <h3 class="help-subtitle">[주요 기능]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">📑 시계열 타임슬라이더</td>
+                        <td class="help-col-desc">2010년부터 현재까지 연도별 슬라이더 조정을 통해 인프라 보급의 역사적 변동 과정을 시각적으로 체감</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">📅 히트맵 및 좌표 분석</td>
+                        <td class="help-col-desc">점 단위의 위치 표시와 밀도 중심의 히트맵 전환 기능을 통해 보급 거점의 형성과 확산 과정을 분석</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">📍 성장 추이 차트</td>
+                        <td class="help-col-desc">연도별 신규 설치량과 누적 설치량을 급속/완속별로 구분하여 성장 곡선을 정밀 분석</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">📡 서비스 권역 분석</td>
+                        <td class="help-col-desc"> 충전소별 반경 분석(300m~1km)을 결합하여 연도별 서비스 커버리지 확대 현황을 검토</td>
+                    </tr>
+                </table>
                 <h3 class="help-subtitle">[주요 확인 사항]</h3>
                 <div class="help-desc-box" style="background:#f0f7ff;">
                     <ul class="help-list">
-                        <li><strong>분석 목표:</strong> 연도별 설치 현황 및 누적 대수 변동 확인</li>
-                        <li><strong>의사 결정:</strong> 지역별 보급 격차 및 향후 설치 목표량 설정 참고</li>
+                        <li><strong>분석 목표:</strong> 연도별 보급 증가 속도 및 특정 시기별 보급 집중 지역 확인</li>
+                        <li><strong>의사 결정:</strong> 과거 보급 패턴 분석을 통한 향후 지역별 목표 할당 및 확충 계획 수립</li>
                     </ul>
                 </div>
             </div>
         </div>
     </div>
-
 
     <div id="loading" class="loading-overlay">
         <div class="spinner"></div>

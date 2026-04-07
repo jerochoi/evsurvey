@@ -168,14 +168,33 @@
             <div class="help-modal-body">
                 <div class="help-desc-box">
                     <p class="help-desc-text">
-                        기후부(ME) 운영 충전소의 실제 이용 데이터(빈도, 충전량, 시간대)를 바탕으로 이용 패턴을 파악하는 분석 화면입니다.
+                        기후부(ME)에서 운영하는 충전소의 실제 트랜잭션 데이터(건수, 전력량, 시계열 동향)를 정밀 전처리하여 사용자 중심의 시각적 패턴 리포트를 제공하는 분석 화면입니다.
                     </p>
                 </div>
+                <h3 class="help-subtitle">[주요 기능]</h3>
+                <table class="help-table">
+                    <tr class="alt-row">
+                        <td class="help-col-title width-33">📑 수요 시황 모니터링</td>
+                        <td class="help-col-desc">총 충전 건수, 공급 전력량, 피크 시간대 등 주요 지표를 대시보드 상단에 요약하여 실시간 수요 현황 파악</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">🔲 다변량 시각화</td>
+                        <td class="help-col-desc">시간대별 이용 빈도(Line)와 에너지 사용량(Bar)을 교차 비교하여 '단순 방문'과 '대용량 충전' 패턴 구분</td>
+                    </tr>
+                    <tr class="alt-row">
+                        <td class="help-col-title">📍 집중도 랭킹</td>
+                        <td class="help-col-desc">관내 충전소 중 이용 빈도와 공급량이 가장 높은 TOP 10을 실시간 추출하여 부하 관리 필요 대상지 선정</td>
+                    </tr>
+                    <tr>
+                        <td class="help-col-title">📋 에너지 수요 밀도 분석</td>
+                        <td class="help-col-desc">폴라 차트와 히트 덴시티 분석을 결합하여 에너지 소비가 집중되는 시간적/공간적 임계점 도출</td>
+                    </tr>
+                </table>
                 <h3 class="help-subtitle">[주요 확인 사항]</h3>
                 <div class="help-desc-box" style="background:#f0f7ff;">
                     <ul class="help-list">
-                        <li><strong>분석 목표:</strong> 충전소별 일평균 이용 횟수 및 이용률 차이 분석</li>
-                        <li><strong>의사 결정:</strong> 고부하/저부하 충전소 식별 및 운영 개선점 도출</li>
+                        <li><strong>분석 목표:</strong> 충전 인프라 이용 패턴의 정형화 및 에너지 수요 집중 구간 발견</li>
+                        <li><strong>의사 결정:</strong> 충전소 운영 정책(점검 주기, 기기 증설, 요금제 차등화 등)의 데이터 기반 의사결정 지원</li>
                     </ul>
                 </div>
             </div>
