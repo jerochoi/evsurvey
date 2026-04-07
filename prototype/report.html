@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>위치선정 고도화 설계 중간 보고</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0F62FE;
+            --secondary: #393939;
+            --bg: #F4F7FB;
+            --white: #FFFFFF;
+            --border: #E0E0E0;
+            --text-main: #161616;
+            --text-sub: #525252;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 300px;
+            background-color: #161616;
+            color: #F4F4F4;
+            padding: 40px 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-sizing: border-box;
+            z-index: 1000;
+        }
+
+        .sidebar h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--white);
+        }
+
+        .sidebar p {
+            font-size: 0.85rem;
+            color: #A8A8A8;
+            margin-bottom: 40px;
+            line-height: 1.4;
+        }
+
+        .nav-group {
+            margin-bottom: 30px;
+        }
+
+        .nav-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #6F6F6F;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .nav-item {
+            display: block;
+            padding: 10px 15px;
+            color: #C6C6C6;
+            text-decoration: none;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+            margin-bottom: 2px;
+        }
+
+        .nav-item:hover {
+            background-color: #393939;
+            color: var(--white);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary);
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 300px;
+            flex: 1;
+            padding: 60px 80px;
+            max-width: 1000px;
+        }
+
+        .doc-header {
+            margin-bottom: 50px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 30px;
+        }
+
+        .doc-category {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .doc-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0 0 15px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .doc-meta {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+        }
+
+        /* Documentation Style */
+        .page-section {
+            margin-bottom: 60px;
+            line-height: 1.7;
+        }
+
+        .page-section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 40px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #E0E0E0;
+        }
+
+        .page-section h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin: 30px 0 15px 0;
+            color: var(--primary);
+        }
+
+        .page-section p {
+            margin-bottom: 18px;
+            color: var(--text-sub);
+            word-break: keep-all;
+        }
+
+        .list-box {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .list-box ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .list-box li {
+            margin-bottom: 12px;
+            color: var(--text-sub);
+        }
+
+        .list-box li strong {
+            color: var(--text-main);
+        }
+
+        .link-card {
+            display: flex;
+            align-items: center;
+            background: #F2F4F8;
+            padding: 15px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-main);
+            margin-top: 10px;
+            transition: transform 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .link-card:hover {
+            transform: scale(1.01);
+            border-color: var(--primary);
+            background: #E8F2FF;
+        }
+
+        .link-icon {
+            font-size: 1.4rem;
+            margin-right: 15px;
+        }
+
+        .link-info h4 {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .link-info p {
+            margin: 3px 0 0 0;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .callout {
+            border-left: 4px solid var(--primary);
+            background-color: #E8F2FF;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .callout strong {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 240px;
+            }
+
+            .main-content {
+                margin-left: 240px;
+                padding: 40px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h1>위치선정 고도화</h1>
+            <p>전기차 충전시설 위치선정 고도화 및 수요발굴 모델링 리포트</p>
+
+            <div class="nav-group">
+                <span class="nav-label">General</span>
+                <a href="#summary" class="nav-item active">추진 개요 및 목적</a>
+                <a href="#requirements" class="nav-item">요구사항 및 분석 결과</a>
+                <a href="#design" class="nav-item">핵심 구현 및 설계 방향</a>
+                <a href="#cili-system" class="nav-item">CILI 시뮬레이션 체계</a>
+                <a href="#demand-system" class="nav-item">수요조사 관리 고도화</a>
+                <a href="#stats-system" class="nav-item">통계 기반 인프라 분석</a>
+                <a href="#future-schedule" class="nav-item">향후 일정</a>
+            </div>
+
+            <div class="nav-group">
+                <span class="nav-label">Analysis Reports</span>
+                <a href="#analysis-reports" class="nav-item">주제별 심층 리포트</a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <header class="doc-header">
+                <span class="doc-category">Project Overview</span>
+                <h1 class="doc-title">CILI 시뮬레이션 고도화 및 수요발굴</h1>
+                <div class="doc-meta">Last Updated: 2026.04.07 | Architecture & Design Report</div>
+            </header>
+
+            <section id="summary" class="page-section">
+                <h2>1. 추진 배경 및 목적</h2>
+                <div class="list-box">
+                    <ul>
+                        <li><strong>CILI 지수 시뮬레이터 및 데이터 관리 체계 구축:</strong> 고정된 지표에서 탈피하여 가중치 조절을 통한 실시간 시뮬레이션 환경 마련</li>
+                        <li><strong>GIS 기반 수요조사 신청 및 관리 고도화:</strong> 인프라 분석 데이터 연계를 통해 수요조사 행정 프로세스를 체계화</li>
+                        <li><strong>수요발굴을 위한 능동적 서비스:</strong> 기존의 수동적 수요 신청 접수 방식에서 데이터 기반의 사각지대 분석 및 후보지 추천 등 능동적 발굴 체계로 전환</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="requirements" class="page-section">
+                <h2>2. 요구사항 분석 결과</h2>
+                <div class="list-box">
+                    <ul>
+                        <li><strong>CILI 재생산:</strong> 지표 데이터 버전 관리와 가중치 수치 변경에 따른 동적 등급 계산 필요.</li>
+                        <li><strong>급/완속 지표 가중치 관리:</strong> 사용자별 가중치 저장, 관리자용 이력 추적 및 변경 로그 기능 제공.</li>
+                        <li><strong>수요조사 고도화:</strong> 단순 텍스트 기반 신청에서 GIS 정보를 결합한 전략적 신청 환경 구축.</li>
+                        <li><strong>사각지대 발굴:</strong> 아파트 의무 비율 미충족 단지 및 국공유지 유휴 부지 자동 식별.</li>
+                        <li><strong>데이터 최신화:</strong> 8년 이상 노후 충전기 추적 및 최신 건축물·토지 속성 데이터 연동.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="design" class="page-section">
+                <h2>3. 핵심 설계 및 구현 방향</h2>
+
+                <h3>3.1. 동적 시뮬레이션 엔진</h3>
+                <p>지표 데이터에 슬라이더 방식의 가중치를 적용하여, 사용자가 '접근성', '수요량', '환경성' 중 중요하게 생각하는 지표에 따라 CILI 등급이 실시간으로 변화하도록 설계하였습니다.</p>
+
+                <h3>3.2. GIS 데이터 퓨전 (Data Fusion)</h3>
+                <p>건축물 대장(세대수, 주차면)과 환경부 충전소 이용 패턴, 그리고 국공유지 지적 데이터를 GIS 레이어상에 병합하여, 레이어 ON/OFF만으로 입지 타당성을 검토할 수 있습니다.</p>
+
+                <h3>3.3. 시각적 최적화 및 고속 분석</h3>
+                <p>복잡한 지리 정보와 통계 데이터를 직관적인 시각적 요소로 표출하고, 대용량 데이터의 사전 가공과 연산 최적화를 통해 사용자에게 지연 없는 빠른 분석 환경을 제공합니다.</p>
+            </section>
+
+            <section id="cili-system" class="page-section">
+                <h2>4. CILI 지수 시뮬레이터 및 데이터 관리 체계</h2>
+                <p>기존의 정적인 위치 선정 정보를 동적 시뮬레이션 체계로 전환하여 정책 수용성을 높였습니다.</p>
+                <div class="list-box">
+                    <ul>
+                        <li><strong>지표 데이터 버전 관리:</strong> 원천 지표 데이터를 버전화하여 관리하고 시뮬레이션에 즉시 투입할 수 있는 환경을 제공합니다.</li>
+                        <li><strong>사용자 맞춤형 가중치 제어:</strong> 특정 권한 사용자가 가중치를 직접 슬라이더로 조절하여 최적의 CILI 등급을 도출합니다.</li>
+                        <li><strong>가중치 이력 추적:</strong> 사용자가 저장한 가중치 설정 내역을 관리자가 조회하여 정책 방향성을 모니터링합니다.</li>
+                    </ul>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <a href="./SFR-022_cili/cili_sim1.html" target="_blank" class="link-card">
+                        <div class="link-icon">⚙️</div>
+                        <div class="link-info">
+                            <h4>CILI 가중치 시뮬레이터</h4>
+                            <p>실시간 등급 렌더링 도구</p>
+                        </div>
+                    </a>
+                    <a href="./SFR-022_cili/cili_weight_history.html" target="_blank" class="link-card">
+                        <div class="link-icon">🕒</div>
+                        <div class="link-info">
+                            <h4>가중치 변경 이력 조회</h4>
+                            <p>사용자 설정값 히스토리 관리</p>
+                        </div>
+                    </a>
+                    <a href="./SFR-022_cili/cili_data_upload.html" target="_blank" class="link-card" style="grid-column: span 2;">
+                        <div class="link-icon">📁</div>
+                        <div class="link-info">
+                            <h4>지표 데이터 버전 관리 및 업로드</h4>
+                            <p>원천 지표 파일 관리 및 배포 인터페이스</p>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <section id="demand-system" class="page-section">
+                <h2>5. GIS 기반 수요조사 신청 및 관리 고도화</h2>
+                <p>단순 신청 접수 중심에서 분석 기반의 '전략적 신청' 환경으로 개편하였습니다.</p>
+                <div class="list-box">
+                    <ul>
+                        <li><strong>주변 인프라 시각화:</strong> 신청지 반경 내 기존 충전소 정보, 이용량, 노후도를 오버레이하여 중복 설치를 방지합니다.</li>
+                        <li><strong>과거 신청 이력 연동:</strong> 동일 부지에 대한 과거 미선정 사유나 신청 히스토리를 지도상에 표출하여 행정을 효율화합니다.</li>
+                    </ul>
+                </div>
+                <a href="./SFR-022_demand.html" target="_blank" class="link-card">
+                    <div class="link-icon">🗳️</div>
+                    <div class="link-info">
+                        <h4>통합 수요조사 관리 및 신청 화면</h4>
+                        <p>인프라 데이터가 연동된 고도화된 신청 창구</p>
+                    </div>
+                </a>
+            </section>
+
+            <section id="stats-system" class="page-section">
+                <h2>6. 통계 기반 인프라 운영 및 패턴 분석</h2>
+                <p>실제 운영 데이터를 기반으로 인프라 효율성을 극대화하기 위한 통계 분석 체계를 구축하였습니다.</p>
+                <div class="list-box">
+                    <ul>
+                        <li><strong>시설 이용 통계 분석:</strong> 인천 및 서구 지역의 통합 충전 통계를 요약하여 거시적인 정책 지표를 상시 제공합니다.</li>
+                        <li><strong>이용 패턴 분석:</strong> 시간대별 이용량 및 점유율 분석을 통해 효율적인 인프라 운영 정책을 지원합니다.</li>
+                        <li><strong>피크 타임 및 부합 분석:</strong> 충전소별 전력 부하 집중 시간대를 분석하여 기기 증설 근거를 마련합니다.</li>
+                    </ul>
+                </div>
+                <div class="callout" style="border-left-color: #24A148; background-color: #F1FBF3;">
+                    <strong style="color: #24A148;">분석 인사이트 (Insights)</strong>
+                    <ul style="font-size: 0.9rem; margin-top: 10px; color: #333; padding-left: 20px;">
+                        <li><strong>보급 타임라인 분석:</strong> 시도별 급속 충전기 커버리지를 확인하면 대부분의 도심 영역에 설치가 완료된 것으로 분석됩니다. (향후 지방 소도시 및 사각지대 중심 정밀 분석 예정)</li>
+                        <li><strong>설치 장소별 입지 패턴:</strong> 이용 통계상 우수 입지의 지목과 건물 용도를 역으로 추적하여, 신규 부지 발굴 시 토지 및 건축물 대장 필터링 조건으로 활용 가능합니다.</li>
+                        <li><strong>운영 효율화 및 증설 검토:</strong> 환경부 충전소 이용 패턴과 피크 타임 분석 결과, 특정 시간대 점유율이 80%를 초과하는 밀집 지역에 대한 기기 추가 설치를 우선 검토할 수 있습니다.</li>
+                    </ul>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <a href="./SFR-022/incheon_charger_timeline.html" target="_blank" class="link-card">
+                        <div class="link-icon">📅</div>
+                        <div class="link-info">
+                            <h4>보급 시계열 타임라인</h4>
+                            <p>지역별 인프라 확장 추이 추적</p>
+                        </div>
+                    </a>
+                    <a href="./SFR-022/charging_stats.html" target="_blank" class="link-card">
+                        <div class="link-icon">📊</div>
+                        <div class="link-info">
+                            <h4>충전 시설 이용 통계 분석</h4>
+                            <p>공공급속 충전시설 </p>
+                        </div>
+                    </a>
+                    <a href="./SFR-022/seogu_me_usage_analysis.html" target="_blank" class="link-card">
+                        <div class="link-icon">⚡</div>
+                        <div class="link-info">
+                            <h4>환경부 충전소 이용 패턴</h4>
+                            <p>시간대별 이용률 및 점유율 분석</p>
+                        </div>
+                    </a>
+                    <a href="./SFR-022/seogu_station_peaks.html" target="_blank" class="link-card">
+                        <div class="link-icon">📈</div>
+                        <div class="link-info">
+                            <h4>충전소별 피크 타임 및 부하</h4>
+                            <p>전력 부하 관리 및 증설 근거 분석</p>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <section id="analysis-reports" class="page-section">
+                <h2>7. 주제별 심층 입지 분석 리포트</h2>
+                <p>국공유지 및 건축물 특성을 활용한 정밀한 수요 발굴 모델링 결과입니다.</p>
+                <div class="callout" style="border-left-color: #0F62FE; background-color: #F0F6FF;">
+                    <strong style="color: #0F62FE;">분석 인사이트 (Insights)</strong>
+                    <ul style="font-size: 0.9rem; margin-top: 10px; color: #333; padding-left: 20px;">
+                        <li><strong>국공유지 부지 활용성:</strong> 충전 취약 지역 내 소유 구분이 '국유지' 또는 '공유지'인 필지를 우선 추출하여, 부지 확보가 용이하고 즉시 설치 가능한 수요 발굴의 핵심 후보지로 활용할 수 있습니다.</li>
+                        <li><strong>건축물 속성 정밀 배분:</strong> 보다 정교한 수요 예측을 위해, 기 설치된 충전소의 명칭과 위치 정보를 기반으로 해당 건축물의 세부 속성(상업/주거/공공 등)을 역으로 매핑하여 분석하는 체계가 필요합니다.</li>
+                    </ul>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <a href="./SFR-022_devel_gov.html" target="_blank" class="link-card">
+                        <div class="link-icon">🏛️</div>
+                        <div class="link-info">
+                            <h4>국공유지 부지 발굴 분석</h4>
+                            <p>공백 지역 내 최적 공공 필지 탐색</p>
+                        </div>
+                    </a>
+                    <a href="./SFR-022/public_land_desert_dashboard.html" target="_blank" class="link-card">
+                        <div class="link-icon">🏜️</div>
+                        <div class="link-info">
+                            <h4>충전 취약지역 분석</h4>
+                            <p>충전 취약지역 필터링 기반 후보지 도출</p>
+                        </div>
+                    </a>
+                    <a href="./SFR-022/apt_ev_mandatory_dashboard.html" target="_blank" class="link-card">
+                        <div class="link-icon">🏢</div>
+                        <div class="link-info">
+                            <h4>아파트 의무 설치 현황</h4>
+                            <p>의무 비율 미충족 단지 식별</p>
+                        </div>
+                    </a>
+                    <a href="./SFR-022/seogu_bld_viewer.html" target="_blank" class="link-card">
+                        <div class="link-icon">🏢</div>
+                        <div class="link-info">
+                            <h4>건축물 속성 정보 뷰어</h4>
+                            <p>서구 전체 건축물 제원 및 잠재 수요 조회</p>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <section id="future-schedule" class="page-section">
+                <h2>8. 향후 일정</h2>
+                <div class="list-box">
+                    <ul>
+                        <li><strong>지방 소도시 기준 데이터 분석:</strong> 대도시 외 지방 소도시의 인프라 특성을 반영한 입지 분석 모델 확장</li>
+                        <li><strong>완속 충전기 이용량 분석:</strong> 급속 외에 완속 충전 데이터(이용량, 점유율 등)를 포함한 종합 패턴 분석</li>
+                        <li><strong>후보지 추출 알고리즘 고도화:</strong> 단순 거리 분석을 넘어선 다각도 후보지 추출 방식에 대한 실무진 논의</li>
+                        <li><strong>현장 중심 요구사항 수렴:</strong> 실제 수요발굴 및 수요조사 관리 관련 실무 현장의 필요 요구사항 청취 및 반영</li>
+                    </ul>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function () {
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+
+</html>
