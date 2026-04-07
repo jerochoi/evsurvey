@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>인천 서구 충전소별 이용 피크 분석</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        :root {
+            --primary: #00A389;
+            --secondary: #0F62FE;
+            --bg: #F0F4F8;
+            --card: #FFFFFF;
+        }
+
+        body {
+            margin: 0;
+            padding: 40px;
+            font-family: 'Pretendard', sans-serif;
+            background-color: var(--bg);
+        }
+
+        .header {
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.6rem;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .chart-card {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .chart-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .control-row {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        select {
+            padding: 8px 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-family: inherit;
+        }
+
+        .desc {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+    </style>
+    <link type="text/css" rel="stylesheet" href="../prototype.css">
+</head>
+
+<body>
+
+    <button class="btn-floating-help" style="width: auto !important; z-index:9999;" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal" style="z-index:10000;">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    📈 충전소별 피크 타임 및 부하 분석
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        특정 충전소에서 전력 사용이 급증하는 피크 타임과 부하 패턴을 분석한 화면입니다.
+                    </p>
+                </div>
+                <h3 class="help-subtitle">[주요 확인 사항]</h3>
+                <div class="help-desc-box" style="background:#f0f7ff;">
+                    <ul class="help-list">
+                        <li><strong>분석 목표:</strong> 시간대별 충전 수요 집중도(Peak) 파악</li>
+                        <li><strong>의사 결정:</strong> 수요 분산 및 요금제 개편을 위한 기초 데이터 제공</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="header">
+        <h1>🛠️ 인천 서구 충전소별 시간대별 이용량 전수 분석</h1>
+        <p style="color:#888; font-size:0.9rem; margin-top:5px;">기후부(ME) 충전기 대상 - 2026.03 데이터 기반</p>
+    </div>
+
+    <div class="main-container">
+
+        <!-- Section 1: All Stations Heatmap -->
+        <div class="chart-card">
+            <div class="chart-title">충전소별 시간 분할 이용 밀도 (Heatmap)</div>
+            <div class="desc">각 가로 행은 특정 충전소를 나타내며, 색상이 진할수록 해당 시간대의 이용량이 많음을 의미합니다.</div>
+            <div id="heatmap-chart" style="width: 100%; height: 600px;"></div>
+        </div>
+
+        <!-- Section 2: Detailed Drilldown -->
+        <div class="chart-card">
+            <div class="chart-title">충전소 상세 이용 곡선 (Drill-down)</div>
+            <div class="control-row">
+                <span>충전소 선택:</span>
+                <select id="station-selector" onchange="updateDetailChart()"></select>
+            </div>
+            <div id="detail-chart" style="width: 100%; height: 350px;"></div>
+        </div>
+
+    </div>
+
+    <script>
+        let globalData = [];
+        let heatmapChart, detailChart;
+
+        async function init() {
+            try {
+                const response = await fetch('data/seogu_station_usage_patterns.json');
+                globalData = await response.json();
+
+                // Populate Selector
+                const selector = document.getElementById('station-selector');
+                globalData.forEach((s, idx) => {
+                    const opt = document.createElement('option');
+                    opt.value = idx;
+                    opt.textContent = `${s.name} (총 ${s.total_uses}건)`;
+                    selector.appendChild(opt);
+                });
+
+                renderHeatmap();
+                updateDetailChart();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderHeatmap() {
+            heatmapChart = echarts.init(document.getElementById('heatmap-chart'));
+
+            const stations = globalData.map(d => d.name).reverse();
+            const hours = Array.from({ length: 24 }, (_, i) => i + '시');
+
+            // Generate Heatmap Data: [hourIndex, stationIndex, count]
+            const heatData = [];
+            globalData.forEach((s, sIdx) => {
+                const displayIdx = globalData.length - 1 - sIdx; // Reverse for bottom-up display
+                s.hourly_counts.forEach((count, hIdx) => {
+                    heatData.push([hIdx, displayIdx, count]);
+                });
+            });
+
+            const option = {
+                tooltip: { position: 'top' },
+                grid: { height: '85%', top: '5%', left: '200' },
+                xAxis: { type: 'category', data: hours, splitArea: { show: true } },
+                yAxis: { type: 'category', data: stations, splitArea: { show: true }, axisLabel: { fontSize: 9 } },
+                visualMap: {
+                    min: 0, max: 20,
+                    calculable: true, orient: 'horizontal', left: 'center', bottom: '0',
+                    inRange: { color: ['#ffffff', '#e0f2f1', '#4db6ac', '#00796b'] }
+                },
+                series: [{
+                    name: '이용 건수',
+                    type: 'heatmap',
+                    data: heatData,
+                    label: { show: false },
+                    emphasis: { itemStyle: { shadowBlur: 10, shadowColor: 'rgba(0, 0, 0, 0.5)' } }
+                }]
+            };
+
+            heatmapChart.setOption(option);
+        }
+
+        function updateDetailChart() {
+            const idx = document.getElementById('station-selector').value;
+            const s = globalData[idx];
+
+            if (!detailChart) detailChart = echarts.init(document.getElementById('detail-chart'));
+
+            detailChart.setOption({
+                tooltip: { trigger: 'axis' },
+                xAxis: { type: 'category', data: Array.from({ length: 24 }, (_, i) => i + '시') },
+                yAxis: { type: 'value', name: '이용 건수' },
+                series: [{
+                    data: s.hourly_counts,
+                    type: 'bar',
+                    itemStyle: { color: s.hourly_counts[s.peak_hour] > 0 ? '#0F62FE' : '#ddd' },
+                    markPoint: {
+                        data: [{ type: 'max', name: 'Peak' }]
+                    }
+                }]
+            });
+        }
+
+        window.addEventListener('resize', () => {
+            heatmapChart && heatmapChart.resize();
+            detailChart && detailChart.resize();
+        });
+
+        init();
+    </script>
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
+
+</body>
+
+</html>

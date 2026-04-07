@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>환경부 충전시설 보급 현황 통계</title>
+    <!-- Use ECharts for premium looking charts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --secondary: #e8f0fe;
+            --bg: #f5f7fa;
+            --card: #ffffff;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background: var(--bg);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .header {
+            grid-column: span 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card);
+            padding: 20px 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .total-count {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .card {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-title {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary);
+            padding-left: 12px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .chart {
+            width: 100%;
+            height: 400px;
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            z-index: 1000;
+        }
+    </style>
+    <link type="text/css" rel="stylesheet" href="../prototype.css">
+</head>
+
+<body>
+
+    <button class="btn-floating-help" style="width: auto !important; z-index:9999;" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal" style="z-index:10000;">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    📊 충전 시설 이용 통계 분석
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        분석 기간 내 전체 충전 이력을 기반으로 충전 횟수, 충전량, 이용률 등의 거시적인 통계를 요약하여 보여주는 화면입니다.
+                    </p>
+                </div>
+                <h3 class="help-subtitle">[주요 확인 사항]</h3>
+                <div class="help-desc-box" style="background:#f0f7ff;">
+                    <ul class="help-list">
+                        <li><strong>분석 목표:</strong> 지역 및 요일/시간대별 전반적 이용 트렌드 파악</li>
+                        <li><strong>의사 결정:</strong> 거시적 데이터 기반 인프라 확충 정책 수립 지원</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="loading" class="loading">통계 데이터를 불러오는 중입니다...</div>
+
+    <div class="header">
+        <h1>환경부 전기차 충전시설 보급 통계</h1>
+        <div>전체 충전기: <span id="total-count" class="total-count">0</span> 건</div>
+    </div>
+
+    <div class="dashboard">
+        <!-- 지역별 현황 -->
+        <div class="card full-width">
+            <div class="card-title">지역별 충전시설 보급 현황</div>
+            <div id="region-chart" class="chart"></div>
+        </div>
+
+        <!-- 시설구분별 현황 (Pie) -->
+        <div class="card">
+            <div class="card-title">시설구분(대분류) 별 비중</div>
+            <div id="facility-chart" class="chart"></div>
+        </div>
+
+        <!-- 충전기종류 현황 (Bar) -->
+        <div class="card">
+            <div class="card-title">충전기 종류 및 전력량 현황</div>
+            <div id="type-chart" class="chart"></div>
+        </div>
+
+        <!-- 교차 분석 (Heatmap or Stacked Bar) -->
+        <div class="card full-width">
+            <div class="card-title">지역별 시설구분 통계 상세</div>
+            <div id="cross-chart" class="chart" style="height: 500px;"></div>
+        </div>
+    </div>
+
+    <script>
+        fetch('./data/charging_stats.json')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('total-count').innerText = data.total_count.toLocaleString();
+
+                renderRegionChart(data.region_stats);
+                renderFacilityChart(data.facility_stats);
+                renderTypeChart(data.type_stats);
+                renderCrossChart(data.cross_stats);
+            });
+
+        function renderRegionChart(stats) {
+            const chart = echarts.init(document.getElementById('region-chart'));
+            const keys = Object.keys(stats);
+            const values = Object.values(stats);
+
+            chart.setOption({
+                tooltip: { trigger: 'axis' },
+                grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+                xAxis: { type: 'category', data: keys, axisLabel: { interval: 0, rotate: 30 } },
+                yAxis: { type: 'value' },
+                series: [{
+                    name: '충전기 수',
+                    type: 'bar',
+                    data: values,
+                    itemStyle: { color: '#1a73e8', borderRadius: [5, 5, 0, 0] }
+                }]
+            });
+        }
+
+        function renderFacilityChart(stats) {
+            const chart = echarts.init(document.getElementById('facility-chart'));
+            const data = Object.entries(stats).map(([name, value]) => ({ name, value }));
+
+            chart.setOption({
+                tooltip: { trigger: 'item' },
+                legend: { top: '5%', left: 'center' },
+                series: [{
+                    name: '시설구분',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
+                    label: { show: false },
+                    emphasis: { label: { show: true, fontSize: 16, fontWeight: 'bold' } },
+                    data: data
+                }]
+            });
+        }
+
+        function renderTypeChart(stats) {
+            const chart = echarts.init(document.getElementById('type-chart'));
+            const keys = Object.keys(stats);
+            const values = Object.values(stats);
+
+            chart.setOption({
+                tooltip: { trigger: 'axis' },
+                xAxis: { type: 'value' },
+                yAxis: { type: 'category', data: keys },
+                series: [{
+                    name: '충전기 수',
+                    type: 'bar',
+                    data: values,
+                    itemStyle: { color: '#34a853', borderRadius: [0, 5, 5, 0] }
+                }]
+            });
+        }
+
+        function renderCrossChart(cross) {
+            const chart = echarts.init(document.getElementById('cross-chart'));
+            const regions = Object.keys(cross);
+            const facilities = Array.from(new Set(regions.flatMap(r => Object.keys(cross[r]))));
+
+            const series = facilities.map(f => ({
+                name: f,
+                type: 'bar',
+                stack: 'total',
+                label: { show: false },
+                emphasis: { focus: 'series' },
+                data: regions.map(r => cross[r][f] || 0)
+            }));
+
+            chart.setOption({
+                tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                legend: { top: '0', icon: 'circle' },
+                grid: { left: '3%', right: '4%', bottom: '15%', containLabel: true },
+                xAxis: { type: 'category', data: regions, axisLabel: { interval: 0, rotate: 45 } },
+                yAxis: { type: 'value' },
+                series: series
+            });
+        }
+    </script>
+
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
+
+</body>
+
+</html>

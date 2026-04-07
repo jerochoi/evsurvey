@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>인천 전기차 충전소 연도별 구축 현황</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <style>
+        :root {
+            --primary: #0F62FE;
+            --fast: #FA4D56;
+            --slow: #0062FF;
+            --me: #00A389;
+            --bg: #F4F7FB;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Pretendard', sans-serif;
+            background: var(--bg);
+        }
+
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+
+        .control-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            width: 340px;
+            max-height: 90vh;
+            overflow-y: auto;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            font-size: 1.1rem;
+            margin: 0 0 15px;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .slider-box {
+            margin-bottom: 20px;
+        }
+
+        .year-label {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: var(--primary);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type=range] {
+            width: 100%;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .option-group {
+            margin-bottom: 15px;
+        }
+
+        .label-text {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 8px;
+            display: block;
+            font-weight: bold;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-family: inherit;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .view-toggle {
+            display: flex;
+            background: #eee;
+            padding: 4px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .view-btn {
+            flex: 1;
+            padding: 6px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .view-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sub-options {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .stats-box {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-val {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .val-fast {
+            color: var(--fast);
+        }
+
+        .val-slow {
+            color: var(--slow);
+        }
+
+        .val-me {
+            color: var(--primary);
+        }
+
+        .charger-marker {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 9px;
+            font-weight: bold;
+            border: 1.5px solid white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .marker-fast {
+            background-color: var(--fast);
+        }
+
+        .marker-slow {
+            background-color: var(--slow);
+        }
+
+        .marker-me::after {
+            content: '★';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            color: #FFD700;
+            font-size: 14px;
+            text-shadow: 0 0 3px #000;
+        }
+
+        .chart-container {
+            height: 180px;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            gap: 15px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+    <link type="text/css" rel="stylesheet" href="../prototype.css">
+</head>
+
+<body>
+
+    <button class="btn-floating-help" style="width: auto !important; z-index:9999;" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal" style="z-index:10000;">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    📅 인천시 전기차 충전기 보급 타임라인
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        인천시 구별/연도별 전기차 충전기 보급 추이를 시계열 형태로 시각화하여, 설치 속도 및 증가율을 파악하는 대시보드입니다.
+                    </p>
+                </div>
+                <h3 class="help-subtitle">[주요 확인 사항]</h3>
+                <div class="help-desc-box" style="background:#f0f7ff;">
+                    <ul class="help-list">
+                        <li><strong>분석 목표:</strong> 연도별 설치 현황 및 누적 대수 변동 확인</li>
+                        <li><strong>의사 결정:</strong> 지역별 보급 격차 및 향후 설치 목표량 설정 참고</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="loading" class="loading-overlay">
+        <div class="spinner"></div>
+        <div id="loading-msg">인천 충전 인프라 고도화 데이터 로딩 중...</div>
+    </div>
+
+    <div class="control-panel">
+        <h1>인천 충전 인프라 보급 추이</h1>
+
+        <div class="view-toggle">
+            <button class="view-btn active" id="btn-marker" onclick="changeView('marker')">위치표시</button>
+            <button class="view-btn" id="btn-heat" onclick="changeView('heat')">히트맵(밀도)</button>
+        </div>
+
+        <div id="heat-options" class="sub-options">
+            <span class="label-text">히트맵 밀도 구분 선택</span>
+            <select id="heat-type-select" onchange="updateDisplay(parseInt(document.getElementById('year-slider').value))">
+                <option value="all">모두 (전체 충전기)</option>
+                <option value="all-fast">급속 (전체 급속)</option>
+                <option value="me-fast">급속 (기후부)</option>
+            </select>
+        </div>
+
+        <div class="slider-box">
+            <span class="label-text">조회 연도 선택 [누적]</span>
+            <span id="year-display" class="year-label">2016</span>
+            <input type="range" id="year-slider" min="2010" max="2024" step="1" value="2016">
+        </div>
+
+        <div class="option-group" id="radius-group">
+            <span class="label-text">분석 가시권 (Radius)</span>
+            <div style="display:flex; gap:5px; align-items:center;">
+                <select id="radius-select" style="flex:1;">
+                    <option value="0">표시 안함</option>
+                    <option value="300">300m</option>
+                    <option value="500">500m</option>
+                    <option value="800">800m</option>
+                    <option value="1000">1km</option>
+                </select>
+                <div style="font-size:0.75rem; white-space:nowrap; display:flex; align-items:center; gap:3px;">
+                    <input type="checkbox" id="me-only-chk" style="margin:0;"> 기후부 전용
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-box">
+            <div class="stat-item">
+                <span class="label-text">전체 누적</span>
+                <span id="stat-total" class="stat-val">-</span>
+            </div>
+            <div class="stat-item">
+                <span class="label-text">기후부(ME)</span>
+                <span id="stat-me" class="stat-val val-me">-</span>
+            </div>
+            <div class="stat-item">
+                <span class="label-text">급속 (Fast)</span>
+                <span id="stat-fast" class="stat-val val-fast">-</span>
+            </div>
+            <div class="stat-item">
+                <span class="label-text">완속 (Slow)</span>
+                <span id="stat-slow" class="stat-val val-slow">-</span>
+            </div>
+        </div>
+
+        <div class="section-title" style="font-size:0.8rem; margin-top:20px; font-weight:bold; color:#555;">보급 성장 추이 (Incheon)</div>
+        <div id="chart-main" class="chart-container"></div>
+    </div>
+
+    <div class="legend" id="legend-box">
+        <div class="legend-item">
+            <div class="dot" style="background:#888"></div> 일반 급속 (Fast)
+        </div>
+        <div class="legend-item">
+            <div class="dot" style="background:var(--slow)"></div> 완속 (Slow)
+        </div>
+        <div class="legend-item">
+            <div class="dot" style="background:#00A389"></div> ★ 기후부(ME) 커버리지
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    <script>
+        const map = L.map('map', { preferCanvas: true }).setView([37.51, 126.68], 11);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; CARTO'
+        }).addTo(map);
+
+        let allData = [];
+        let markerLayer = L.layerGroup().addTo(map);
+        let heatLayer = null;
+        let radiusLayer = L.layerGroup().addTo(map);
+        let currentRadius = 0;
+        let mainChart = null;
+        let currentView = 'marker';
+
+        const INCHEON_BOUNDS = { latMin: 37.0, latMax: 37.9, lngMin: 124.5, lngMax: 126.9 };
+
+        async function init() {
+            try {
+                const response = await fetch('data/stat_incheon.json.gz');
+                const arrayBuffer = await response.arrayBuffer();
+                const decompressed = pako.ungzip(new Uint8Array(arrayBuffer), { to: 'string' });
+                const rawData = JSON.parse(decompressed);
+                allData = rawData.filter(d => {
+                    const lat = parseFloat(d.lat), lng = parseFloat(d.lng);
+                    return lat >= INCHEON_BOUNDS.latMin && lat <= INCHEON_BOUNDS.latMax &&
+                        lng >= INCHEON_BOUNDS.lngMin && lng <= INCHEON_BOUNDS.lngMax;
+                });
+                const years = allData.map(d => parseInt(d.year)).filter(y => !isNaN(y));
+                const minYear = Math.min(...years), maxYear = Math.max(...years);
+                const slider = document.getElementById('year-slider');
+                slider.min = minYear; slider.max = maxYear; slider.value = 2016;
+                initChart(minYear, maxYear);
+                updateDisplay(2016);
+                slider.oninput = (e) => updateDisplay(parseInt(e.target.value));
+                document.getElementById('radius-select').onchange = (e) => {
+                    currentRadius = parseInt(e.target.value);
+                    updateDisplay(parseInt(slider.value));
+                };
+                document.getElementById('me-only-chk').onchange = () => updateDisplay(parseInt(slider.value));
+                document.getElementById('loading').style.display = 'none';
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loading-msg').innerText = "데이터 환경 오류!";
+            }
+        }
+
+        function changeView(type) {
+            currentView = type;
+            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-' + type).classList.add('active');
+
+            // Show/Hide sub-options
+            document.getElementById('heat-options').style.display = (type === 'heat') ? 'flex' : 'none';
+            document.getElementById('radius-group').style.display = (type === 'marker') ? 'block' : 'none';
+            document.getElementById('legend-box').style.display = (type === 'marker') ? 'block' : 'none';
+
+            updateDisplay(parseInt(document.getElementById('year-slider').value));
+        }
+
+        function initChart(min, max) {
+            mainChart = echarts.init(document.getElementById('chart-main'));
+            const yearLabels = [], yearlyFast = [], yearlySlow = [], cumulFast = [], cumulSlow = [];
+            let totalFast = 0, totalSlow = 0;
+            for (let y = min; y <= max; y++) {
+                const yearData = allData.filter(d => parseInt(d.year) === y);
+                const fastCount = yearData.filter(d => (parseInt(d.output) || 0) >= 50).length;
+                const slowCount = yearData.length - fastCount;
+                totalFast += fastCount; totalSlow += slowCount;
+                yearLabels.push(y); yearlyFast.push(fastCount); yearlySlow.push(slowCount);
+                cumulFast.push(totalFast); cumulSlow.push(totalSlow);
+            }
+            const option = {
+                tooltip: { trigger: 'axis' },
+                legend: { data: ['신규(급속)', '신규(완속)', '누적(급속)', '누적(완속)'], top: 0, itemWidth: 8, textStyle: { fontSize: 8 } },
+                grid: { top: 40, left: '5%', right: '5%', bottom: '5%', containLabel: true },
+                xAxis: { type: 'category', data: yearLabels, axisLabel: { fontSize: 8 } },
+                yAxis: [{ type: 'value', axisLabel: { fontSize: 8 }, splitLine: { show: false } }, { type: 'value', position: 'right', axisLabel: { fontSize: 8 }, splitLine: { show: false } }],
+                series: [
+                    { name: '신규(급속)', type: 'bar', stack: 'total', data: yearlyFast, itemStyle: { color: '#FA4D56' } },
+                    { name: '신규(완속)', type: 'bar', stack: 'total', data: yearlySlow, itemStyle: { color: '#0062FF' } },
+                    { name: '누적(급속)', type: 'line', yAxisIndex: 1, data: cumulFast, itemStyle: { color: '#FA4D56' }, symbol: 'none', smooth: true },
+                    { name: '누적(완속)', type: 'line', yAxisIndex: 1, data: cumulSlow, itemStyle: { color: '#0062FF' }, symbol: 'none', smooth: true }
+                ]
+            };
+            mainChart.setOption(option);
+        }
+
+        function updateDisplay(targetYear) {
+            document.getElementById('year-display').innerText = targetYear;
+            markerLayer.clearLayers();
+            radiusLayer.clearLayers();
+            if (heatLayer) map.removeLayer(heatLayer);
+
+            const filtered = allData.filter(d => parseInt(d.year) <= targetYear);
+            let fastCount = 0, slowCount = 0, meCount = 0;
+            const coordMap = {};
+
+            filtered.forEach(d => {
+                const out = parseInt(d.output) || 0;
+                const isFast = out >= 50, isMe = d.busiId === 'ME';
+                if (isFast) fastCount++; else slowCount++;
+                if (isMe) meCount++;
+
+                const key = `${d.lat}_${d.lng}`;
+                if (!coordMap[key]) {
+                    coordMap[key] = { lat: parseFloat(d.lat), lng: parseFloat(d.lng), chargers: [], hasFast: false, hasMe: false };
+                }
+                coordMap[key].chargers.push(d);
+                if (isFast) coordMap[key].hasFast = true;
+                if (isMe) coordMap[key].hasMe = true;
+            });
+
+            document.getElementById('stat-total').innerText = filtered.length.toLocaleString();
+            document.getElementById('stat-me').innerText = meCount.toLocaleString();
+            document.getElementById('stat-fast').innerText = fastCount.toLocaleString();
+            document.getElementById('stat-slow').innerText = slowCount.toLocaleString();
+
+            if (currentView === 'marker') {
+                const meOnly = document.getElementById('me-only-chk').checked;
+                Object.values(coordMap).forEach(group => {
+                    const icon = L.divIcon({
+                        className: '',
+                        html: `<div class="charger-marker ${group.hasFast ? 'marker-fast' : 'marker-slow'} ${group.hasMe ? 'marker-me' : ''}">${group.chargers.length}</div>`,
+                        iconSize: [18, 18], iconAnchor: [9, 9]
+                    });
+                    const marker = L.marker([group.lat, group.lng], { icon: icon });
+                    let pop = `<b>${group.chargers[0].statNm}</b><br><small>${group.chargers[0].addr}</small><hr style="margin:5px 0; border:0; border-top:1px solid #eee;">`;
+                    group.chargers.forEach(c => {
+                        pop += `<div style="font-size:0.75rem; display:flex; justify-content:space-between;"><span>${c.busiId === 'ME' ? '[기후부]' : ''}기기${c.chgerId}</span><span style="font-weight:bold; color:${parseInt(c.output) >= 50 ? 'var(--fast)' : 'var(--slow)'}">${c.output}kW</span></div>`;
+                    });
+                    marker.bindPopup(pop).addTo(markerLayer);
+                    if (currentRadius > 0) {
+                        if (group.hasMe) L.circle([group.lat, group.lng], { radius: currentRadius, color: '#00A389', weight: 2, fillColor: '#00A389', fillOpacity: 0.15, interactive: false }).addTo(radiusLayer);
+                        else if (!meOnly && group.hasFast) L.circle([group.lat, group.lng], { radius: currentRadius, color: '#888', weight: 1, fillColor: '#888', fillOpacity: 0.1, interactive: false }).addTo(radiusLayer);
+                    }
+                });
+            } else {
+                const heatType = document.getElementById('heat-type-select').value;
+                let points = [];
+                Object.values(coordMap).forEach(g => {
+                    let weight = 0;
+                    if (heatType === 'me-fast') {
+                        weight = g.chargers.filter(c => c.busiId === 'ME' && (parseInt(c.output) || 0) >= 50).length;
+                    } else if (heatType === 'all-fast') {
+                        weight = g.chargers.filter(c => (parseInt(c.output) || 0) >= 50).length;
+                    } else {
+                        weight = g.chargers.length;
+                    }
+                    if (weight > 0) points.push([g.lat, g.lng, weight]);
+                });
+                heatLayer = L.heatLayer(points, { radius: 25, blur: 15, maxZoom: 17 }).addTo(map);
+            }
+        }
+        init();
+    </script>
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
+
+</body>
+
+</html>

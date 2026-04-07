@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인천 서구 국공유지 EV 충전 사공지대 분석 대시보드</title>
+
+    <!-- CSS Dependencies -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pretendard+Variable:wght@400;500;700&display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --bg-dark: #0f172a;
+            --card-dark: #1e293b;
+            --accent-red: #e74c3c;
+            --accent-yellow: #f1c40f;
+            --accent-green: #2ecc71;
+            --text-light: #f8fafc;
+            --text-dim: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Pretendard Variable', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Layout Structure */
+        header {
+            height: 70px;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            z-index: 1000;
+        }
+
+        .header-title h1 {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+
+        /* Sidebar */
+        aside {
+            width: 400px;
+            background: var(--card-dark);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .stat-card {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+        }
+
+        .stat-val {
+            font-size: 24px;
+            font-weight: 700;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-top: 5px;
+            display: block;
+        }
+
+        .stat-priority {
+            color: var(--accent-red);
+        }
+
+        .stat-total {
+            color: var(--primary-light);
+        }
+
+        #dong-chart {
+            height: 300px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        /* Map Area */
+        #content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #map-container {
+            flex: 1.5;
+            /* Map gets more space */
+            position: relative;
+            min-height: 400px;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        /* Candidate List Section - Now part of flex flow */
+        #list-section {
+            flex: 1;
+            /* Table area */
+            background: var(--card-dark);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .list-header {
+            padding: 15px 25px;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-body {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            position: sticky;
+            top: 0;
+            background: #1e293b;
+            text-align: left;
+            padding: 12px 15px;
+            font-weight: 500;
+            color: var(--text-dim);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        tr:hover {
+            background: rgba(79, 70, 229, 0.1);
+            cursor: pointer;
+        }
+
+        .tag {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .tag-red {
+            background: rgba(231, 76, 60, 0.2);
+            color: #ff7675;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .tag-yellow {
+            background: rgba(241, 196, 15, 0.2);
+            color: #ffeaa7;
+            border: 1px solid rgba(241, 196, 15, 0.3);
+        }
+
+        .tag-green {
+            background: rgba(46, 204, 113, 0.2);
+            color: #55efc4;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Legends */
+        .legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--card-dark);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 12px;
+            z-index: 1001;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .color-box {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            margin-right: 8px;
+        }
+
+        .legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--card-dark);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 11px;
+            z-index: 1001;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .color-box {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            margin-right: 8px;
+        }
+
+        .radius-toggle {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .radius-toggle input {
+            cursor: pointer;
+        }
+    </style>
+    <link type="text/css" rel="stylesheet" href="../prototype.css">
+</head>
+
+<body>
+
+    <button class="btn-floating-help" style="width: auto !important; z-index:9999;" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal" style="z-index:10000;">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    🏜️ 국공유지 충전 취약 지역(Desert) 분석 대시보드
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        충전기 설치가 부족한 취약 지역(사각지대)과 국공유지를 겹쳐 표시하여, 공공 주도의 충전기 확충 입지를 선정하기 위한 분석 화면입니다.
+                    </p>
+                </div>
+                <h3 class="help-subtitle">[주요 확인 사항]</h3>
+                <div class="help-desc-box" style="background:#f0f7ff;">
+                    <ul class="help-list">
+                        <li><strong>분석 목표:</strong> 격자별 충전 취약도 확인</li>
+                        <li><strong>의사 결정:</strong> 인근 국공유지 활용 가능 대상지 발굴</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <header>
+        <div class="header-title">
+            <h1>인천 서구 국공유지 EV 충전 사막 지역 분석</h1>
+        </div>
+        <div class="header-meta">
+            <span style="font-size: 12px; color: var(--text-dim);">기준 데이터: AL_D160 (2025-11-03)</span>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside>
+            <div class="stat-card">
+                <div class="stat-grid">
+                    <div class="stat-item">
+                        <span class="stat-val stat-total" id="total-count">-</span>
+                        <span class="stat-label">분석 후보 실적</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-val stat-priority" id="red-count">-</span>
+                        <span class="stat-label">충전 사막 (500m+)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <h3>동별 입지 분포 통계</h3>
+                <div id="dong-chart"></div>
+            </div>
+
+            <div class="stat-card">
+                <h3>지목별 분포</h3>
+                <div id="jimok-chart" style="height: 200px;"></div>
+            </div>
+        </aside>
+
+        <div id="content-area">
+            <main id="map-container">
+                <div id="map"></div>
+
+                <div class="legend">
+                    <p style="margin-bottom: 8px; font-weight: 700;">후보지 이격거리 (Desert)</p>
+                    <div class="legend-item">
+                        <div class="color-box" style="background: var(--accent-red);"></div> 500m 이상 (최우선)
+                    </div>
+                    <div class="legend-item">
+                        <div class="color-box" style="background: var(--accent-yellow);"></div> 201m - 500m (보완)
+                    </div>
+                    <div class="legend-item">
+                        <div class="color-box" style="background: var(--accent-green);"></div> 200m 이내 (양호)
+                    </div>
+                </div>
+            </main>
+
+            <section id="list-section">
+                <div class="list-header">
+                    <h3 id="list-title">후보지 리스트 (Top 100)</h3>
+                    <div id="list-pagination" style="font-size: 12px; color: var(--text-dim);">클릭 시 지도가 해당 위치로 이동합니다.</div>
+                </div>
+                <div class="list-body">
+                    <table id="candidate-table">
+                        <thead>
+                            <tr>
+                                <th>순위</th>
+                                <th>행정동</th>
+                                <th>건물명</th>
+                                <th>소유 (지목)</th>
+                                <th>이격거리</th>
+                                <th>주차면수</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        let map;
+        let geojsonData;
+        let chargerData;
+        let radiusLayer = L.layerGroup();
+        const dataPath = './data/seogu_public_candidates_final.json';
+        const chargerPath = './data/seogu_full_chargers.json';
+
+        async function init() {
+            // Init Map
+            map = L.map('map', {
+                center: [37.545, 126.675],
+                zoom: 12,
+                zoomControl: false
+            });
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; CartoDB'
+            }).addTo(map);
+
+            L.control.zoom({ position: 'topleft' }).addTo(map);
+
+            try {
+                const res = await fetch(dataPath);
+                const data = await res.json();
+                geojsonData = data;
+
+                const resC = await fetch(chargerPath);
+                const cData = await resC.json();
+                chargerData = cData;
+
+                processData(data);
+                renderMap(data);
+                renderChargers(cData);
+                renderTable(data.features);
+            } catch (e) {
+                console.error("Data Load Error:", e);
+            }
+        }
+
+        function toggleRadiusFromDiv() {
+            const checkbox = document.getElementById('radius-checkbox');
+            checkbox.checked = !checkbox.checked;
+            toggleRadius();
+        }
+
+        function toggleRadius() {
+            const checkbox = document.getElementById('radius-checkbox');
+            if (checkbox.checked) {
+                if (!map.hasLayer(radiusLayer)) map.addLayer(radiusLayer);
+            } else {
+                if (map.hasLayer(radiusLayer)) map.removeLayer(radiusLayer);
+            }
+        }
+
+        function renderChargers(data) {
+            // Filter for fast chargers
+            const fastOnly = data.filter(c => c.has_fast || (c.fast_count > 0));
+
+            fastOnly.forEach(c => {
+                if (!c.lat || !c.lng) return;
+
+                // Solid Red Marker for Charger
+                L.circleMarker([c.lat, c.lng], {
+                    radius: 6,
+                    fillColor: "#ff0000",
+                    color: "#ffffff",
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 1
+                }).addTo(map).bindPopup(`
+                <div style="color:#333;">
+                    <b style="color:#ff0000;">${c.name} (기존)</b><br>
+                    구분: 급속 충전소<br>
+                    주소: ${c.addr}
+                </div>
+            `);
+
+                // 500m Radius Circle (subtle red)
+                L.circle([c.lat, c.lng], {
+                    radius: 500,
+                    color: '#ff0000',
+                    weight: 1.5,
+                    opacity: 0.3, // Slightly higher
+                    fillColor: '#ff0000',
+                    fillOpacity: 0.1, // Slightly higher
+                    interactive: false
+                }).addTo(radiusLayer);
+            });
+        }
+        function processData(grid) {
+            const features = grid.features;
+            document.getElementById('total-count').innerText = features.length.toLocaleString();
+
+            const redSites = features.filter(f => f.properties.color_code === '#e74c3c');
+            document.getElementById('red-count').innerText = redSites.length.toLocaleString();
+
+            // Dong Stats
+            const dongCounts = {};
+            const jimokCounts = {};
+
+            // Jjimok Labels
+            const jimokMap = {
+                '1': '전', '2': '답', '5': '임야', '8': '대', '9': '공장', '10': '학교', '11': '주차장',
+                '13': '창고', '22': '공원', '24': '유원지', '25': '종교', '28': '잡종지'
+            };
+
+            features.forEach(f => {
+                const props = f.properties;
+                let dong = props.dong_name || '기타';
+                dongCounts[dong] = (dongCounts[dong] || 0) + 1;
+
+                const jname = props.jimok_name || '기타';
+                jimokCounts[jname] = (jimokCounts[jname] || 0) + 1;
+            });
+
+            renderDongChart(dongCounts);
+            renderJimokChart(jimokCounts);
+        }
+
+        function renderDongChart(counts) {
+            const chartDom = document.getElementById('dong-chart');
+            const myChart = echarts.init(chartDom, 'dark');
+
+            const sortedData = Object.entries(counts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+
+            const option = {
+                backgroundColor: 'transparent',
+                tooltip: { trigger: 'axis' },
+                grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+                xAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } } },
+                yAxis: { type: 'category', data: sortedData.map(d => d[0]), inverse: true },
+                series: [{
+                    name: '후보지수',
+                    type: 'bar',
+                    data: sortedData.map(d => d[1]),
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                            { offset: 0, color: '#4f46e5' },
+                            { offset: 1, color: '#818cf8' }
+                        ]),
+                        borderRadius: [0, 4, 4, 0]
+                    }
+                }]
+            };
+            myChart.setOption(option);
+        }
+
+        function renderJimokChart(counts) {
+            const chartDom = document.getElementById('jimok-chart');
+            const myChart = echarts.init(chartDom, 'dark');
+            const data = Object.entries(counts).map(d => ({ name: d[0], value: d[1] }));
+
+            const option = {
+                backgroundColor: 'transparent',
+                tooltip: { trigger: 'item' },
+                series: [{
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: { borderRadius: 10, borderColor: '#1e293b', borderWidth: 2 },
+                    label: { show: false },
+                    data: data
+                }]
+            };
+            myChart.setOption(option);
+        }
+
+        function renderChargers(data) {
+            // Filter for fast chargers
+            const fastOnly = data.filter(c => c.has_fast || (c.fast_count > 0));
+
+            fastOnly.forEach(c => {
+                if (!c.lat || !c.lng) return;
+
+                L.circleMarker([c.lat, c.lng], {
+                    radius: 4,
+                    fillColor: "#00d2ff",
+                    color: "#fff",
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(map).bindPopup(`
+                <div style="color:#333;">
+                    <b>${c.name}</b><br>
+                    구분: 급속 충전소<br>
+                    주소: ${c.addr}
+                </div>
+            `);
+            });
+        }
+
+        function renderMap(data) {
+            L.geoJSON(data, {
+                style: function (f) {
+                    return {
+                        fillColor: f.properties.color_code || '#7f8c8d',
+                        weight: 1.5,
+                        opacity: 1,
+                        color: 'white',
+                        fillOpacity: 0.5
+                    };
+                },
+                onEachFeature: function (f, layer) {
+                    const p = f.properties;
+                    const ownerName = p.A8 || '기타';
+                    const jibun = `${p.A3 == '2' ? '산 ' : ''}${p.A4 || ''}`;
+
+                    let popupContent = `
+                    <div style="color:#333; font-family: Pretendard; min-width:200px;">
+                        <span style="background:#4f46e5; color:white; padding:2px 6px; border-radius:4px; font-size:10px; margin-bottom:5px; display:inline-block;">${p.A8} (${p.agency_name})</span>
+                        <h4 style="margin-bottom:5px;">${p.bldg_name || '무명건물'}</h4>
+                        <div style="font-size:12px; line-height:1.6;">
+                            <b>주소:</b> ${p.dong_name} ${jibun}<br>
+                            <b>충전기 거리:</b> <span style="color:#e74c3c; font-weight:bold;">${Math.round(p.dist_to_fast)}m</span><br>
+                            <b>주차면수:</b> ${p.parking_count || 0}대<br>
+                            <b>건물용도:</b> ${p.bldg_usage || '-'} (${p.jimok_name || ''})
+                        </div>
+                    </div>
+                `;
+                    layer.bindPopup(popupContent);
+
+                    layer.on('mouseover', function (e) { this.setStyle({ fillOpacity: 0.8, weight: 3 }); });
+                    layer.on('mouseout', function (e) { this.setStyle({ fillOpacity: 0.5, weight: 1.5 }); });
+                }
+            }).addTo(map);
+        }
+
+        function renderTable(features) {
+            const tbody = document.querySelector('#candidate-table tbody');
+            tbody.innerHTML = '';
+
+            const jimokMap = {
+                '1': '전', '2': '답', '3': '과수원', '4': '목장용지', '5': '임야', '6': '광천지', '7': '염전', '8': '대', '9': '공장', '10': '학교', '11': '주차장',
+                '12': '주유소', '13': '창고', '14': '도로', '15': '철도', '22': '공원', '24': '유원지', '25': '종교', '28': '잡종지'
+            };
+            const ownerMap = { '02': '국유지', '04': '시도유지', '05': '군유지' };
+
+            // Sort by distance (Longest first)
+            const sorted = [...features].sort((a, b) => b.properties.dist_to_fast - a.properties.dist_to_fast);
+
+            sorted.slice(0, 100).forEach((f, idx) => {
+                const p = f.properties;
+                let colorClass = 'tag-green';
+                if (p.dist_to_fast > 500) colorClass = 'tag-red';
+                else if (p.dist_to_fast > 200) colorClass = 'tag-yellow';
+
+                const jname = p.jimok_name || '-';
+                const oname = p.agency_name || p.A8 || '-';
+                const dongName = p.dong_name || '-';
+                const jibun = `${p.A3 == '2' ? '산 ' : ''}${p.A4 || ''}`;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                <td>${idx + 1}</td>
+                <td style="color:#818cf8">${dongName}</td>
+                <td style="font-weight:500">${p.bldg_name || '-'}</td>
+                <td><span style="font-size:11px; opacity:0.8;">${oname} (${jname})</span></td>
+                <td><span class="tag ${colorClass}">${Math.round(p.dist_to_fast).toLocaleString()}m</span></td>
+                <td style="text-align:right; padding-right:30px;">${p.parking_count || 0}</td>
+            `;
+
+                tr.onclick = () => {
+                    const center = getCentroid(f.geometry);
+                    map.flyTo(center, 18, { duration: 1.5 });
+
+                    // 지도 클릭 시와 동일한 고품격 팝업 컨텐츠 생성
+                    let popupContent = `
+                    <div style="color:#333; font-family: Pretendard; min-width:200px;">
+                        <span style="background:#4f46e5; color:white; padding:2px 6px; border-radius:4px; font-size:10px; margin-bottom:5px; display:inline-block;">${p.A8} (${p.agency_name})</span>
+                        <h4 style="margin-bottom:5px;">${p.bldg_name || '무명건물'}</h4>
+                        <div style="font-size:12px; line-height:1.6;">
+                            <b>주소:</b> ${p.dong_name} ${jibun}<br>
+                            <b>충전기 거리:</b> <span style="color:#e74c3c; font-weight:bold;">${Math.round(p.dist_to_fast)}m</span><br>
+                            <b>주차면수:</b> ${p.parking_count || 0}대<br>
+                            <b>건물용도:</b> ${p.bldg_usage || '-'} (${p.jimok_name || ''})
+                        </div>
+                    </div>
+                `;
+                    L.popup().setLatLng(center).setContent(popupContent).openOn(map);
+                };
+                tbody.appendChild(tr);
+            });
+        }
+
+        function getCentroid(geometry) {
+            if (geometry.type === 'Point') return [geometry.coordinates[1], geometry.coordinates[0]];
+            if (geometry.type === 'Polygon') {
+                let lat = 0, lng = 0, count = 0;
+                geometry.coordinates[0].forEach(coord => {
+                    lng += coord[0]; lat += coord[1]; count++;
+                });
+                return [lat / count, lng / count];
+            }
+            if (geometry.type === 'MultiPolygon') {
+                let lat = 0, lng = 0, count = 0;
+                geometry.coordinates[0][0].forEach(coord => {
+                    lng += coord[0]; lat += coord[1]; count++;
+                });
+                return [lat / count, lng / count];
+            }
+            return [37.545, 126.675];
+        }
+
+        window.onload = init;
+    </script>
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
+
+</body>
+
+</html>

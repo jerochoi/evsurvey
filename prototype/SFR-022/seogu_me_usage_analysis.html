@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>인천 서구 기후부(ME) 충전 패턴 분석</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        :root {
+            --primary: #00A389;
+            --secondary: #0F62FE;
+            --bg: #F0F4F8;
+            --card: #FFFFFF;
+            --text: #333333;
+        }
+
+        body {
+            margin: 0;
+            padding: 40px;
+            font-family: 'Pretendard', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+
+        .header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: #1a1a1a;
+        }
+
+        .header p {
+            margin: 5px 0 0;
+            color: #666;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .summary-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-top: 10px;
+            color: var(--secondary);
+        }
+
+        .stat-card .unit {
+            font-size: 0.9rem;
+            color: #999;
+            margin-left: 4px;
+        }
+
+        .chart-card {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            height: 450px;
+        }
+
+        .chart-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .ranking-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .ranking-table th {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 2px solid #eee;
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        .ranking-table td {
+            padding: 12px;
+            border-bottom: 1px solid #f9f9f9;
+            font-size: 0.9rem;
+        }
+
+        .ranking-table tr:hover {
+            background: #fcfcfc;
+        }
+
+        .rank-num {
+            font-weight: bold;
+            color: var(--primary);
+            width: 30px;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: white;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+    </style>
+    <link type="text/css" rel="stylesheet" href="../prototype.css">
+</head>
+
+<body>
+
+    <button class="btn-floating-help" style="width: auto !important; z-index:9999;" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal" style="z-index:10000;">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    ⚡ 서구 기후부 충전소 이용 패턴 분석
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        기후부(ME) 운영 충전소의 실제 이용 데이터(빈도, 충전량, 시간대)를 바탕으로 이용 패턴을 파악하는 분석 화면입니다.
+                    </p>
+                </div>
+                <h3 class="help-subtitle">[주요 확인 사항]</h3>
+                <div class="help-desc-box" style="background:#f0f7ff;">
+                    <ul class="help-list">
+                        <li><strong>분석 목표:</strong> 충전소별 일평균 이용 횟수 및 이용률 차이 분석</li>
+                        <li><strong>의사 결정:</strong> 고부하/저부하 충전소 식별 및 운영 개선점 도출</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="loading" class="loading-overlay">서구 기후부 충전 데이터 분석 리포트 생성 중...</div>
+
+    <div class="header">
+        <div>
+            <h1>인천 서구 기후부(ME) 충전 소통량 패턴 분석</h1>
+            <p>데이터 기준: 2026년 3월 (서구 내 기후부 운영 충전기 대상)</p>
+        </div>
+        <div style="font-size: 0.85rem; color: #888;">Antigravity Infra Intelligence</div>
+    </div>
+
+    <div class="summary-row">
+        <div class="stat-card">
+            <h3>총 충전 건수</h3>
+            <div class="value" id="total-count">-</div>
+        </div>
+        <div class="stat-card">
+            <h3>총 전력 공급량</h3>
+            <div class="value" id="total-amt">-<span class="unit">kWh</span></div>
+        </div>
+        <div class="stat-card">
+            <h3>피크 시간대</h3>
+            <div class="value" id="peak-hour">-<span class="unit">시</span></div>
+        </div>
+        <div class="stat-card">
+            <h3>평균 충전량</h3>
+            <div class="value" id="avg-amt">-<span class="unit">kWh/건</span></div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="chart-card">
+            <div class="chart-title">시간대별 충전 빈도 (Frequency)</div>
+            <div id="freq-chart" style="width: 100%; height: 350px;"></div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-title">시간대별 에너지 사용량 (kWh)</div>
+            <div id="amt-chart" style="width: 100%; height: 350px;"></div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-title">서구 ME 충전소 이용 집중도 TOP 10</div>
+            <div style="overflow-y: auto; height: 350px;">
+                <table class="ranking-table" id="rank-table">
+                    <thead>
+                        <tr>
+                            <th>순위</th>
+                            <th>충전소명</th>
+                            <th>건수</th>
+                            <th>공급량(kWh)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rank-body"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-title">에너지 수요 집중도 분석 (Heat Density)</div>
+            <div id="density-chart" style="width: 100%; height: 350px;"></div>
+        </div>
+    </div>
+
+    <script>
+        async function loadStats() {
+            try {
+                const response = await fetch('data/seogu_me_usage_stats.json');
+                const data = await response.json();
+
+                document.getElementById('total-count').innerText = data.total_records.toLocaleString();
+                document.getElementById('total-amt').innerHTML = `${Math.round(data.total_amount).toLocaleString()}<span class="unit">kWh</span>`;
+
+                const peakIdx = data.hourly_frequency.indexOf(Math.max(...data.hourly_frequency));
+                document.getElementById('peak-hour').innerHTML = `${peakIdx}<span class="unit">시</span>`;
+
+                const avg = data.total_amount / data.total_records;
+                document.getElementById('avg-amt').innerHTML = `${avg.toFixed(1)}<span class="unit">kWh/건</span>`;
+
+                renderCharts(data);
+                renderTable(data.top_stations);
+
+                document.getElementById('loading').style.display = 'none';
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loading').innerText = "통계 데이터를 불러올 수 없습니다.";
+            }
+        }
+
+        function renderCharts(data) {
+            // Frequency Chart
+            const freqChart = echarts.init(document.getElementById('freq-chart'));
+            freqChart.setOption({
+                tooltip: { trigger: 'axis' },
+                xAxis: { type: 'category', data: data.hourly_labels.map(h => h + '시') },
+                yAxis: { type: 'value', name: '건수' },
+                series: [{
+                    data: data.hourly_frequency,
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: { color: 'rgba(15, 98, 254, 0.1)' },
+                    lineStyle: { color: '#0F62FE', width: 3 },
+                    itemStyle: { color: '#0F62FE' }
+                }]
+            });
+
+            // Amount Chart
+            const amtChart = echarts.init(document.getElementById('amt-chart'));
+            amtChart.setOption({
+                tooltip: { trigger: 'axis' },
+                xAxis: { type: 'category', data: data.hourly_labels.map(h => h + '시') },
+                yAxis: { type: 'value', name: 'kWh' },
+                series: [{
+                    data: data.hourly_amount,
+                    type: 'bar',
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: '#00A389' },
+                            { offset: 1, color: '#00D1B2' }
+                        ])
+                    }
+                }]
+            });
+
+            // Density Radar/Polar Chart for visual variety
+            const densityChart = echarts.init(document.getElementById('density-chart'));
+            densityChart.setOption({
+                tooltip: {},
+                polar: {},
+                angleAxis: { type: 'category', data: data.hourly_labels.map(h => h + '시'), boundaryGap: false },
+                radiusAxis: {},
+                series: [{
+                    coordinateSystem: 'polar',
+                    name: '에너지 밀도',
+                    type: 'line',
+                    data: data.hourly_amount,
+                    smooth: true
+                }]
+            });
+        }
+
+        function renderTable(stations) {
+            const body = document.getElementById('rank-body');
+            stations.forEach((s, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="rank-num">${idx + 1}</td>
+                    <td>${s.충전소명}</td>
+                    <td>${s.count.toLocaleString()}</td>
+                    <td>${Math.round(s.충전량).toLocaleString()}</td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        loadStats();
+    </script>
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
+
+</body>
+
+</html>

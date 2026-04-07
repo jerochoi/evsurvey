@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인천 서구 아파트 EV 인프라 준수 현황</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --danger: #e11d48;
+            --success: #16a34a;
+            --bg: #f8fafc;
+            --sidebar-w: 480px;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Pretendard', sans-serif;
+            background: var(--bg);
+            overflow: hidden;
+        }
+
+        .main-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .list-panel {
+            width: var(--sidebar-w);
+            background: white;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .map-panel {
+            flex: 1;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .header {
+            padding: 20px;
+            background: #1e293b;
+            color: white;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            margin: 5px 0 0;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .stat-banner {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding: 15px;
+            background: #f1f5f9;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .search-box {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            gap: 8px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            outline: none;
+        }
+
+        .table-area {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            table-layout: fixed;
+        }
+
+        th {
+            position: sticky;
+            top: 0;
+            background: #f8fafc;
+            padding: 12px 6px;
+            text-align: left;
+            color: #475569;
+            border-bottom: 2px solid #e2e8f0;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover {
+            background: #f1f5f9;
+        }
+
+        th i {
+            margin-left: 4px;
+            font-size: 10px;
+            color: #cbd5e1;
+        }
+
+        th.active i {
+            color: var(--primary);
+        }
+
+        td {
+            padding: 12px 6px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: top;
+            cursor: pointer;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        .tag {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .tag-shortage {
+            background: #fff1f2;
+            color: #e11d48;
+        }
+
+        .tag-ok {
+            background: #f0fdf4;
+            color: #16a34a;
+        }
+
+        .tag-no-loc {
+            background: #f1f5f9;
+            color: #64748b;
+            font-size: 10px;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .tag-gps {
+            background: #fff7ed;
+            color: #f97316;
+            font-size: 10px;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-weight: 500;
+            border: 1px solid #ffedd5;
+        }
+
+        .stat-match-box {
+            background: #eff6ff;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            border: 1px solid #dbeafe;
+            margin-top: 8px;
+        }
+
+        .stat-match-title {
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-match-item {
+            padding-left: 10px;
+            border-left: 2px solid #93c5fd;
+            margin-top: 4px;
+            color: #334155;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .custom-charger-marker {
+            border: none;
+            background: none;
+        }
+    </style>
+    <link type="text/css" rel="stylesheet" href="../prototype.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+</head>
+
+<body>
+
+    <button class="btn-floating-help" style="width: auto !important; z-index:9999;" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <div id="helpModal" class="help-modal" style="z-index:10000;">
+        <div class="help-modal-content">
+            <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
+            <div class="help-modal-header">
+                <h2 class="help-title">
+                    🏢 아파트 전기차 의무 설치 현황 대시보드
+                </h2>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-desc-box">
+                    <p class="help-desc-text">
+                        관내 아파트의 전기차 충전기 의무 설치 기준 준수 여부를 확인하고, K-APT 통계와 일치하는지 모니터링하는 화면입니다.
+                    </p>
+                </div>
+                <h3 class="help-subtitle">[주요 확인 사항]</h3>
+                <div class="help-desc-box" style="background:#f0f7ff;">
+                    <ul class="help-list">
+                        <li><strong>분석 목표:</strong> 단지별 의무 설치 준수율 확인</li>
+                        <li><strong>의사 결정:</strong> 미설치/부족 단지 점검 및 행정지도 대상 발굴</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="main-container">
+        <div class="list-panel">
+            <div class="header">
+                <h1>인천 서구 아파트 EV 인프라 현황</h1>
+                <p>K-APT 전수 데이터 기반 의무설치 및 보급률 분석</p>
+            </div>
+
+            <div class="stat-banner">
+                <div class="stat-card">
+                    <div class="stat-label">분석 대상</div>
+                    <div class="stat-value" id="count-total">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">위치 매칭</div>
+                    <div class="stat-value" id="count-loc-match" style="color:var(--primary);">0</div>
+                </div>
+                <div class="stat-card" style="border-left: 3px solid var(--danger);">
+                    <div class="stat-label">설치 부족</div>
+                    <div class="stat-value" id="count-shortage" style="color:var(--danger);">0</div>
+                </div>
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="단지명 검색..." onkeyup="filterList()">
+            </div>
+
+            <div class="table-area">
+                <table id="target-table">
+                    <thead>
+                        <tr>
+                            <th style="width:130px;" onclick="setSort('단지명')">단지명<i class="fas fa-sort"></i></th>
+                            <th style="width:105px;">주소</th>
+                            <th style="width:55px;" onclick="setSort('총주차대수')">총주차<i class="fas fa-sort"></i></th>
+                            <th style="width:45px;" onclick="setSort('current_kapt_total')">충전<i class="fas fa-sort"></i></th>
+                            <th style="width:45px;" onclick="setSort('external_matched_count')">매칭<i class="fas fa-sort"></i></th>
+                            <th style="width:45px;" onclick="setSort('shortage')">부족<i class="fas fa-sort"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="map-panel">
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let map, aptData = [], chargerData = [], unmatchedData = [];
+        let aptLayer, chargerLayer, polygonLayer, unmatchedLayer;
+        let sortConfig = { key: 'shortage', order: 'desc' };
+
+        async function init() {
+            const light = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OSM' });
+            const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri' });
+            
+            map = L.map('map', { center: [37.545, 126.675], zoom: 12, layers: [light], zoomControl: false });
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+            // 중요 마커를 최상단에 띄우기 위한 전용 pane 생성
+            map.createPane('topMarkerPane');
+            map.getPane('topMarkerPane').style.zIndex = 650; // 충전소 마커보다 상단
+            map.getPane('topMarkerPane').style.pointerEvents = 'none';
+
+            try {
+                const ts = new Date().getTime();
+                const [resMap, resChargers] = await Promise.all([
+                    fetch(`./data/seogu_apt_ev_analysis.json.gz?v=${ts}`),
+                    fetch(`./data/seogu_full_chargers_detailed.json.gz?v=${ts}`)
+                ]);
+                
+                if (!resMap.ok || !resChargers.ok) throw new Error("Data loading failed");
+
+                const mapBuf = await resMap.arrayBuffer();
+                const mapData = JSON.parse(pako.ungzip(new Uint8Array(mapBuf), {to:'string'}));
+                aptData = mapData.features || [];
+                const chargerBuf = await resChargers.arrayBuffer();
+                chargerData = JSON.parse(pako.ungzip(new Uint8Array(chargerBuf), {to:'string'}));
+
+                updateStats(aptData);
+                filterList();
+                renderMapLayers();
+
+                L.control.layers(
+                    { "일반지도": light, "항공지도": satellite },
+                    { 
+                        "아파트 단지(영역)": polygonLayer,
+                        "아파트 단지(마커)": aptLayer,
+                        "전체 충전소 정보": chargerLayer 
+                    },
+                    { position: 'topright' }
+                ).addTo(map);
+
+            } catch (e) {
+                console.error("Initialization error:", e);
+                alert("데이터를 불러오는 중 오류가 발생했습니다.");
+            }
+        }
+
+        function updateStats(data) {
+            document.getElementById('count-total').innerText = data.length;
+            const locMatch = data.filter(f => f.geometry).length;
+            document.getElementById('count-loc-match').innerText = `${((locMatch / data.length) * 100).toFixed(0)}%`;
+            document.getElementById('count-shortage').innerText = data.filter(f => (f.properties.shortage || 0) > 0).length;
+        }
+
+        function setSort(key) {
+            if (sortConfig.key === key) sortConfig.order = sortConfig.order === 'asc' ? 'desc' : 'asc';
+            else { sortConfig.key = key; sortConfig.order = 'desc'; }
+
+            document.querySelectorAll('th').forEach(th => th.classList.remove('active'));
+            const activeTh = Array.from(document.querySelectorAll('th')).find(th => {
+                const t = th.textContent;
+                if (key === 'current_kapt_total') return t.includes('충전기');
+                if (key === 'external_matched_count') return t.includes('매칭');
+                if (key === 'shortage') return t.includes('부족');
+                if (key === '총주차대수') return t.includes('총주차');
+                return t.includes('단지명');
+            });
+            if (activeTh) activeTh.classList.add('active');
+
+            filterList();
+        }
+
+        function renderList(features) {
+            const tbody = document.querySelector('#target-table tbody');
+            tbody.innerHTML = '';
+
+            features.sort((a, b) => {
+                let v1 = a.properties[sortConfig.key] || 0, v2 = b.properties[sortConfig.key] || 0;
+                return sortConfig.order === 'asc' ? v1 - v2 : v2 - v1;
+            }).forEach(f => {
+                const p = f.properties;
+                const shortage = p.shortage || 0;
+                const matched = p.external_matched_count || 0;
+                const stations = p.matched_stations || [];
+                let matchBox = '';
+                if (stations.length > 0) {
+                    const items = stations.map(s => {
+                        const icon = s.is_fast ? '<i class="fas fa-bolt" style="color:#e11d48; width:10px;"></i>' : '<i class="fas fa-plug" style="color:#3b82f6; width:10px;"></i>';
+                        return `<div class="stat-match-item">${icon} <span class="station-id">[${s.id}]</span> <b>(${s.count}기)</b> - ${s.name}</div>`;
+                    }).join('');
+                    matchBox = `<div class="stat-match-box">${items}</div>`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = 'main-row';
+                const locTag = (f.geometry && p.is_point_only) ? '<span class="tag-gps">GPS</span>' : (f.geometry ? '' : '<span class="tag-no-loc">위치 미상</span>');
+                tr.innerHTML = `
+                    <td><div style="font-weight: 600; color:var(--primary);">${p.단지명} ${locTag}</div></td>
+                    <td><div style="font-size: 10px; color:#94a3b8;">${p.도로명주소 || p.법정동주소}</div></td>
+                    <td>${p.총주차대수}</td>
+                    <td style="color:#64748b;">${p.current_kapt_total || 0}</td>
+                    <td style="color:var(--primary); font-weight:bold;">${matched}</td>
+                    <td><span class="tag ${shortage > 0 ? 'tag-shortage' : 'tag-ok'}">${shortage}</span></td>
+                `;
+                tr.onclick = () => zoomToComplex(f);
+                tbody.appendChild(tr);
+
+                if (stations.length > 0) {
+                    const infoTr = document.createElement('tr');
+                    infoTr.className = 'info-row';
+                    infoTr.innerHTML = `
+                        <td colspan="6" style="padding: 0 10px 12px 10px; border-bottom: 1px solid #f1f5f9;">
+                            ${matchBox}
+                        </td>
+                    `;
+                    infoTr.onclick = () => zoomToComplex(f);
+                    tbody.appendChild(infoTr);
+                }
+            });
+        }
+
+        function filterList() {
+            const val = document.getElementById('search-input').value.toLowerCase();
+            const filtered = aptData.filter(f => f.properties.단지명.toLowerCase().includes(val));
+            renderList(filtered);
+        }
+
+        function zoomToComplex(f) {
+            if (!f.geometry) { alert("위치 정보가 없습니다."); return; }
+            if (polygonLayer) polygonLayer.eachLayer(l => polygonLayer.resetStyle(l));
+
+            let targetLayer;
+            polygonLayer.eachLayer(l => { 
+                if (l.feature.properties.단지코드 === f.properties.단지코드) targetLayer = l; 
+            });
+
+            if (targetLayer) {
+                targetLayer.setStyle({ weight: 5, color: '#f59e0b', fillOpacity: 0.7 });
+                
+                if (f.geometry.type.includes('Polygon')) {
+                    map.fitBounds(targetLayer.getBounds(), { padding: [50, 50], maxZoom: 18 });
+                } else {
+                    map.setView(targetLayer.getLatLng(), 18);
+                }
+                targetLayer.bindPopup(getAptPopup(f.properties)).openPopup();
+            } else {
+                const tempLayer = L.geoJSON(f);
+                if (f.geometry.type.includes('Polygon')) {
+                    map.fitBounds(tempLayer.getBounds(), { padding: [50, 50], maxZoom: 18 });
+                } else {
+                    const coords = f.geometry.coordinates;
+                    map.setView([coords[1], coords[0]], 18);
+                }
+            }
+        }
+
+        function getAptPopup(p) {
+            const mRate = p.mandatory_count / p.총주차대수 * 100;
+            const cRate = p.final_est_capacity / p.총주차대수 * 100;
+            const msg = p.is_point_only ? '<div style="color:var(--danger); font-size:10px;">* 주소 불일치로 단지 경계(건물)를 찾지 못함</div>' : '';
+            
+            // 사용승인일 포맷팅 (YYYYMMDD -> YYYY-MM-DD)
+            let dateStr = p.사용승인일 ? String(p.사용승인일).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3') : '-';
+            
+            return `
+            <div style="font-size:13px; line-height:1.7; width:260px;">
+                <b style="font-size:16px; color:var(--primary);">${p.단지명}</b><br>
+                ${msg}
+                <hr style="margin:8px 0; border:0; border-top:1px solid #eee;">
+                <b>사용승인일:</b> ${dateStr}<br>
+                <b>총 주차대수:</b> ${p.총주차대수}면<br>
+                <b>의무 설치비율:</b> <b style="color:#1e293b;">${mRate.toFixed(0)}% (${p.mandatory_count}대)</b><br>
+                <b>현재 설치비율:</b> <b style="color:${p.shortage > 0 ? 'var(--danger)' : 'var(--success)'};">${cRate.toFixed(1)}% (${p.final_est_capacity}대)</b><br>
+                <hr style="margin:8px 0; border:0; border-top:1px solid #eee;">
+                <div style="font-size:11px; color:#64748b;">
+                    K-APT 기록: ${p.current_kapt_total}대 | 외부 매칭: ${p.external_matched_count}대<br>
+                    최종 부족량: <b style="color:var(--danger);">${p.shortage}대</b>
+                </div>
+            </div>
+        `;
+        }
+
+        function renderMapLayers() {
+            if (polygonLayer) map.removeLayer(polygonLayer);
+            if (aptLayer) map.removeLayer(aptLayer);
+            if (chargerLayer) map.removeLayer(chargerLayer);
+            if (unmatchedLayer) map.removeLayer(unmatchedLayer);
+
+
+            const mapFeatures = aptData.filter(f => f.geometry);
+
+            polygonLayer = L.geoJSON(mapFeatures, {
+                style: (f) => {
+                    const shortage = f.properties.shortage || 0;
+                    const isPoint = f.properties.is_point_only;
+                    const statusColor = shortage > 0 ? '#e11d48' : '#2563eb';
+                    return {
+                        fillColor: isPoint ? '#eab308' : statusColor,
+                        color: statusColor, 
+                        weight: isPoint ? 3 : 2, 
+                        fillOpacity: isPoint ? 1 : 0.5,
+                        dashArray: isPoint ? '3,3' : ''
+                    };
+                },
+                pointToLayer: (f, latlng) => {
+                    const shortage = f.properties.shortage || 0;
+                    const statusColor = shortage > 0 ? '#e11d48' : '#2563eb';
+                    return L.circleMarker(latlng, {
+                        radius: 10,
+                        fillColor: '#f59e0b',
+                        color: statusColor, weight: 4, fillOpacity: 0.9,
+                        pane: 'topMarkerPane'
+                    });
+                },
+                onEachFeature: (f, layer) => {
+                    layer.on('click', (e) => {
+                        L.DomEvent.stopPropagation(e);
+                        zoomToComplex(f);
+                    });
+                }
+            }).addTo(map);
+
+            polygonLayer.bringToBack();
+
+            aptLayer = L.layerGroup();
+            mapFeatures.filter(f => !f.properties.is_point_only).forEach(f => {
+                const geom = L.geoJSON(f);
+                const center = geom.getBounds().getCenter();
+                const shortage = f.properties.shortage || 0;
+                const statusColor = shortage > 0 ? '#e11d48' : '#2563eb';
+                L.circleMarker(center, {
+                    radius: 7,
+                    fillColor: statusColor,
+                    color: '#fff', weight: 2, fillOpacity: 1, pane: 'markerPane'
+                }).bindPopup(getAptPopup(f.properties)).addTo(aptLayer);
+            });
+            aptLayer.addTo(map);
+
+            chargerLayer = L.layerGroup();
+            const cluster = {};
+            chargerData.forEach(c => { 
+                if (c.lat && c.lng) { 
+                    const k = c.lat + ',' + c.lng; 
+                    if (!cluster[k]) cluster[k] = []; 
+                    cluster[k].push(c); 
+                } 
+            });
+            Object.values(cluster).forEach(group => {
+                const hasFast = group.some(x => x.has_fast || (x.fast_count && x.fast_count > 0));
+                const totalChargers = group.reduce((acc, current) => acc + (current.total_count || 0), 0);
+                const totalFast = group.reduce((acc, current) => acc + (current.fast_count || 0), 0);
+                const totalSlow = group.reduce((acc, current) => acc + (current.slow_count || 0), 0);
+                
+                const color = hasFast ? '#e11d48' : '#2563eb';
+                const mainStat = group[0];
+                
+                const stationDetails = group.map(s => `
+                    <div style="margin-top: 8px; border-top: 1px solid #eee; padding-top: 8px;">
+                        <div style="font-size: 11px; color: #64748b; margin-bottom: 2px;">ID: ${s.statId} | 설치: ${s.year || '-'}년</div>
+                        <div style="font-weight: 600; font-size: 13px; color: #1e293b;">${s.statNm}</div>
+                        <div style="font-size: 11px; color: #94a3b8;">${s.addr}</div>
+                        <div style="display: flex; gap: 10px; margin-top: 4px;">
+                            <span style="font-size: 11px; color: #e11d48;"><i class="fa-solid fa-bolt"></i> 급속 ${s.fast_count || 0}</span>
+                            <span style="font-size: 11px; color: #2563eb;"><i class="fa-solid fa-plug"></i> 완속 ${s.slow_count || 0}</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                L.marker([mainStat.lat, mainStat.lng], {
+                    icon: L.divIcon({
+                        html: `<div style="background:${color}; width:24px; height:24px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 5px rgba(0,0,0,0.2); position:relative;">
+                        <i class="fa-solid ${hasFast ? 'fa-bolt' : 'fa-plug'}" style="color:white; font-size:12px;"></i>
+                        ${totalChargers > 0 ? `<span style="position:absolute; top:-8px; right:-8px; background:#1e293b; color:white; padding:1px 5px; border-radius:10px; font-size:10px; border:1px solid #fff; min-width:12px; text-align:center;">${totalChargers}</span>` : ''}
+                    </div>`,
+                        className: 'custom-charger-marker', iconSize: [24, 24]
+                    })
+                }).bindPopup(`
+                    <div style="min-width: 250px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="background: ${color}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">
+                                ${hasFast ? '급속충전소' : '완속 전용'}
+                            </span>
+                            <span style="font-size: 12px; color: #64748b; font-weight: 700;">총 ${totalChargers}기</span>
+                        </div>
+                        <div style="max-height: 250px; overflow-y: auto;">
+                            ${stationDetails}
+                        </div>
+                    </div>
+                `).addTo(chargerLayer);
+            });
+            chargerLayer.addTo(map);
+        }
+        window.onload = init;
+    </script>
+
+    <script>
+        function toggleHelpModal() {
+            var modal = document.getElementById("helpModal");
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                modal.style.display = "block";
+            }
+        }
+    </script>
+
+</body>
+
+</html>
