@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>인천 서구 국공유지 EV 충전 사공지대 분석 대시보드</title>
+    <title>인천 서구 국공유지 충전 취약지역 분석 대시보드</title>
 
     <!-- CSS Dependencies -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -315,7 +315,7 @@
 
 <body>
 
-    <button class="btn-floating-help" style="width: auto !important; z-index:9999;" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <button class="btn-floating-help" style="width: auto !important; z-index:9999; top:50px;" onclick="toggleHelpModal()">💬 화면 설명</button>
     <div id="helpModal" class="help-modal" style="z-index:10000;">
         <div class="help-modal-content">
             <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
@@ -344,7 +344,7 @@
 
     <header>
         <div class="header-title">
-            <h1>인천 서구 국공유지 EV 충전 사막 지역 분석</h1>
+            <h1>인천 서구 국공유지 충전 취약지역 분석</h1>
         </div>
         <div class="header-meta">
             <span style="font-size: 12px; color: var(--text-dim);">기준 데이터: AL_D160 (2025-11-03)</span>
@@ -361,7 +361,7 @@
                     </div>
                     <div class="stat-item">
                         <span class="stat-val stat-priority" id="red-count">-</span>
-                        <span class="stat-label">충전 사막 (500m+)</span>
+                        <span class="stat-label">충전 취약지역 (500m+)</span>
                     </div>
                 </div>
             </div>

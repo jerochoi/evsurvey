@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>환경부 충전시설 보급 현황 통계</title>
+    <title>기후부 충전시설 보급 현황 통계</title>
     <!-- Use ECharts for premium looking charts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
     <style>
@@ -98,26 +98,26 @@
 
 <body>
 
-    <button class="btn-floating-help" style="width: auto !important; z-index:9999;" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <button class="btn-floating-help" style="width: auto !important; z-index:9999; top:100px;" onclick="toggleHelpModal()">💬 화면 설명</button>
     <div id="helpModal" class="help-modal" style="z-index:10000;">
         <div class="help-modal-content">
             <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
             <div class="help-modal-header">
                 <h2 class="help-title">
-                    📊 충전 시설 이용 통계 분석
+                    📊 충전 시설 설치 현황 분석
                 </h2>
             </div>
             <div class="help-modal-body">
                 <div class="help-desc-box">
                     <p class="help-desc-text">
-                        분석 기간 내 전체 충전 이력을 기반으로 충전 횟수, 충전량, 이용률 등의 거시적인 통계를 요약하여 보여주는 화면입니다.
+                        현재 어떤 지역과 시설에 충전기가 집중되어 있는지 설치 현황을 분석하여, 인프라가 편중된 곳이나 추가 설치가 필요한 전략적 입지를 파악하기 위한 화면입니다.
                     </p>
                 </div>
                 <h3 class="help-subtitle">[주요 확인 사항]</h3>
                 <div class="help-desc-box" style="background:#f0f7ff;">
                     <ul class="help-list">
-                        <li><strong>분석 목표:</strong> 지역 및 요일/시간대별 전반적 이용 트렌드 파악</li>
-                        <li><strong>의사 결정:</strong> 거시적 데이터 기반 인프라 확충 정책 수립 지원</li>
+                        <li><strong>분석 목표:</strong> 지역별/시설용도별 충전 인프라 보급 편중도 식별</li>
+                        <li><strong>의사 결정:</strong> 설치 현황 데이터를 기반으로 한 신규 충전소 우선 설치 지역 도출</li>
                     </ul>
                 </div>
             </div>
@@ -128,7 +128,7 @@
     <div id="loading" class="loading">통계 데이터를 불러오는 중입니다...</div>
 
     <div class="header">
-        <h1>환경부 전기차 충전시설 보급 통계</h1>
+        <h1>기후부 전기차 충전시설 보급 통계</h1>
         <div>전체 충전기: <span id="total-count" class="total-count">0</span> 건</div>
     </div>
 

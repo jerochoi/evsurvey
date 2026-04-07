@@ -237,7 +237,7 @@
 
 <body>
 
-    <button class="btn-floating-help" style="width: auto !important; z-index:9999;" onclick="toggleHelpModal()">💬 화면 설명</button>
+    <button class="btn-floating-help" style="width: auto !important; z-index:9999; top:130px;" onclick="toggleHelpModal()">💬 화면 설명</button>
     <div id="helpModal" class="help-modal" style="z-index:10000;">
         <div class="help-modal-content">
             <span class="help-close-btn" onclick="toggleHelpModal()">&times;</span>
@@ -320,7 +320,7 @@
         async function init() {
             const light = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OSM' });
             const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri' });
-            
+
             map = L.map('map', { center: [37.545, 126.675], zoom: 12, layers: [light], zoomControl: false });
             L.control.zoom({ position: 'bottomright' }).addTo(map);
 
@@ -335,14 +335,14 @@
                     fetch(`./data/seogu_apt_ev_analysis.json.gz?v=${ts}`),
                     fetch(`./data/seogu_full_chargers_detailed.json.gz?v=${ts}`)
                 ]);
-                
+
                 if (!resMap.ok || !resChargers.ok) throw new Error("Data loading failed");
 
                 const mapBuf = await resMap.arrayBuffer();
-                const mapData = JSON.parse(pako.ungzip(new Uint8Array(mapBuf), {to:'string'}));
+                const mapData = JSON.parse(pako.ungzip(new Uint8Array(mapBuf), { to: 'string' }));
                 aptData = mapData.features || [];
                 const chargerBuf = await resChargers.arrayBuffer();
-                chargerData = JSON.parse(pako.ungzip(new Uint8Array(chargerBuf), {to:'string'}));
+                chargerData = JSON.parse(pako.ungzip(new Uint8Array(chargerBuf), { to: 'string' }));
 
                 updateStats(aptData);
                 filterList();
@@ -350,10 +350,10 @@
 
                 L.control.layers(
                     { "일반지도": light, "항공지도": satellite },
-                    { 
+                    {
                         "아파트 단지(영역)": polygonLayer,
                         "아파트 단지(마커)": aptLayer,
-                        "전체 충전소 정보": chargerLayer 
+                        "전체 충전소 정보": chargerLayer
                     },
                     { position: 'topright' }
                 ).addTo(map);
@@ -449,13 +449,13 @@
             if (polygonLayer) polygonLayer.eachLayer(l => polygonLayer.resetStyle(l));
 
             let targetLayer;
-            polygonLayer.eachLayer(l => { 
-                if (l.feature.properties.단지코드 === f.properties.단지코드) targetLayer = l; 
+            polygonLayer.eachLayer(l => {
+                if (l.feature.properties.단지코드 === f.properties.단지코드) targetLayer = l;
             });
 
             if (targetLayer) {
                 targetLayer.setStyle({ weight: 5, color: '#f59e0b', fillOpacity: 0.7 });
-                
+
                 if (f.geometry.type.includes('Polygon')) {
                     map.fitBounds(targetLayer.getBounds(), { padding: [50, 50], maxZoom: 18 });
                 } else {
@@ -477,10 +477,10 @@
             const mRate = p.mandatory_count / p.총주차대수 * 100;
             const cRate = p.final_est_capacity / p.총주차대수 * 100;
             const msg = p.is_point_only ? '<div style="color:var(--danger); font-size:10px;">* 주소 불일치로 단지 경계(건물)를 찾지 못함</div>' : '';
-            
+
             // 사용승인일 포맷팅 (YYYYMMDD -> YYYY-MM-DD)
             let dateStr = p.사용승인일 ? String(p.사용승인일).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3') : '-';
-            
+
             return `
             <div style="font-size:13px; line-height:1.7; width:260px;">
                 <b style="font-size:16px; color:var(--primary);">${p.단지명}</b><br>
@@ -515,8 +515,8 @@
                     const statusColor = shortage > 0 ? '#e11d48' : '#2563eb';
                     return {
                         fillColor: isPoint ? '#eab308' : statusColor,
-                        color: statusColor, 
-                        weight: isPoint ? 3 : 2, 
+                        color: statusColor,
+                        weight: isPoint ? 3 : 2,
                         fillOpacity: isPoint ? 1 : 0.5,
                         dashArray: isPoint ? '3,3' : ''
                     };
@@ -557,22 +557,22 @@
 
             chargerLayer = L.layerGroup();
             const cluster = {};
-            chargerData.forEach(c => { 
-                if (c.lat && c.lng) { 
-                    const k = c.lat + ',' + c.lng; 
-                    if (!cluster[k]) cluster[k] = []; 
-                    cluster[k].push(c); 
-                } 
+            chargerData.forEach(c => {
+                if (c.lat && c.lng) {
+                    const k = c.lat + ',' + c.lng;
+                    if (!cluster[k]) cluster[k] = [];
+                    cluster[k].push(c);
+                }
             });
             Object.values(cluster).forEach(group => {
                 const hasFast = group.some(x => x.has_fast || (x.fast_count && x.fast_count > 0));
                 const totalChargers = group.reduce((acc, current) => acc + (current.total_count || 0), 0);
                 const totalFast = group.reduce((acc, current) => acc + (current.fast_count || 0), 0);
                 const totalSlow = group.reduce((acc, current) => acc + (current.slow_count || 0), 0);
-                
+
                 const color = hasFast ? '#e11d48' : '#2563eb';
                 const mainStat = group[0];
-                
+
                 const stationDetails = group.map(s => `
                     <div style="margin-top: 8px; border-top: 1px solid #eee; padding-top: 8px;">
                         <div style="font-size: 11px; color: #64748b; margin-bottom: 2px;">ID: ${s.statId} | 설치: ${s.year || '-'}년</div>
