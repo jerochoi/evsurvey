@@ -313,6 +313,110 @@
         .print-footer {
             display: none;
         }
+
+        /* ── Lightbox ── */
+        .lightbox-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.88);
+            z-index: 9000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .lightbox-overlay.active {
+            display: flex;
+        }
+
+        .lightbox-overlay img {
+            max-width: 92vw;
+            max-height: 88vh;
+            border-radius: 8px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+            object-fit: contain;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 28px;
+            font-size: 2.2rem;
+            color: #fff;
+            cursor: pointer;
+            line-height: 1;
+            opacity: 0.85;
+            transition: opacity .2s;
+        }
+
+        .lightbox-close:hover {
+            opacity: 1;
+        }
+
+        .lightbox-caption {
+            margin-top: 14px;
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+
+        /* ── Project meta box ── */
+        .project-meta {
+            margin-top: 18px;
+            padding: 18px 22px;
+            background: #F4F7FB;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .project-meta .meta-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .project-meta .meta-label {
+            font-weight: 700;
+            color: var(--primary);
+            min-width: 80px;
+        }
+
+        .project-meta .meta-value {
+            color: var(--text-main);
+        }
+
+        /* ── Image link cards ── */
+        .img-link-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .img-link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: #fff;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            text-decoration: none;
+            transition: border-color .2s, background .2s;
+        }
+
+        .img-link-btn:hover {
+            border-color: var(--primary);
+            background: #E8F2FF;
+            color: var(--primary);
+        }
     </style>
 </head>
 
@@ -349,12 +453,26 @@
 
             <header class="doc-header">
                 <span class="doc-category">Project Overview</span>
-                <h1 class="doc-title">CILI 시뮬레이션 고도화 및 수요발굴</h1>
+                <h1 class="doc-title">CILI 기능개선 및 수요발굴</h1>
                 <div class="doc-meta">Last Updated: 2026.04.08 | Architecture & Design Report</div>
             </header>
 
             <section id="summary" class="page-section">
                 <h2>1. 추진 배경 및 목적</h2>
+                <div class="project-meta" style="margin-bottom:18px;">
+                    <div class="meta-row">
+                        <span class="meta-label">사업명</span>
+                        <span class="meta-value">무공해차 통합 누리집 개선 및 배터리 정보 기능 개발</span>
+                    </div>
+                </div>
+                <div class="img-link-row" style="margin-bottom:18px; margin-top:0;">
+                    <button class="img-link-btn" onclick="openLightbox('SFR-022/마일스톤.jpg', '프로젝트 마일스톤')">
+                        📅 프로젝트 마일스톤
+                    </button>
+                    <button class="img-link-btn" onclick="openLightbox('SFR-022/협의사항.jpg', '협의사항')">
+                        📝 협의사항
+                    </button>
+                </div>
                 <div class="list-box">
                     <ul>
                         <li><strong>CILI 지수 시뮬레이터 및 데이터 관리 체계 구축:</strong> 고정된 지표에서 탈피하여 가중치 조절을 통한 실시간 시뮬레이션 환경 마련</li>
@@ -559,7 +677,28 @@
                 this.classList.add('active');
             });
         });
+
+        function openLightbox(src, caption) {
+            const ov = document.getElementById('lightbox-overlay');
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox-caption').textContent = caption || '';
+            ov.classList.add('active');
+        }
+        function closeLightbox() {
+            document.getElementById('lightbox-overlay').classList.remove('active');
+        }
+        document.getElementById('lightbox-overlay').addEventListener('click', function (e) {
+            if (e.target === this) closeLightbox();
+        });
     </script>
+
+    <!-- ── Lightbox Overlay ── -->
+    <div id="lightbox-overlay" class="lightbox-overlay">
+        <span class="lightbox-close" onclick="closeLightbox()">&#x2715;</span>
+        <img id="lightbox-img" src="" alt="">
+        <div id="lightbox-caption" class="lightbox-caption"></div>
+    </div>
+
 </body>
 
 </html>
