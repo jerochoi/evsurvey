@@ -180,36 +180,80 @@
         .link-card {
             display: flex;
             align-items: center;
-            background: #F2F4F8;
-            padding: 15px 20px;
+            background: #fff;
+            padding: 12px 16px;
             border-radius: 10px;
             text-decoration: none;
             color: var(--text-main);
             margin-top: 10px;
-            transition: transform 0.2s;
-            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            gap: 16px;
         }
 
         .link-card:hover {
-            transform: scale(1.01);
+            transform: translateX(4px);
             border-color: var(--primary);
-            background: #E8F2FF;
+            background: #F8FAFF;
+            box-shadow: 0 4px 10px rgba(15, 98, 254, 0.08);
+        }
+
+        .link-thumbnail {
+            width: 100px;
+            height: 60px;
+            flex-shrink: 0;
+            border-radius: 4px;
+            border: 1.5px solid #B0B0B0; /* Clearly identifiable border */
+            overflow: hidden;
+            background-color: #F2F4F8;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.2);
+        }
+
+        .link-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .link-body {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            gap: 15px;
         }
 
         .link-icon {
-            font-size: 1.4rem;
-            margin-right: 15px;
+            font-size: 1.3rem;
+            background: #F2F4F8;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .link-info {
+            flex: 1;
         }
 
         .link-info h4 {
             margin: 0;
             font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.3px;
         }
 
         .link-info p {
-            margin: 3px 0 0 0;
+            margin: 2px 0 0 0;
             font-size: 0.8rem;
-            color: #666;
+            color: var(--text-sub);
+            line-height: 1.4;
         }
 
         .callout {
@@ -519,26 +563,41 @@
                         <li><strong>가중치 이력 추적:</strong> 사용자가 저장한 가중치 설정 내역을 관리자가 조회하여 정책 방향성을 모니터링합니다.</li>
                     </ul>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                     <a href="./SFR-022_cili/cili_sim1.html" target="_blank" class="link-card">
-                        <div class="link-icon">⚙️</div>
-                        <div class="link-info">
-                            <h4>CILI 가중치 시뮬레이터</h4>
-                            <p>실시간 등급 렌더링 도구</p>
+                        <div class="link-thumbnail">
+                            <img src="./SFR-022/report_screen/4-1. CILI 가중치 시뮬레이터.jpg" alt="Preview">
+                        </div>
+                        <div class="link-body">
+                            <div class="link-icon">⚙️</div>
+                            <div class="link-info">
+                                <h4>CILI 가중치 시뮬레이터</h4>
+                                <p>실시간 등급 렌더링 도구</p>
+                            </div>
                         </div>
                     </a>
                     <a href="./SFR-022_cili/cili_weight_history.html" target="_blank" class="link-card">
-                        <div class="link-icon">🕒</div>
-                        <div class="link-info">
-                            <h4>가중치 변경 이력 조회</h4>
-                            <p>사용자 설정값 히스토리 관리</p>
+                        <div class="link-thumbnail">
+                            <img src="./SFR-022/report_screen/4-2. 가중치 변경 이력 조회.jpg" alt="Preview">
+                        </div>
+                        <div class="link-body">
+                            <div class="link-icon">🕒</div>
+                            <div class="link-info">
+                                <h4>가중치 변경 이력 조회</h4>
+                                <p>사용자 설정값 히스토리 관리</p>
+                            </div>
                         </div>
                     </a>
                     <a href="./SFR-022_cili/cili_data_upload.html" target="_blank" class="link-card" style="grid-column: span 2;">
-                        <div class="link-icon">📁</div>
-                        <div class="link-info">
-                            <h4>지표 데이터 버전 관리 및 업로드</h4>
-                            <p>원천 지표 파일 관리 및 배포 인터페이스</p>
+                        <div class="link-thumbnail">
+                            <img src="./SFR-022/report_screen/4-3. 지표 데이터 버전 관리 및 업로드.jpg" alt="Preview">
+                        </div>
+                        <div class="link-body">
+                            <div class="link-icon">📁</div>
+                            <div class="link-info">
+                                <h4>지표 데이터 버전 관리 및 업로드</h4>
+                                <p>원천 지표 파일 관리 및 배포 인터페이스</p>
+                            </div>
                         </div>
                     </a>
                 </div>
@@ -555,10 +614,15 @@
                     </ul>
                 </div>
                 <a href="./SFR-022_demand.html" target="_blank" class="link-card">
-                    <div class="link-icon">🗳️</div>
-                    <div class="link-info">
-                        <h4>통합 수요조사 관리 및 신청 화면</h4>
-                        <p>인프라 데이터가 연동된 고도화된 신청 창구</p>
+                    <div class="link-thumbnail">
+                        <img src="./SFR-022/report_screen/5. 통합 수요조사 관리 및 신청 화면.jpg" alt="Preview">
+                    </div>
+                    <div class="link-body">
+                        <div class="link-icon">🗳️</div>
+                        <div class="link-info">
+                            <h4>통합 수요조사 관리 및 신청 화면</h4>
+                            <p>인프라 데이터가 연동된 고도화된 신청 창구</p>
+                        </div>
                     </div>
                 </a>
             </section>
@@ -581,33 +645,53 @@
                         <li><strong>운영 효율화 및 증설 검토:</strong> 기후부 충전소 이용 패턴과 피크 타임 분석 결과, 특정 시간대 점유율이 80%를 초과하는 밀집 지역에 대한 기기 추가 설치를 우선 검토할 수 있습니다.</li>
                     </ul>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                     <a href="./SFR-022/incheon_charger_timeline.html" target="_blank" class="link-card">
-                        <div class="link-icon">📅</div>
-                        <div class="link-info">
-                            <h4>보급 시계열 타임라인</h4>
-                            <p>지역별 인프라 확장 추이 추적</p>
+                        <div class="link-thumbnail">
+                            <img src="./SFR-022/report_screen/6-1. 보급 시계열 타임라인.jpg" alt="Preview">
+                        </div>
+                        <div class="link-body">
+                            <div class="link-icon">📅</div>
+                            <div class="link-info">
+                                <h4>보급 시계열 타임라인</h4>
+                                <p>지역별 인프라 확장 추이 추적</p>
+                            </div>
                         </div>
                     </a>
                     <a href="./SFR-022/charging_stats.html" target="_blank" class="link-card">
-                        <div class="link-icon">📊</div>
-                        <div class="link-info">
-                            <h4>충전소 시설 유형 분석</h4>
-                            <p>시설대분류/소분류별 보급 편중 · 충전소명 키워드 입지 유추 · 연도별 트렌드 통합 분석</p>
+                        <div class="link-thumbnail">
+                            <img src="./SFR-022/report_screen/6-2. 충전소 시설 유형 분석.jpg" alt="Preview">
+                        </div>
+                        <div class="link-body">
+                            <div class="link-icon">📊</div>
+                            <div class="link-info">
+                                <h4>충전소 시설 유형 분석</h4>
+                                <p>기존 보급 현황 입지 유추 및 트렌드 통합 분석</p>
+                            </div>
                         </div>
                     </a>
                     <a href="./SFR-022/seogu_me_usage_analysis.html" target="_blank" class="link-card">
-                        <div class="link-icon">⚡</div>
-                        <div class="link-info">
-                            <h4>기후부 충전소 이용 패턴</h4>
-                            <p>시간대별 이용률 및 점유율 분석</p>
+                        <div class="link-thumbnail">
+                            <img src="./SFR-022/report_screen/6-3. 기후부 충전소 이용 패턴.jpg" alt="Preview">
+                        </div>
+                        <div class="link-body">
+                            <div class="link-icon">⚡</div>
+                            <div class="link-info">
+                                <h4>기후부 충전소 이용 패턴</h4>
+                                <p>시간대별 이용률 및 점유율 분석</p>
+                            </div>
                         </div>
                     </a>
                     <a href="./SFR-022/seogu_station_peaks.html" target="_blank" class="link-card">
-                        <div class="link-icon">📈</div>
-                        <div class="link-info">
-                            <h4>충전소별 피크 타임 및 부하</h4>
-                            <p>전력 부하 관리 및 증설 근거 분석</p>
+                        <div class="link-thumbnail">
+                            <img src="./SFR-022/report_screen/6-4. 충전소별 피크 타임 및 부하.jpg" alt="Preview">
+                        </div>
+                        <div class="link-body">
+                            <div class="link-icon">📈</div>
+                            <div class="link-info">
+                                <h4>충전소별 피크 타임 및 부하</h4>
+                                <p>전력 부하 관리 및 증설 근거 분석</p>
+                            </div>
                         </div>
                     </a>
                 </div>
@@ -623,33 +707,53 @@
                         <li><strong>건축물 속성 정밀 배분:</strong> 기 설치된 충전소 명칭/위치 기반으로 건축물 세부 속성을 역으로 매핑하는 분석 체계를 강화합니다.</li>
                     </ul>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                     <a href="./SFR-022_devel_gov.html" target="_blank" class="link-card">
-                        <div class="link-icon">🏛️</div>
-                        <div class="link-info">
-                            <h4>국공유지 부지 발굴 분석</h4>
-                            <p>공백 지역 내 최적 공공 필지 탐색</p>
+                        <div class="link-thumbnail">
+                            <img src="./SFR-022/report_screen/7-1. 국공유지 부지 발굴 분석.jpg" alt="Preview">
+                        </div>
+                        <div class="link-body">
+                            <div class="link-icon">🏛️</div>
+                            <div class="link-info">
+                                <h4>국공유지 부지 발굴 분석</h4>
+                                <p>공백 지역 내 최적 공공 필지 탐색</p>
+                            </div>
                         </div>
                     </a>
                     <a href="./SFR-022/public_land_desert_dashboard.html" target="_blank" class="link-card">
-                        <div class="link-icon">🏜️</div>
-                        <div class="link-info">
-                            <h4>충전 취약지역 분석</h4>
-                            <p>충전 취약지역 필터링 기반 후보지 도출</p>
+                        <div class="link-thumbnail">
+                            <img src="./SFR-022/report_screen/7-2. 충전 취약지역 분석.jpg" alt="Preview">
+                        </div>
+                        <div class="link-body">
+                            <div class="link-icon">🏜️</div>
+                            <div class="link-info">
+                                <h4>충전 취약지역 분석</h4>
+                                <p>충전 취약지역 필터링 기반 후보지 도출</p>
+                            </div>
                         </div>
                     </a>
                     <a href="./SFR-022/apt_ev_mandatory_dashboard.html" target="_blank" class="link-card">
-                        <div class="link-icon">🏢</div>
-                        <div class="link-info">
-                            <h4>아파트 의무 설치 현황</h4>
-                            <p>의무 비율 미충족 단지 식별</p>
+                        <div class="link-thumbnail">
+                            <img src="./SFR-022/report_screen/7-3. 아파트 의무 설치 현황.jpg" alt="Preview">
+                        </div>
+                        <div class="link-body">
+                            <div class="link-icon">🏢</div>
+                            <div class="link-info">
+                                <h4>아파트 의무 설치 현황</h4>
+                                <p>의무 비율 미충족 단지 식별</p>
+                            </div>
                         </div>
                     </a>
                     <a href="./SFR-022/seogu_bld_viewer.html" target="_blank" class="link-card">
-                        <div class="link-icon">🏢</div>
-                        <div class="link-info">
-                            <h4>건축물 속성 정보 뷰어</h4>
-                            <p>서구 전체 건축물 제원 및 잠재 수요 조회</p>
+                        <div class="link-thumbnail">
+                            <img src="./SFR-022/report_screen/7-4. 건축물 속성 정보 뷰어.jpg" alt="Preview">
+                        </div>
+                        <div class="link-body">
+                            <div class="link-icon">🏢</div>
+                            <div class="link-info">
+                                <h4>건축물 속성 정보 뷰어</h4>
+                                <p>서구 전체 건축물 제원 및 잠재 수요 조회</p>
+                            </div>
                         </div>
                     </a>
                 </div>
