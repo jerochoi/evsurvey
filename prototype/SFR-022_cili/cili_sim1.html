@@ -528,6 +528,9 @@
             }
         }
 
+        // 기본 가중치 기준 전국 min/max (하드코딩)
+        const CILI_SCORE_RANGE = { min: 0.2042, max: 0.6140 }; // 필요시 실제 전국 CILI min/max로 조정
+
         // -------------------------
         // 맵 재생산 (CILI 계산) 로직
         // -------------------------
@@ -559,6 +562,11 @@
                     });
                     finalScore += subScoreSum * weights[key];
                 }
+
+                // 최소값, 최대값 보정 (Min-Max 정규화)
+                const range = CILI_SCORE_RANGE;
+                const normalized = (finalScore - range.min) / (range.max - range.min);
+                finalScore = Math.max(0, Math.min(1, normalized));
 
                 feature.properties.finalScore = finalScore;
                 feature.properties.grade = getGrade(finalScore);
